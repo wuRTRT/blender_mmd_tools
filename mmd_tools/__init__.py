@@ -3,7 +3,7 @@
 bl_info = {
     "name": "mmd_tools",
     "author": "sugiany",
-    "version": (1, 0, 1),
+    "version": (1, 0, 2),
     "blender": (2, 80, 0),
     "location": "View3D > Tool Shelf > MMD Tools Panel",
     "description": "Utility tools for MMD model editing. (powroupi's forked version)",
@@ -111,10 +111,11 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
 
 
         # add-on updater
-        layout.separator()
+        update_col = layout.box().column(align=False)
+        update_col.label(text='Add-on update', icon='RECOVER_LAST')
         updater = operators.addon_updater.AddonUpdaterManager.get_instance()
         if not updater.candidate_checked():
-            col = layout.column()
+            col = update_col.column()
             col.scale_y = 2
             row = col.row()
             row.operator(
@@ -123,7 +124,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
                 icon='FILE_REFRESH'
             )
         else:
-            row = layout.row(align=True)
+            row = update_col.row(align=True)
             row.scale_y = 2
             col = row.column()
             col.operator(
@@ -147,9 +148,9 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
                     text="No updates are available."
                 )
 
-            layout.separator()
-            layout.label(text="Manual Update:")
-            row = layout.row(align=True)
+            update_col.separator()
+            update_col.label(text="Manual Update:")
+            row = update_col.row(align=True)
             row.prop(self, "updater_branch_to_update", text="Target")
             ops = row.operator(
                 operators.addon_updater.UpdateAddon.bl_idname, text="Update",
@@ -157,12 +158,12 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             )
             ops.branch_name = self.updater_branch_to_update
 
-            layout.separator()
+            update_col.separator()
             if updater.has_error():
-                box = layout.box()
+                box = update_col.box()
                 box.label(text=updater.error(), icon='CANCEL')
             elif updater.has_info():
-                box = layout.box()
+                box = update_col.box()
                 box.label(text=updater.info(), icon='ERROR')
 
 
