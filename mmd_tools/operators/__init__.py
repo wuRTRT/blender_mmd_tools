@@ -5,6 +5,7 @@ if "bpy" in locals():
         import imp as importlib
     else:
         import importlib
+    importlib.reload(addon_updater)
     importlib.reload(animation)
     importlib.reload(camera)
     importlib.reload(display_item)
@@ -20,6 +21,7 @@ if "bpy" in locals():
 else:
     import bpy
     from . import (
+        addon_updater,
         animation,
         camera,
         display_item,

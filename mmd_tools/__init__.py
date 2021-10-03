@@ -97,6 +97,52 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
         layout.prop(self, "non_collision_threshold")
 
 
+        # add-on updater
+        layout.separator()
+        updater = operators.addon_updater.AddonUpdaterManager.get_instance()
+        if not updater.candidate_checked():
+            col = layout.column()
+            col.scale_y = 2
+            row = col.row()
+            row.operator(
+                operators.addon_updater.CheckAddonUpdate.bl_idname,
+                text="Check 'mmd_tools' add-on update",
+                icon='FILE_REFRESH'
+            )
+        else:
+            row = layout.row(align=True)
+            row.scale_y = 2
+            col = row.column()
+            col.operator(
+                operators.addon_updater.CheckAddonUpdate.bl_idname,
+                text="Check 'mmd_tools' add-on update",
+                icon='FILE_REFRESH'
+            )
+            col = row.column()
+            if updater.latest_version() != "":
+                col.enabled = True
+                ops = col.operator(
+                    operators.addon_updater.UpdateAddon.bl_idname,
+                    text=bpy.app.translations.pgettext_iface("Update to the latest release version (version: {})").format(updater.latest_version()),
+                    icon='TRIA_DOWN_BAR'
+                )
+                ops.branch_name = updater.latest_version()
+            else:
+                col.enabled = False
+                col.operator(
+                    operators.addon_updater.UpdateAddon.bl_idname,
+                    text="No updates are available."
+                )
+
+            layout.separator()
+            if updater.has_error():
+                box = layout.box()
+                box.label(text=updater.error(), icon='CANCEL')
+            elif updater.has_info():
+                box = layout.box()
+                box.label(text=updater.info(), icon='ERROR')
+
+
 def menu_func_import(self, context):
     self.layout.operator(operators.fileio.ImportPmx.bl_idname, text='MikuMikuDance Model (.pmd, .pmx)', icon='OUTLINER_OB_ARMATURE')
     self.layout.operator(operators.fileio.ImportVmd.bl_idname, text='MikuMikuDance Motion (.vmd)', icon='ANIM')
@@ -125,6 +171,7 @@ def load_handler(dummy):
     FnSDEF.clear_cache()
     FnSDEF.register_driver_function()
 
+
 def register():
     for cls in __bl_classes:
         bpy.utils.register_class(cls)
@@ -147,7 +194,11 @@ def register():
     from mmd_tools.m17n import translation_dict
     bpy.app.translations.register(bl_info['name'], translation_dict)
 
+    operators.addon_updater.register_updater(bl_info, __file__)
+
 def unregister():
+    operators.addon_updater.unregister_updater()
+
     bpy.app.translations.unregister(bl_info['name'])
 
     if bpy.app.version < (2, 80, 0):
