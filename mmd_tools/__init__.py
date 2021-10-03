@@ -3,7 +3,7 @@
 bl_info = {
     "name": "mmd_tools",
     "author": "sugiany",
-    "version": (1, 0, 2),
+    "version": (1, 0, 3),
     "blender": (2, 80, 0),
     "location": "View3D > Tool Shelf > MMD Tools Panel",
     "description": "Utility tools for MMD model editing. (powroupi's forked version)",
@@ -133,7 +133,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
                 icon='FILE_REFRESH'
             )
             col = row.column()
-            if updater.latest_version() != "":
+            if updater.update_ready():
                 col.enabled = True
                 ops = col.operator(
                     operators.addon_updater.UpdateAddon.bl_idname,

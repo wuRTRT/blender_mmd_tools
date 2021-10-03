@@ -366,6 +366,13 @@ class AddonUpdaterManager:
 
         return latest
 
+    def update_ready(self):
+        latest_version = self.latest_version()
+        if latest_version == "":
+            return False
+        compare = _compare_version(_parse_release_version(latest_version), self.__bl_info['version'])
+        return compare > 0
+
 from mmd_tools import register_wrap
 
 @register_wrap
@@ -408,7 +415,7 @@ def register_updater(bl_info, init_py_file):
     config.branches = ['main', 'dev_test', ]
     config.addon_directory = os.path.dirname(config.current_addon_path)
     config.min_release_version = (1, 0, 0)
-    config.default_target_addon_path = ''
+    config.default_target_addon_path = 'mmd_tools'
     config.target_addon_path = {}
     updater = AddonUpdaterManager.get_instance()
     updater.init(bl_info, config)
