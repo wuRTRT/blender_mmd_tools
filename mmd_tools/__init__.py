@@ -3,7 +3,7 @@
 bl_info = {
     "name": "mmd_tools",
     "author": "sugiany",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (2, 80, 0),
     "location": "View3D > Tool Shelf > MMD Tools Panel",
     "description": "Utility tools for MMD model editing. (powroupi's forked version)",
@@ -57,6 +57,12 @@ if bpy.app.version < (2, 80, 0):
 
 logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
+def get_update_candidate_branches(_, __):
+    updater = operators.addon_updater.AddonUpdaterManager.get_instance()
+    if not updater.candidate_checked():
+        return []
+
+    return [(name, name, "") for name in updater.get_candidate_branch_names()]
 
 @register_wrap
 class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
@@ -88,6 +94,13 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             soft_max=10,
             default=1.5,
             )
+
+    # for add-on updater
+    updater_branch_to_update = bpy.props.EnumProperty(
+        name='branch',
+        description='Target branch to update add-on',
+        items=get_update_candidate_branches
+    )
 
     def draw(self, context):
         layout = self.layout
@@ -133,6 +146,16 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
                     operators.addon_updater.UpdateAddon.bl_idname,
                     text="No updates are available."
                 )
+
+            layout.separator()
+            layout.label(text="Manual Update:")
+            row = layout.row(align=True)
+            row.prop(self, "updater_branch_to_update", text="Target")
+            ops = row.operator(
+                operators.addon_updater.UpdateAddon.bl_idname, text="Update",
+                icon='TRIA_DOWN_BAR'
+            )
+            ops.branch_name = self.updater_branch_to_update
 
             layout.separator()
             if updater.has_error():

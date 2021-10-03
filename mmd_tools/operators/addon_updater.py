@@ -260,9 +260,7 @@ class AddonUpdaterManager:
                 if b["name"] in self.__config.branches:
                     info = UpdateCandidateInfo()
                     info.name = b["name"]
-                    info.url = "https://github.com/{}/{}/archive/{}.zip"\
-                               .format(self.__config.owner,
-                                       self.__config.repository, b["name"])
+                    info.url = "https://github.com/{}/{}/archive/{}.zip".format(self.__config.owner, self.__config.repository, b["name"])
                     info.group = 'BRANCH'
                     self.__update_candidate.append(info)
 
@@ -278,11 +276,9 @@ class AddonUpdaterManager:
                     info.group = 'RELEASE'
                     self.__update_candidate.append(info)
         except RuntimeError as e:
-            self.__error = "Failed to check update {}. ({})"\
-                           .format(str(e), datetime.datetime.now())
+            self.__error = bpy.app.translations.pgettext_iface("Failed to check update {}. ({})").format(str(e), datetime.datetime.now())
 
-        self.__info = "Checked update. ({})"\
-                      .format(datetime.datetime.now())
+        self.__info = bpy.app.translations.pgettext_iface("Checked update. ({})").format(datetime.datetime.now())
 
         self.__candidate_checked = True
 
@@ -340,11 +336,9 @@ class AddonUpdaterManager:
                            info, self.__config.current_addon_path,
                            offset_path)
 
-            self.__info = "Updated to {}. ({})" \
-                          .format(info.name, datetime.datetime.now())
+            self.__info = bpy.app.translations.pgettext_iface("Updated to {}. ({})").format(info.name, datetime.datetime.now())
         except RuntimeError as e:
-            self.__error = "Failed to update {}. ({})"\
-                           .format(str(e), datetime.datetime.now())
+            self.__error = bpy.app.translations.pgettext_iface("Failed to update {}. ({})").format(str(e), datetime.datetime.now())
 
         shutil.rmtree(_make_workspace_path(self.__config.addon_directory))
 
@@ -408,13 +402,13 @@ class UpdateAddon(bpy.types.Operator):
 
 def register_updater(bl_info, init_py_file):
     config = AddonUpdaterConfig()
-    config.owner = "UuuNyaa"
-    config.repository = "blender_mmd_tools"
+    config.owner = 'UuuNyaa'
+    config.repository = 'blender_mmd_tools'
     config.current_addon_path = os.path.dirname(os.path.realpath(init_py_file))
-    config.branches = []
+    config.branches = ['main', 'dev_test', ]
     config.addon_directory = os.path.dirname(config.current_addon_path)
     config.min_release_version = (1, 0, 0)
-    config.default_target_addon_path = ""
+    config.default_target_addon_path = ''
     config.target_addon_path = {}
     updater = AddonUpdaterManager.get_instance()
     updater.init(bl_info, config)
