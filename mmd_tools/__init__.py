@@ -3,7 +3,7 @@
 bl_info = {
     "name": "mmd_tools",
     "author": "sugiany",
-    "version": (1, 0, 3),
+    "version": (1, 0, 0),
     "blender": (2, 80, 0),
     "location": "View3D > Tool Shelf > MMD Tools Panel",
     "description": "Utility tools for MMD model editing. (powroupi's forked version)",
@@ -137,7 +137,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
                 col.enabled = True
                 ops = col.operator(
                     operators.addon_updater.UpdateAddon.bl_idname,
-                    text=bpy.app.translations.pgettext_iface("Update to the latest release version (version: {})").format(updater.latest_version()),
+                    text=bpy.app.translations.pgettext_iface("Update to the latest release version ({})").format(updater.latest_version()),
                     icon='TRIA_DOWN_BAR'
                 )
                 ops.branch_name = updater.latest_version()

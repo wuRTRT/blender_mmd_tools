@@ -120,16 +120,14 @@ def _replace_addon(addon_dir, info, current_addon_path, offset_path=""):
 
 
 def _get_all_releases_data(owner, repository):
-    url = "https://api.github.com/repos/{}/{}/releases"\
-          .format(owner, repository)
+    url = "https://api.github.com/repos/{}/{}/releases".format(owner, repository)
     data = _request(url)
 
     return data
 
 
 def _get_all_branches_data(owner, repository):
-    url = "https://api.github.com/repos/{}/{}/branches"\
-          .format(owner, repository)
+    url = "https://api.github.com/repos/{}/{}/branches".format(owner, repository)
     data = _request(url)
 
     return data
@@ -412,7 +410,7 @@ def register_updater(bl_info, init_py_file):
     config.owner = 'UuuNyaa'
     config.repository = 'blender_mmd_tools'
     config.current_addon_path = os.path.dirname(os.path.realpath(init_py_file))
-    config.branches = ['main', 'dev_test', ]
+    config.branches = ['main']
     config.addon_directory = os.path.dirname(config.current_addon_path)
     config.min_release_version = (1, 0, 0)
     config.default_target_addon_path = 'mmd_tools'
