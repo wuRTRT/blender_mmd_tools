@@ -114,11 +114,23 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
         update_col = layout.box().column(align=False)
         update_col.label(text='Add-on update', icon='RECOVER_LAST')
         updater = operators.addon_updater.AddonUpdaterManager.get_instance()
+
+
+        if updater.updated():
+            col = update_col.column()
+            col.scale_y = 2
+            col.alert = True
+            col.operator(
+                "wm.quit_blender",
+                text="Restart blender to complete update",
+                icon="ERROR"
+            )
+            return
+
         if not updater.candidate_checked():
             col = update_col.column()
             col.scale_y = 2
-            row = col.row()
-            row.operator(
+            col.operator(
                 operators.addon_updater.CheckAddonUpdate.bl_idname,
                 text="Check 'mmd_tools' add-on update",
                 icon='FILE_REFRESH'
@@ -135,12 +147,11 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             col = row.column()
             if updater.update_ready():
                 col.enabled = True
-                ops = col.operator(
+                col.operator(
                     operators.addon_updater.UpdateAddon.bl_idname,
                     text=bpy.app.translations.pgettext_iface("Update to the latest release version ({})").format(updater.latest_version()),
                     icon='TRIA_DOWN_BAR'
-                )
-                ops.branch_name = updater.latest_version()
+                ).branch_name = updater.latest_version()
             else:
                 col.enabled = False
                 col.operator(
@@ -152,11 +163,10 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             update_col.label(text="Manual Update:")
             row = update_col.row(align=True)
             row.prop(self, "updater_branch_to_update", text="Target")
-            ops = row.operator(
+            row.operator(
                 operators.addon_updater.UpdateAddon.bl_idname, text="Update",
                 icon='TRIA_DOWN_BAR'
-            )
-            ops.branch_name = self.updater_branch_to_update
+            ).branch_name = self.updater_branch_to_update
 
             update_col.separator()
             if updater.has_error():

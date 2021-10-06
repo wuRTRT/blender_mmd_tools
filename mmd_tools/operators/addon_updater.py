@@ -211,6 +211,7 @@ class AddonUpdaterManager:
     __candidate_checked = False
     __error = ""
     __info = ""
+    __updated = False
 
     def __init__(self):
         raise NotImplementedError("Not allowed to call constructor")
@@ -235,6 +236,7 @@ class AddonUpdaterManager:
         self.__candidate_checked = False
         self.__error = ""
         self.__info = ""
+        self.__updated = False
         self.__initialized = True
 
     def initialized(self):
@@ -334,6 +336,7 @@ class AddonUpdaterManager:
                            info, self.__config.current_addon_path,
                            offset_path)
 
+            self.__updated = True
             self.__info = bpy.app.translations.pgettext_iface("Updated to {}. ({})").format(info.name, datetime.datetime.now())
         except RuntimeError as e:
             self.__error = bpy.app.translations.pgettext_iface("Failed to update {}. ({})").format(str(e), datetime.datetime.now())
@@ -370,6 +373,10 @@ class AddonUpdaterManager:
             return False
         compare = _compare_version(_parse_release_version(latest_version), self.__bl_info['version'])
         return compare > 0
+
+    def updated(self):
+        return self.__updated
+
 
 from mmd_tools import register_wrap
 
