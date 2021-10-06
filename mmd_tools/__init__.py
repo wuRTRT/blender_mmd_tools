@@ -6,13 +6,13 @@ bl_info = {
     "version": (1, 0, 0),
     "blender": (2, 80, 0),
     "location": "View3D > Tool Shelf > MMD Tools Panel",
-    "description": "Utility tools for MMD model editing. (powroupi's forked version)",
+    "description": "Utility tools for MMD model editing. (UuuNyaa's forked version)",
     "warning": "",
-    "doc_url": "https://github.com/powroupi/blender_mmd_tools/wiki",
-    "wiki_url": "https://github.com/powroupi/blender_mmd_tools/wiki",
-    "tracker_url": "https://github.com/powroupi/blender_mmd_tools/issues",
+    "doc_url": "https://mmd-blender.fandom.com/wiki/MMD_Tools",
+    "wiki_url": "https://mmd-blender.fandom.com/wiki/MMD_Tools",
+    "tracker_url": "https://github.com/UuuNyaa/blender_mmd_tools/issues",
     "category": "Object",
-    }
+}
 
 __bl_classes = []
 def register_wrap(cls):
