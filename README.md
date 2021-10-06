@@ -3,9 +3,6 @@ MMD Tools is a blender addon for importing MMD (MikuMikuDance) model data (.pmd,
 
 MMD ToolsはMMD(MikuMikuDance)のモデルデータ(.pmd, .pmx)、モーションデータ(.vmd)、ポーズデータ(.vpd)をインポートするためのBlenderアドオンです。モデルデータ(.pmx)、モーションデータ(.vmd)、ポーズデータ(.vpd)のエクスポートにも対応しています。
 
-- [Documentation](https://mmd-blender.fandom.com/wiki/MMD_Tools)
-- [日本語ドキュメント](https://mmd-blender.fandom.com/ja/wiki/MMD_Tools)
-
 ## Installation & Usage
 - Check [the MMD Tools Wiki](https://mmd-blender.fandom.com/wiki/MMD_Tools) for details.
 - 詳細は [MMD ToolsのWiki (日本語)](https://mmd-blender.fandom.com/ja/wiki/MMD_Tools) を確認してください。
