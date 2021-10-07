@@ -18,7 +18,6 @@ MMD Tools needs your contribution!
 
 If you are interested in any of the above, please contact me via the following channels:
 - [MMD Tools Issues](https://github.com/UuuNyaa/blender_mmd_tools/issues)
-- [MMD & Blender Wiki](https://mmd-blender.fandom.com/wiki)
 - [MMD & Blender Discord Server](https://discord.gg/zRgUkuaPWw)
 
 ## License
