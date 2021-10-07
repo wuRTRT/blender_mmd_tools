@@ -3,7 +3,7 @@
 bl_info = {
     "name": "mmd_tools",
     "author": "sugiany",
-    "version": (1, 0, 0),
+    "version": (1, 0, 1),
     "blender": (2, 80, 0),
     "location": "View3D > Tool Shelf > MMD Tools Panel",
     "description": "Utility tools for MMD model editing. (UuuNyaa's forked version)",
@@ -97,7 +97,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
 
     # for add-on updater
     updater_branch_to_update = bpy.props.EnumProperty(
-        name='branch',
+        name='Branch',
         description='Target branch to update add-on',
         items=get_update_candidate_branches
     )
@@ -122,7 +122,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             col.alert = True
             col.operator(
                 "wm.quit_blender",
-                text="Restart blender to complete update",
+                text="Restart Blender to complete update",
                 icon="ERROR"
             )
             return
@@ -132,7 +132,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             col.scale_y = 2
             col.operator(
                 operators.addon_updater.CheckAddonUpdate.bl_idname,
-                text="Check 'mmd_tools' add-on update",
+                text="Check mmd_tools add-on update",
                 icon='FILE_REFRESH'
             )
         else:
@@ -141,7 +141,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             col = row.column()
             col.operator(
                 operators.addon_updater.CheckAddonUpdate.bl_idname,
-                text="Check 'mmd_tools' add-on update",
+                text="Check mmd_tools add-on update",
                 icon='FILE_REFRESH'
             )
             col = row.column()
@@ -156,11 +156,11 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
                 col.enabled = False
                 col.operator(
                     operators.addon_updater.UpdateAddon.bl_idname,
-                    text="No updates are available."
+                    text="No updates are available"
                 )
 
             update_col.separator()
-            update_col.label(text="Manual Update:")
+            update_col.label(text="(Danger) Manual Update:")
             row = update_col.row(align=True)
             row.prop(self, "updater_branch_to_update", text="Target")
             row.operator(

@@ -10,6 +10,21 @@ translation_dict = {
         ("*", "Dictionary Folder"): "辞書フォルダ",
         ("*", "Non-Collision Threshold"): "非コリジョンしきい値",
 
+        ("*", "Add-on update"): "アドオン更新",
+        ("Operator", "Restart Blender to complete update"): "Blenderを再起動して更新を完了",
+        ("Operator", "Check mmd_tools add-on update"): "mmd_toolsアドオンの更新を確認",
+        ("*", "Update to the latest release version ({})"): "最新バージョンへ更新",
+        ("Operator", "No updates are available"): "更新はありません",
+        ("*", "(Danger) Manual Update:"): "(危険)手動更新:",
+        ("*", "Branch"): "ブランチ",
+        ("*", "Target"): "ターゲット",
+        ("Operator", "Update"): "更新",
+
+        ("*", "Failed to check update {}. ({})"): "更新の確認に失敗しました。{} ({})",
+        ("*", "Checked update. ({})"): "更新を確認しました。({})",
+        ("*", "Updated to {}. ({})"): "{}へ更新しました。({})",
+        ("*", "Failed to update {}. ({})"): "更新に失敗しました。{} ({})",
+
         # 3D Viewport > Sidebar > MMD > Operator Panel
         ("Operator", "Create Model"): "モデルを作成",
         ("Operator", "Create a MMD Model Root Object"): "MMDモデルルートオブジェクトを作成",
@@ -260,6 +275,21 @@ translation_dict = {
         ("*", "Base Texture Folder"): "基线纹理文件夹",
         ("*", "Dictionary Folder"): "辞書文件夹",
         ("*", "Non-Collision Threshold"): "非碰撞阈值",
+
+        ("*", "Add-on update"): "插件更新",
+        ("Operator", "Restart Blender to complete update"): "重新启动Blender以完成更新",
+        ("Operator", "Check mmd_tools add-on update"): "检查mmd_tools插件更新",
+        ("*", "Update to the latest release version ({})"): "更新到最新发布版本",
+        ("Operator", "No updates are available"): "没有更新",
+        ("*", "(Danger) Manual Update:"): "(危险)手动更新:",
+        ("*", "Branch"): "分支",
+        ("*", "Target"): "目标",
+        ("Operator", "Update"): "更新",
+
+        ("*", "Failed to check update {}. ({})"): "更新の確認に失敗しました。{} ({})",
+        ("*", "Checked update. ({})"): "更新を確認しました。({})",
+        ("*", "Updated to {}. ({})"): "{}へ更新しました。({})",
+        ("*", "Failed to update {}. ({})"): "更新に失敗しました。{} ({})",
 
         # 3D Viewport > Sidebar > MMD > Operator Panel
         ("Operator", "Create Model"): "创建新的模型",
