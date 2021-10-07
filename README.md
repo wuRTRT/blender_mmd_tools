@@ -1,3 +1,11 @@
+___
+This repository is **NOT** maintained!<br>
+The latest version is available in [UuuNyaa/blender_mmd_tools](https://github.com/UuuNyaa/blender_mmd_tools).<br><br>
+このリポジトリはメンテナンスされていません！<br>
+最新版は[UuuNyaa/blender_mmd_tools](https://github.com/UuuNyaa/blender_mmd_tools)で入手できます。<br><br>
+------------------------------
+___
+
 mmd_tools
 ===========
 
