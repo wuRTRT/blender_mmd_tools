@@ -461,6 +461,11 @@ class ExportPmx(Operator, ExportHelper):
         description='Export visible meshes only',
         default=False,
         )
+    overwrite_bone_morphs_from_pose_library = bpy.props.BoolProperty(
+        name='Overwrite Bone Morphs from active Pose Library',
+        description='Overwrite the bone morphs from the pose library before exporting.',
+        default=False,
+        )
     sort_vertices = bpy.props.EnumProperty(
         name='Sort Vertices',
         description='Choose the method to sort vertices',
@@ -540,6 +545,7 @@ class ExportPmx(Operator, ExportHelper):
                 rigid_bodies=rig.rigidBodies(),
                 joints=rig.joints(),
                 copy_textures=self.copy_textures,
+                overwrite_bone_morphs_from_pose_library=self.overwrite_bone_morphs_from_pose_library,
                 sort_materials=self.sort_materials,
                 sort_vertices=self.sort_vertices,
                 disable_specular=self.disable_specular,
