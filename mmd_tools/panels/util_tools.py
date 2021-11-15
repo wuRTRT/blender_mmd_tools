@@ -338,3 +338,49 @@ class MMDBoneOrder(_PanelBase, Panel):
                 row.operator('object.vertex_group_move', text='', icon='TRIA_UP').direction = 'UP'
                 row.operator('object.vertex_group_move', text='', icon='TRIA_DOWN').direction = 'DOWN'
 
+
+
+@register_wrap
+class MMD_TOOLS_UL_PoseBones(UIList):
+    def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
+        col = layout.row()
+        col.prop(item, 'name', text='', emboss=False)
+        col.prop(item.mmd_bone, 'name_j', text='', emboss=False)
+        col.prop(item.mmd_bone, 'name_e', text='', emboss=False)
+
+@register_wrap
+class MMDTranslation(_PanelBase, Panel):
+    bl_idname = 'OBJECT_PT_mmd_tools_translation'
+    bl_label = 'Translation'
+    bl_context = ''
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+        active_obj = context.active_object
+
+        root = Model.findRoot(active_obj)
+        if root is None:
+            layout.label(text='Select a MMD Model')
+            return
+
+        armature_object = Model(root).armature()
+        if armature_object is None:
+            layout.label(text='The armature object of active MMD model can\'t be found', icon='ERROR')
+            return
+
+        # mmd_armature = armature_object.mmd_armature
+        # for pose_bone in armature_object.pose.bones:
+        #     pose_bone_name = pose_bone.name
+
+        #     if pose_bone_name not in mmd_armature.members:
+        #         member = mmd_armature.members.add()
+        #         member.name = pose_bone_name
+
+        col = layout.column(align=True)
+        row = col.row()
+        row.template_list(
+            "MMD_TOOLS_UL_PoseBones", "",
+            mmd_armature, 'members',
+            mmd_armature, 'active_index',
+        )

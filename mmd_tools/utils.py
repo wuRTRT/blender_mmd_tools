@@ -64,6 +64,17 @@ def convertNameToLR(name, use_underscore=False):
         name = m.group(1) + m.group(2) + delimiter + 'R'
     return name
 
+__CONVERT_L_TO_NAME_REGEXP = re.compile(r'[._][lL]$')
+__CONVERT_R_TO_NAME_REGEXP = re.compile(r'[._][rR]$')
+def convertLRToName(name):
+    if __CONVERT_L_TO_NAME_REGEXP.search(name):
+        return f'左{name[0:-2]}'
+
+    if __CONVERT_R_TO_NAME_REGEXP.search(name):
+        return f'右{name[0:-2]}'
+
+    return name
+
 ## src_vertex_groupのWeightをdest_vertex_groupにaddする
 def mergeVertexGroup(meshObj, src_vertex_group_name, dest_vertex_group_name):
     mesh = meshObj.data
