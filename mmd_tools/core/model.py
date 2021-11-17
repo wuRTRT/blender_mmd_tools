@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from typing import Iterable, Union
 import bpy
 import mathutils
 
@@ -8,9 +9,12 @@ from mmd_tools.core import rigid_body
 from mmd_tools.core.bone import FnBone
 from mmd_tools.core.morph import FnMorph
 from mmd_tools.bpyutils import matmul, Props, SceneOp
+from mmd_tools.utils import convertLRToName, convertNameToLR
 
 import logging
 import time
+
+from mmd_tools.translations import DictionaryEnum
 
 
 def isRigidBodyObject(obj):
@@ -47,6 +51,67 @@ def getRigidBodySize(obj):
 
 class InvalidRigidSettingException(ValueError):
     pass
+
+class FnModel:
+    @classmethod
+    def find_root(cls, obj):
+        if obj:
+            if obj.mmd_type == 'ROOT':
+                return obj
+            return cls.find_root(obj.parent)
+        return None
+
+    @staticmethod
+    def find_armature(root):
+        return next(filter(lambda x: x.type == 'ARMATURE', root.children), None)
+
+    @classmethod
+    def all_children(cls, obj:bpy.types.Object) -> Iterable[bpy.types.Object]:
+        child: bpy.types.Object
+        for child in obj.children:
+            yield child
+            yield from cls.all_children(child)
+
+    @classmethod
+    def child_meshes(cls, obj: bpy.types.Object):
+        return filter(lambda x: x.type == 'MESH' and x.mmd_type == 'NONE', cls.all_children(obj))
+
+    @staticmethod
+    def translate_in_presettings(armature_object: bpy.types.Object):
+        mmd_data_query = armature_object.mmd_data_query
+        operation_script = mmd_data_query.operation_script
+        if not operation_script:
+            return
+
+        translator = DictionaryEnum.get_translator(mmd_data_query.dictionary)
+
+        operation_script_ast = compile(mmd_data_query.operation_script, '<string>', 'eval')
+        operation_target: str = mmd_data_query.operation_target
+
+        for mmd_data_ref in mmd_data_query.result_data:
+            if mmd_data_ref.type == 'BONE':
+                pose_bone: bpy.types.PoseBone = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
+
+                translated_name = str(eval(
+                    operation_script_ast,
+                    {'__builtins__': {}},
+                    {
+                        'to_english': translator.translate,
+                        # 'to_japanese': self.to_j,
+                        'to_mmd_lr': convertLRToName,
+                        'to_blender_lr': convertNameToLR,
+                        'name': pose_bone.name,
+                        'name_j': pose_bone.mmd_bone.name_j,
+                        'name_e': pose_bone.mmd_bone.name_e,
+                    }
+                ))
+                if operation_target == 'BLENDER':
+                    pose_bone.name = translated_name
+                elif operation_target == 'JAPANESE':
+                    pose_bone.mmd_bone.name_j = translated_name
+                elif operation_target == 'ENGLISH':
+                    pose_bone.mmd_bone.name_e = translated_name
+
 
 class Model:
     def __init__(self, root_obj):
@@ -102,11 +167,7 @@ class Model:
 
     @classmethod
     def findRoot(cls, obj):
-        if obj:
-            if obj.mmd_type == 'ROOT':
-                return obj
-            return cls.findRoot(obj.parent)
-        return None
+        return FnModel.find_root(obj)
 
     def initialDisplayFrames(self, reset=True):
         frames = self.__root.mmd_root.display_item_frames
@@ -357,26 +418,19 @@ class Model:
         ik_const.subtarget = ik_target_name
         return ik_const
 
-    def __allObjects(self, obj):
-        r = []
-        for i in obj.children:
-            r.append(i)
-            r += self.__allObjects(i)
-        return r
 
-    def allObjects(self, obj=None):
+    def allObjects(self, obj: Union[bpy.types.Object, None]=None) -> Iterable[bpy.types.Object]:
         if obj is None:
-            obj = self.__root
-        return [obj] + self.__allObjects(obj)
+            obj: bpy.types.Object = self.__root
+        yield obj
+        yield from FnModel.all_children(obj)
 
     def rootObject(self):
         return self.__root
 
     def armature(self):
         if self.__arm is None:
-            for i in filter(lambda x: x.type == 'ARMATURE', self.__root.children):
-                self.__arm = i
-                break
+            self.__arm = FnModel.find_armature(self.__root)
         return self.__arm
 
     def rigidGroupObject(self):
@@ -428,7 +482,7 @@ class Model:
         arm = self.armature()
         if arm is None:
             return []
-        return filter(lambda x: x.type == 'MESH' and x.mmd_type == 'NONE', self.allObjects(arm))
+        return FnModel.child_meshes(arm)
 
     def firstMesh(self):
         for i in self.meshes():

@@ -14,6 +14,7 @@ from mmd_tools.core import pmx
 from mmd_tools.core.bone import FnBone
 from mmd_tools.core.material import FnMaterial
 from mmd_tools.core.morph import FnMorph
+from mmd_tools.core.model import FnModel
 from mmd_tools.core.sdef import FnSDEF
 from mmd_tools.core.vmd.importer import BoneConverter, BoneConverterPoseMode
 from mmd_tools import bpyutils
@@ -81,6 +82,7 @@ class __PmxExporter:
         self.__default_material = None
         self.__vertex_order_map = None # used for controlling vertex order
         self.__overwrite_bone_morphs_from_pose_library = False
+        self.__translate_in_presettings = False
         self.__disable_specular = False
         self.__add_uv_count = 0
 
@@ -1203,6 +1205,8 @@ class __PmxExporter:
             for m, show in muted_modifiers:
                 m.show_viewport = show
 
+    def __translate_armature(self, armature_object):
+        FnModel.translate_in_presettings(armature_object)
 
     def execute(self, filepath, **args):
         root = args.get('root', None)
@@ -1234,6 +1238,10 @@ class __PmxExporter:
             self.__vertex_order_map = {'method':sort_vertices}
 
         self.__overwrite_bone_morphs_from_pose_library = args.get('overwrite_bone_morphs_from_pose_library', False)
+        self.__translate_in_presettings = args.get('translate_in_presettings', False)
+
+        if self.__translate_in_presettings:
+            self.__translate_armature(self.__armature)
 
         nameMap = self.__exportBones(meshes)
 

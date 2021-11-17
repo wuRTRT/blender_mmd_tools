@@ -61,6 +61,7 @@ class MMDToolsObjectPanel(_PanelBase, Panel):
             col.operator('mmd_tools.join_meshes')
             col.operator('mmd_tools.attach_meshes')
             col.operator('mmd_tools.translate_mmd_model', text='Translation')
+            col.operator('mmd_tools.show_global_translation_popup', text='(Experimental) New Translation')
 
             row = _layout_split(layout, factor=1/3, align=False)
 
