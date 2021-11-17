@@ -64,14 +64,16 @@ def convertNameToLR(name, use_underscore=False):
         name = m.group(1) + m.group(2) + delimiter + 'R'
     return name
 
-__CONVERT_L_TO_NAME_REGEXP = re.compile(r'[._][lL]$')
-__CONVERT_R_TO_NAME_REGEXP = re.compile(r'[._][rR]$')
+__CONVERT_L_TO_NAME_REGEXP = re.compile(r'(?P<lr>(?P<separator>[._])[lL])(?P<after>($|(?P=separator)))')
+__CONVERT_R_TO_NAME_REGEXP = re.compile(r'(?P<lr>(?P<separator>[._])[rR])(?P<after>($|(?P=separator)))')
 def convertLRToName(name):
-    if __CONVERT_L_TO_NAME_REGEXP.search(name):
-        return f'左{name[0:-2]}'
+    match = __CONVERT_L_TO_NAME_REGEXP.search(name)
+    if match:
+        return f"左{name[0:match.start()]}{match['after']}{name[match.end():]}"
 
-    if __CONVERT_R_TO_NAME_REGEXP.search(name):
-        return f'右{name[0:-2]}'
+    match = __CONVERT_R_TO_NAME_REGEXP.search(name)
+    if match:
+        return f"右{name[0:match.start()]}{match['after']}{name[match.end():]}"
 
     return name
 
