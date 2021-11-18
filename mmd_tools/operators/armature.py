@@ -8,6 +8,8 @@ from mmd_tools.core.model import FnModel
 from mmd_tools.properties.armature import MMDDataQuery
 
 
+DEFAULT_SHOW_ROW_COUNT = 20
+
 @register_wrap
 class ShowGlobalTranslationPopup(bpy.types.Operator):
     bl_idname = 'mmd_tools.show_global_translation_popup'
@@ -22,9 +24,13 @@ class ShowGlobalTranslationPopup(bpy.types.Operator):
         col.label(text='Filter', icon='FILTER')
         row = col.row()
         row.prop(mmd_data_query, 'filter_types')
+
+        group = row.row(align=True, heading='is Blank:')
+        group.alignment = 'RIGHT'
+        group.prop(mmd_data_query, 'filter_japanese_blank', toggle=True, text='Japanese')
+        group.prop(mmd_data_query, 'filter_english_blank', toggle=True, text='English')
+
         group = row.row(align=True)
-        group.prop(mmd_data_query, 'filter_japanese_blank', toggle=True)
-        group.prop(mmd_data_query, 'filter_english_blank', toggle=True)
         group.prop(mmd_data_query, 'filter_selected', toggle=True, icon='RESTRICT_SELECT_OFF', icon_only=True)
         group.prop(mmd_data_query, 'filter_visible', toggle=True, icon='HIDE_OFF', icon_only=True)
 
@@ -34,13 +40,15 @@ class ShowGlobalTranslationPopup(bpy.types.Operator):
         row.prop(mmd_data_query, 'operation_target', expand=True)
         row.label(text='', icon='RESTRICT_SELECT_OFF')
         row.label(text='', icon='HIDE_ON')
-        row.label(text='', icon='BLANK1')
+
+        if len(mmd_data_query.result_data) > DEFAULT_SHOW_ROW_COUNT:
+            row.label(text='', icon='BLANK1')
 
         col.template_list(
             "MMD_TOOLS_UL_PoseBones", "",
             mmd_data_query, 'result_data',
             mmd_data_query, 'result_data_index',
-            rows=20,
+            rows=DEFAULT_SHOW_ROW_COUNT,
         )
 
         box = layout.box()
@@ -66,7 +74,7 @@ class ShowGlobalTranslationPopup(bpy.types.Operator):
         self._mmd_data_query = mmd_data_query
         MMDDataQuery._update_query(mmd_data_query, None)
 
-        return context.window_manager.invoke_popup(self, width=800)
+        return context.window_manager.invoke_props_dialog(self, width=800)
 
     def execute(self, _context):
         return {'FINISHED'}

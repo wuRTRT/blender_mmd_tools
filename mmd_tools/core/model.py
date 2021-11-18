@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import itertools
 from typing import Iterable, Union
 import bpy
 import mathutils
@@ -54,16 +55,24 @@ class InvalidRigidSettingException(ValueError):
 
 class FnModel:
     @classmethod
-    def find_root(cls, obj):
-        if obj:
-            if obj.mmd_type == 'ROOT':
-                return obj
-            return cls.find_root(obj.parent)
-        return None
+    def find_root(cls, obj: bpy.types.Object) -> Union[bpy.types.Object, None]:
+        if not obj:
+            return None
+        if obj.mmd_type == 'ROOT':
+            return obj
+        return cls.find_root(obj.parent)
 
     @staticmethod
-    def find_armature(root):
-        return next(filter(lambda x: x.type == 'ARMATURE', root.children), None)
+    def find_armature(root) -> Union[bpy.types.Object, None]:
+        return next(filter(lambda o: o.type == 'ARMATURE', root.children), None)
+
+    @staticmethod
+    def find_rigid_group(root) -> Union[bpy.types.Object, None]:
+        return next(filter(lambda o: o.type == 'EMPTY' and o.mmd_type == 'RIGID_GRP_OBJ', root.children), None)
+
+    @staticmethod
+    def find_joint_group(root) -> Union[bpy.types.Object, None]:
+        return next(filter(lambda o: o.type == 'EMPTY' and o.mmd_type == 'JOINT_GRP_OBJ', root.children), None)
 
     @classmethod
     def all_children(cls, obj:bpy.types.Object) -> Iterable[bpy.types.Object]:
@@ -73,7 +82,7 @@ class FnModel:
             yield from cls.all_children(child)
 
     @classmethod
-    def child_meshes(cls, obj: bpy.types.Object):
+    def child_meshes(cls, obj: bpy.types.Object) -> Iterable[bpy.types.Object]:
         return filter(lambda x: x.type == 'MESH' and x.mmd_type == 'NONE', cls.all_children(obj))
 
     @staticmethod
@@ -435,9 +444,7 @@ class Model:
 
     def rigidGroupObject(self):
         if self.__rigid_grp is None:
-            for i in filter(lambda x: x.mmd_type == 'RIGID_GRP_OBJ', self.__root.children):
-                self.__rigid_grp = i
-                break
+            self.__rigid_grp = FnModel.find_rigid_group(self.__root)
             if self.__rigid_grp is None:
                 rigids = bpy.data.objects.new(name='rigidbodies', object_data=None)
                 SceneOp(bpy.context).link_object(rigids)
@@ -450,9 +457,7 @@ class Model:
 
     def jointGroupObject(self):
         if self.__joint_grp is None:
-            for i in filter(lambda x: x.mmd_type == 'JOINT_GRP_OBJ', self.__root.children):
-                self.__joint_grp = i
-                break
+            self.__joint_grp = FnModel.find_joint_group(self.__root)
             if self.__joint_grp is None:
                 joints = bpy.data.objects.new(name='joints', object_data=None)
                 SceneOp(bpy.context).link_object(joints)
@@ -524,16 +529,16 @@ class Model:
 
     def rigidBodies(self):
         if self.__root.mmd_root.is_built:
-            return filter(isRigidBodyObject, self.allObjects(self.armature())+self.allObjects(self.rigidGroupObject()))
-        return filter(isRigidBodyObject, self.allObjects(self.rigidGroupObject()))
+            return filter(isRigidBodyObject, itertools.chain(FnModel.all_children(self.armature()),FnModel.all_children(self.rigidGroupObject())))
+        return filter(isRigidBodyObject, FnModel.all_children(self.rigidGroupObject()))
 
     def joints(self):
-        return filter(isJointObject, self.allObjects(self.jointGroupObject()))
+        return filter(isJointObject, FnModel.all_children(self.jointGroupObject()))
 
     def temporaryObjects(self, rigid_track_only=False):
         if rigid_track_only:
-            return filter(isTemporaryObject, self.allObjects(self.rigidGroupObject()))
-        return filter(isTemporaryObject, self.allObjects(self.rigidGroupObject())+self.allObjects(self.temporaryGroupObject()))
+            return filter(isTemporaryObject, FnModel.all_children(self.rigidGroupObject()))
+        return filter(isTemporaryObject, itertools.chain(FnModel.all_children(self.rigidGroupObject()),FnModel.all_children(self.temporaryGroupObject())))
 
     def materials(self):
         """
