@@ -170,7 +170,7 @@ class OverwriteBoneMorphsFromPoseLibrary(Operator):
 
     def execute(self, context):
         root = mmd_model.Model.findRoot(context.active_object)
-        FnMorph.overwrite_bone_morphs_from_pose_library(mmd_model.Model(root).armature())
+        FnMorph.overwrite_bone_morphs_from_pose_library(mmd_model.FnModel.find_armature(root))
 
         return {'FINISHED'}
 

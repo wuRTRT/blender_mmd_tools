@@ -3,7 +3,7 @@
 """
 import bpy
 from bpy.types import PropertyGroup
-from bpy.props import BoolProperty, CollectionProperty, FloatProperty, IntProperty, StringProperty, EnumProperty
+from bpy.props import BoolProperty, CollectionProperty, IntProperty, StringProperty, EnumProperty
 
 from mmd_tools import register_wrap
 from mmd_tools import utils
@@ -12,7 +12,7 @@ from mmd_tools.core.material import FnMaterial
 from mmd_tools.core.sdef import FnSDEF
 from mmd_tools.properties.morph import MaterialMorph, UVMorph, BoneMorph, VertexMorph, GroupMorph
 import mmd_tools.core.model as mmd_model
-
+from mmd_tools.translations import DictionaryEnum
 
 def __driver_variables(id_data, path, index=-1):
     d = id_data.driver_add(path, index)
@@ -139,7 +139,7 @@ def _toggleShowNamesOfJoints(self, context):
 
 def _setVisibilityOfMMDRigArmature(prop, v):
     root = prop.id_data
-    arm = mmd_model.Model(root).armature()
+    arm = mmd_model.FnModel.find_armature(root)
     if arm:
         if not v and bpy.context.active_object == arm:
             SceneOp(bpy.context).active_object = root
@@ -148,7 +148,7 @@ def _setVisibilityOfMMDRigArmature(prop, v):
 def _getVisibilityOfMMDRigArmature(prop):
     if prop.id_data.mmd_type != 'ROOT':
         return False
-    arm = mmd_model.Model(prop.id_data).armature()
+    arm = mmd_model.FnModel.find_armature(prop.id_data)
     return (arm and not arm.hide)
 
 def _setActiveRigidbodyObject(prop, v):
@@ -447,3 +447,117 @@ class MMDRoot(PropertyGroup):
         set=_setActiveMeshObject,
         get=_getActiveMeshObject,
         )
+
+MMD_DATA_TYPE_ENUM_ITEMS = [
+    (mmd_model.MMDDataType.BONE.name, mmd_model.MMDDataType.BONE.value, 'Bones', 1),
+    (mmd_model.MMDDataType.MORPH.name, mmd_model.MMDDataType.MORPH.value, 'Morphs', 2),
+    (mmd_model.MMDDataType.MATERIAL.name, mmd_model.MMDDataType.MATERIAL.value, 'Materials', 4),
+    (mmd_model.MMDDataType.DISPLAY.name, mmd_model.MMDDataType.DISPLAY.value, 'Display frames', 8),
+    (mmd_model.MMDDataType.PHYSICS.name, mmd_model.MMDDataType.PHYSICS.value, 'Rigidbodies and joints', 16),
+    (mmd_model.MMDDataType.INFO.name, mmd_model.MMDDataType.INFO.value, 'Model name and comments', 32),
+]
+
+@register_wrap
+class MMDDataReference(bpy.types.PropertyGroup):
+    type: bpy.props.EnumProperty(items=MMD_DATA_TYPE_ENUM_ITEMS)
+    object: bpy.props.PointerProperty(type=bpy.types.Object)
+    data_path: bpy.props.StringProperty()
+
+
+
+@register_wrap
+class MMDDataQuery(bpy.types.PropertyGroup):
+    @staticmethod
+    def _update_index(mmd_data_query: 'MMDDataQuery', _context):
+        """Display the selected data in the Property Editor"""
+        if mmd_data_query.result_data_index < 0:
+            return
+
+        mmd_data_ref: MMDDataReference = mmd_data_query.result_data[mmd_data_query.result_data_index]
+
+        mmd_model.MMD_DATA_TYPE_TO_HANDLERS[mmd_data_ref.type].update_index(mmd_data_ref)
+
+    @staticmethod
+    def _update_query(mmd_data_query: 'MMDDataQuery', _context):
+        """Update the data by the query"""
+
+        mmd_data_query.result_data.clear()
+        mmd_data_query.result_data_index = -1
+
+        filter_japanese_blank: bool = mmd_data_query.filter_japanese_blank
+        filter_english_blank: bool = mmd_data_query.filter_english_blank
+
+        filter_selected: bool = mmd_data_query.filter_selected
+        filter_visible: bool = mmd_data_query.filter_visible
+
+        def check_data_visible(select: bool, hide: bool) -> bool:
+            return (
+                filter_selected and not select
+                or
+                filter_visible and hide
+            )
+
+        def check_blank_name(name_j: str, name_e: str) -> bool:
+            return (
+                filter_japanese_blank and name_j
+                or
+                filter_english_blank and name_e
+            )
+
+        for handler in mmd_model.MMD_DATA_HANDLERS:
+            if handler.type_name in mmd_data_query.filter_types:
+                handler.update_query(mmd_data_query, check_data_visible, check_blank_name)
+
+    @staticmethod
+    def _update_operation_script_preset(mmd_data_query: 'MMDDataQuery', _context):
+        if mmd_data_query.operation_script_preset == 'NOTHING':
+            return
+
+        if mmd_data_query.operation_script_preset == 'TO_MMD_LR':
+            mmd_data_query.operation_script = 'to_mmd_lr(name)'
+            return
+
+        if mmd_data_query.operation_script_preset == 'TO_BLENDER_LR':
+            mmd_data_query.operation_script = 'to_blender_lr(name)'
+            return
+
+    filter_japanese_blank: bpy.props.BoolProperty(name='Japanese Blank', default=False, update=_update_query.__func__)
+    filter_english_blank: bpy.props.BoolProperty(name='English Blank', default=False, update=_update_query.__func__)
+    filter_selected: bpy.props.BoolProperty(name='Selected', default=False, update=_update_query.__func__)
+    filter_visible: bpy.props.BoolProperty(name='Visible', default=False, update=_update_query.__func__)
+    filter_types: bpy.props.EnumProperty(
+        items=MMD_DATA_TYPE_ENUM_ITEMS,
+        default={'BONE', 'MORPH', 'MATERIAL', 'DISPLAY', 'PHYSICS', },
+        options={'ENUM_FLAG'},
+        update=_update_query.__func__,
+    )
+    result_data_index: bpy.props.IntProperty(update=_update_index.__func__)
+    result_data: bpy.props.CollectionProperty(type=MMDDataReference)
+
+    dictionary = bpy.props.EnumProperty(
+        items=DictionaryEnum.get_dictionary_items,
+        name='Dictionary',
+    )
+
+    operation_target: bpy.props.EnumProperty(
+        items=[
+            ('BLENDER', 'Blender Name (name)', '', 1),
+            ('JAPANESE', 'Japanese Name (name_j)', '', 2),
+            ('ENGLISH', 'English Name (name_e)', '', 3),
+        ],
+        name='Operation Target',
+        default='JAPANESE',
+    )
+
+    operation_script_preset: bpy.props.EnumProperty(
+        items=[
+            ('NOTHING', '', '', 1),
+            ('TO_MMD_LR', 'Blender L/R to MMD L/R', 'to_mmd_lr(name)', 2),
+            ('TO_BLENDER_LR', 'MMD L/R to Blender L/R', 'to_blender_lr(name_j)', 3),
+        ],
+        name='Operation Script Preset',
+        default='NOTHING',
+        update=_update_operation_script_preset.__func__,
+    )
+
+    operation_script: bpy.props.StringProperty()

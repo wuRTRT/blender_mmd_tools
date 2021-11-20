@@ -3,7 +3,7 @@
 from bpy.types import Panel
 
 from mmd_tools import register_wrap
-from mmd_tools.core.model import Model
+from mmd_tools.core.model import Model, FnModel
 from mmd_tools.core.sdef import FnSDEF
 
 class _PanelBase(object):
@@ -47,7 +47,7 @@ class MMDModelObjectDisplayPanel(_PanelBase, Panel):
 
         layout.prop(root.mmd_root, 'use_property_driver', text='Property Drivers', icon='DRIVER')
 
-        self.__draw_IK_toggle(Model(root).armature() or root)
+        self.__draw_IK_toggle(FnModel.find_armature(root) or root)
 
     def __draw_IK_toggle(self, armature):
         bones = getattr(armature.pose, 'bones', ())

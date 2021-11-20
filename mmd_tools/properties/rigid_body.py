@@ -7,7 +7,7 @@ from bpy.props import StringProperty, IntProperty, BoolVectorProperty, EnumPrope
 from mmd_tools import register_wrap
 from mmd_tools import bpyutils
 from mmd_tools.core import rigid_body
-from mmd_tools.core.model import getRigidBodySize, Model
+from mmd_tools.core.model import getRigidBodySize, FnModel
 
 
 def _updateCollisionGroup(prop, context):
@@ -57,9 +57,9 @@ def _set_bone(prop, value):
 
     arm = relation.target
     if arm is None:
-        root = Model.findRoot(obj)
+        root = FnModel.find_root(obj)
         if root:
-            arm = relation.target = Model(root).armature()
+            arm = relation.target = FnModel.find_armature(root)
 
     if arm is not None and bone_name in arm.data.bones:
         relation.subtarget = bone_name

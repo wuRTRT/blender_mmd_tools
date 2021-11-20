@@ -1205,8 +1205,8 @@ class __PmxExporter:
             for m, show in muted_modifiers:
                 m.show_viewport = show
 
-    def __translate_armature(self, armature_object):
-        FnModel.translate_in_presettings(armature_object)
+    def __translate_armature(self, root_object: bpy.types.Object):
+        FnModel.translate_in_presettings(root_object)
 
     def execute(self, filepath, **args):
         root = args.get('root', None)
@@ -1241,7 +1241,7 @@ class __PmxExporter:
         self.__translate_in_presettings = args.get('translate_in_presettings', False)
 
         if self.__translate_in_presettings:
-            self.__translate_armature(self.__armature)
+            self.__translate_armature(root)
 
         nameMap = self.__exportBones(meshes)
 

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import bpy
+import mmd_tools.core.model as mmd_model
 from bpy.types import Operator
-
 from mmd_tools import register_wrap
 from mmd_tools.bpyutils import SceneOp
 from mmd_tools.core.bone import FnBone
+from mmd_tools.properties.root import MMDDataQuery, MMDDataReference
 from mmd_tools.translations import DictionaryEnum
-import mmd_tools.core.model as mmd_model
 
 
 @register_wrap
@@ -486,3 +486,93 @@ class TranslateMMDModel(Operator):
         for i in rig.joints():
             i.mmd_joint.name_e = self.translate(i.mmd_joint.name_j, i.mmd_joint.name_e)
 
+
+DEFAULT_SHOW_ROW_COUNT = 20
+
+
+@register_wrap
+class MMD_TOOLS_UL_PoseBones(bpy.types.UIList):
+    def draw_item(self, context, layout: bpy.types.UILayout, data, mmd_data_ref: MMDDataReference, icon, active_data, active_propname, index):
+        mmd_model.MMD_DATA_TYPE_TO_HANDLERS[mmd_data_ref.type].draw_item(layout, mmd_data_ref)
+
+
+@register_wrap
+class ShowGlobalTranslationPopup(bpy.types.Operator):
+    bl_idname = 'mmd_tools.show_global_translation_popup'
+    bl_label = 'Show Global Translation Popup'
+    bl_options = {'REGISTER'}
+
+    def draw(self, context):
+        layout = self.layout
+        mmd_data_query = self._mmd_data_query
+
+        col = layout.column(align=True)
+        col.label(text='Filter', icon='FILTER')
+        row = col.row()
+        row.prop(mmd_data_query, 'filter_types')
+
+        group = row.row(align=True, heading='is Blank:')
+        group.alignment = 'RIGHT'
+        group.prop(mmd_data_query, 'filter_japanese_blank', toggle=True, text='Japanese')
+        group.prop(mmd_data_query, 'filter_english_blank', toggle=True, text='English')
+
+        group = row.row(align=True)
+        group.prop(mmd_data_query, 'filter_selected', toggle=True, icon='RESTRICT_SELECT_OFF', icon_only=True)
+        group.prop(mmd_data_query, 'filter_visible', toggle=True, icon='HIDE_OFF', icon_only=True)
+
+        col = layout.column(align=True)
+        row = col.box().row(align=True)
+        row.label(text='', icon='BLENDER')
+        row.prop(mmd_data_query, 'operation_target', expand=True)
+        row.label(text='', icon='RESTRICT_SELECT_OFF')
+        row.label(text='', icon='HIDE_ON')
+
+        if len(mmd_data_query.result_data) > DEFAULT_SHOW_ROW_COUNT:
+            row.label(text='', icon='BLANK1')
+
+        col.template_list(
+            "MMD_TOOLS_UL_PoseBones", "",
+            mmd_data_query, 'result_data',
+            mmd_data_query, 'result_data_index',
+            rows=DEFAULT_SHOW_ROW_COUNT,
+        )
+
+        box = layout.box()
+        box.label(text='Batch Operation', icon='MODIFIER')
+        box.prop(mmd_data_query, 'operation_script', text='', icon='SCRIPT')
+        row = box.row()
+        row.prop(mmd_data_query, 'dictionary', text='Dictionary', icon='HELP')
+        row.prop(mmd_data_query, 'operation_script_preset', text='Preset', icon='CON_TRANSFORM_CACHE')
+        row.operator(ExecuteTranslationScriptOperator.bl_idname, text='Execute')
+
+    def invoke(self, context: bpy.types.Context, _event):
+        active_obj = context.active_object
+
+        root = mmd_model.FnModel.find_root(active_obj)
+        if root is None:
+            return {'CANCELLED'}
+
+        mmd_data_query: MMDDataQuery = root.mmd_data_query
+        self._mmd_data_query = mmd_data_query
+        MMDDataQuery._update_query(mmd_data_query, None)
+
+        return context.window_manager.invoke_props_dialog(self, width=800)
+
+    def execute(self, _context):
+        return {'FINISHED'}
+
+
+@register_wrap
+class ExecuteTranslationScriptOperator(bpy.types.Operator):
+    bl_idname = 'mmd_tools.execute_translation_script'
+    bl_label = 'Execute Translation Script'
+    bl_options = {'INTERNAL'}
+
+    def execute(self, context: bpy.types.Context):
+        root = mmd_model.FnModel.find_root(context.active_object)
+        if root is None:
+            return {'CANCELLED'}
+
+        mmd_model.FnModel.translate_in_presettings(root)
+
+        return {'FINISHED'}
