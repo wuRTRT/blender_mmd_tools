@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import bpy
 import csv
+import time
+
+import bpy
 
 jp_half_to_full_tuples = (
     ('ｳﾞ', 'ヴ'), ('ｶﾞ', 'ガ'), ('ｷﾞ', 'ギ'), ('ｸﾞ', 'グ'), ('ｹﾞ', 'ゲ'),
@@ -282,16 +284,15 @@ class MMDTranslator:
 
 
 class DictionaryEnum:
-    __items_id = None
+    __items_ttl = 0.0
     __items_cache = None
 
     @staticmethod
     def get_dictionary_items(prop, context):
-        id_tag = prop.as_pointer()
-        if id_tag and DictionaryEnum.__items_id == id_tag:
+        if DictionaryEnum.__items_ttl > time.time():
             return DictionaryEnum.__items_cache
 
-        DictionaryEnum.__items_id = id_tag
+        DictionaryEnum.__items_ttl = time.time() + 5
         DictionaryEnum.__items_cache = items = []
         if 'import' in prop.bl_rna.identifier:
             items.append(('DISABLED', 'Disabled', '', 0))

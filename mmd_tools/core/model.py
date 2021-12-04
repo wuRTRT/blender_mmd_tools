@@ -123,7 +123,7 @@ class MMDBoneHandler(MMDDataHandlerABC):
     @staticmethod
     def update_index(mmd_data_ref: 'MMDDataReference'):
         bpy.context.view_layer.objects.active = mmd_data_ref.object
-        mmd_data_ref.id_data.data.bones.active = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path).bone
+        mmd_data_ref.object.id_data.data.bones.active = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path).bone
 
     @staticmethod
     def update_query(mmd_data_query: 'MMDDataQuery', check_data_visible: Callable[[bool, bool], bool], check_blank_name: Callable[[str, str], bool]):
@@ -545,13 +545,17 @@ class FnModel:
         return filter(lambda x: x.type == 'MESH' and x.mmd_type == 'NONE', cls.all_children(obj))
 
     @staticmethod
-    def translate_in_presettings(root_object: bpy.types.Object):
+    def translate_in_presettings(root_object: bpy.types.Object) -> Tuple[Dict[str, str], Union[bpy.types.Text, None]]:
         mmd_data_query: MMDDataQuery = root_object.mmd_data_query
         operation_script = mmd_data_query.operation_script
         if not operation_script:
-            return
+            return ({}, None)
 
         translator = DictionaryEnum.get_translator(mmd_data_query.dictionary)
+        def translate(name: str) -> str:
+            if translator:
+                return translator.translate(name, name)
+            return name
 
         operation_script_ast = compile(mmd_data_query.operation_script, '<string>', 'eval')
         operation_target: str = mmd_data_query.operation_target
@@ -564,8 +568,7 @@ class FnModel:
                 operation_script_ast,
                 {'__builtins__': {}},
                 {
-                    'to_english': translator.translate,
-                    # 'to_japanese': self.to_j,
+                    'to_english': translate,
                     'to_mmd_lr': convertLRToName,
                     'to_blender_lr': convertNameToLR,
                     'name': name,
@@ -579,6 +582,8 @@ class FnModel:
                 translated_name if operation_target == 'JAPANESE' else None,
                 translated_name if operation_target == 'ENGLISH' else None,
             )
+
+        return (translator.fails, translator.save_fails())
 
 
 class Model:

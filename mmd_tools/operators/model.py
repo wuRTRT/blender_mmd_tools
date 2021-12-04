@@ -502,7 +502,7 @@ class ShowGlobalTranslationPopup(bpy.types.Operator):
     bl_label = 'Show Global Translation Popup'
     bl_options = {'REGISTER'}
 
-    def draw(self, context):
+    def draw(self, _context):
         layout = self.layout
         mmd_data_query = self._mmd_data_query
 
@@ -541,9 +541,18 @@ class ShowGlobalTranslationPopup(bpy.types.Operator):
         box.label(text='Batch Operation', icon='MODIFIER')
         box.prop(mmd_data_query, 'operation_script', text='', icon='SCRIPT')
         row = box.row()
-        row.prop(mmd_data_query, 'dictionary', text='Dictionary', icon='HELP')
         row.prop(mmd_data_query, 'operation_script_preset', text='Preset', icon='CON_TRANSFORM_CACHE')
         row.operator(ExecuteTranslationScriptOperator.bl_idname, text='Execute')
+
+        translation_box = box.box()
+        translation_box.label(text='Dictionaries', icon='HELP')
+        row = translation_box.row()
+        row.prop(mmd_data_query, 'dictionary', text='to_english')
+        row.operator(ExecuteTranslationScriptOperator.bl_idname, text='Write to .csv')
+
+        row = translation_box.row()
+        row.prop(mmd_data_query, 'dictionary', text='replace')
+
 
     def invoke(self, context: bpy.types.Context, _event):
         active_obj = context.active_object
@@ -573,6 +582,8 @@ class ExecuteTranslationScriptOperator(bpy.types.Operator):
         if root is None:
             return {'CANCELLED'}
 
-        mmd_model.FnModel.translate_in_presettings(root)
+        fails, text = mmd_model.FnModel.translate_in_presettings(root)
+        if fails:
+            self.report({'WARNING'}, "Failed to translate %d names, see '%s' in text editor"%(len(fails), text.name))
 
         return {'FINISHED'}

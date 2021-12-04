@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ MMDモデルパラメータ用Prop
 """
+from typing import Dict, List, Tuple
 import bpy
 from bpy.types import PropertyGroup
 from bpy.props import BoolProperty, CollectionProperty, IntProperty, StringProperty, EnumProperty
@@ -465,6 +466,13 @@ class MMDDataReference(bpy.types.PropertyGroup):
 
 
 
+OPERATION_SCRIPT_PRESET_ITEMS: List[Tuple[str, str, str, int]] = [
+    ('NOTHING', '', '', 1),
+    ('TO_ENGLISH', 'Translate to English', 'to_english(name)', 2),
+    ('TO_MMD_LR', 'Blender L/R to MMD L/R', 'to_mmd_lr(name)', 3),
+    ('TO_BLENDER_LR', 'MMD L/R to Blender L/R', 'to_blender_lr(name_j)', 4),
+]
+
 @register_wrap
 class MMDDataQuery(bpy.types.PropertyGroup):
     @staticmethod
@@ -513,13 +521,13 @@ class MMDDataQuery(bpy.types.PropertyGroup):
         if mmd_data_query.operation_script_preset == 'NOTHING':
             return
 
-        if mmd_data_query.operation_script_preset == 'TO_MMD_LR':
-            mmd_data_query.operation_script = 'to_mmd_lr(name)'
+        id2scripts: Dict[str, str] = {i[0]:i[2] for i in OPERATION_SCRIPT_PRESET_ITEMS}
+
+        operation_script = id2scripts.get(mmd_data_query.operation_script_preset)
+        if operation_script is None:
             return
 
-        if mmd_data_query.operation_script_preset == 'TO_BLENDER_LR':
-            mmd_data_query.operation_script = 'to_blender_lr(name)'
-            return
+        mmd_data_query.operation_script = operation_script
 
     filter_japanese_blank: bpy.props.BoolProperty(name='Japanese Blank', default=False, update=_update_query.__func__)
     filter_english_blank: bpy.props.BoolProperty(name='English Blank', default=False, update=_update_query.__func__)
@@ -550,11 +558,7 @@ class MMDDataQuery(bpy.types.PropertyGroup):
     )
 
     operation_script_preset: bpy.props.EnumProperty(
-        items=[
-            ('NOTHING', '', '', 1),
-            ('TO_MMD_LR', 'Blender L/R to MMD L/R', 'to_mmd_lr(name)', 2),
-            ('TO_BLENDER_LR', 'MMD L/R to Blender L/R', 'to_blender_lr(name_j)', 3),
-        ],
+        items=OPERATION_SCRIPT_PRESET_ITEMS,
         name='Operation Script Preset',
         default='NOTHING',
         update=_update_operation_script_preset.__func__,
