@@ -202,6 +202,7 @@ def makeSphere(segment=8, ring_count=5, radius=1.0, target_object=None):
             radius=radius,
             )
     else:
+        # SUPPORT_UNTIL: 3.3 LTS
         bmesh.ops.create_uvsphere(
             bm,
             u_segments=segment,
