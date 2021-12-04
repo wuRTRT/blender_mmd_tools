@@ -82,7 +82,7 @@ class __PmxExporter:
         self.__default_material = None
         self.__vertex_order_map = None # used for controlling vertex order
         self.__overwrite_bone_morphs_from_pose_library = False
-        self.__translate_in_presettings = False
+        self.__translate_in_presets = False
         self.__disable_specular = False
         self.__add_uv_count = 0
 
@@ -1206,7 +1206,7 @@ class __PmxExporter:
                 m.show_viewport = show
 
     def __translate_armature(self, root_object: bpy.types.Object):
-        FnModel.translate_in_presettings(root_object)
+        FnModel.translate_in_presets(root_object)
 
     def execute(self, filepath, **args):
         root = args.get('root', None)
@@ -1238,9 +1238,9 @@ class __PmxExporter:
             self.__vertex_order_map = {'method':sort_vertices}
 
         self.__overwrite_bone_morphs_from_pose_library = args.get('overwrite_bone_morphs_from_pose_library', False)
-        self.__translate_in_presettings = args.get('translate_in_presettings', False)
+        self.__translate_in_presets = args.get('translate_in_presets', False)
 
-        if self.__translate_in_presettings:
+        if self.__translate_in_presets:
             self.__translate_armature(root)
 
         nameMap = self.__exportBones(meshes)

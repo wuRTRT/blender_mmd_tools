@@ -545,7 +545,7 @@ class FnModel:
         return filter(lambda x: x.type == 'MESH' and x.mmd_type == 'NONE', cls.all_children(obj))
 
     @staticmethod
-    def translate_in_presettings(root_object: bpy.types.Object) -> Tuple[Dict[str, str], Union[bpy.types.Text, None]]:
+    def translate_in_presets(root_object: bpy.types.Object) -> Tuple[Dict[str, str], Union[bpy.types.Text, None]]:
         mmd_data_query: MMDDataQuery = root_object.mmd_data_query
         operation_script = mmd_data_query.operation_script
         if not operation_script:

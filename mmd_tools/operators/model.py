@@ -538,14 +538,14 @@ class ShowGlobalTranslationPopup(bpy.types.Operator):
         )
 
         box = layout.box()
-        box.label(text='Batch Operation', icon='MODIFIER')
+        box.label(text='Batch Operation:', icon='MODIFIER')
         box.prop(mmd_data_query, 'operation_script', text='', icon='SCRIPT')
         row = box.row()
         row.prop(mmd_data_query, 'operation_script_preset', text='Preset', icon='CON_TRANSFORM_CACHE')
         row.operator(ExecuteTranslationScriptOperator.bl_idname, text='Execute')
 
         translation_box = box.box()
-        translation_box.label(text='Dictionaries', icon='HELP')
+        translation_box.label(text='Dictionaries:', icon='HELP')
         row = translation_box.row()
         row.prop(mmd_data_query, 'dictionary', text='to_english')
         row.operator(ExecuteTranslationScriptOperator.bl_idname, text='Write to .csv')
@@ -582,7 +582,7 @@ class ExecuteTranslationScriptOperator(bpy.types.Operator):
         if root is None:
             return {'CANCELLED'}
 
-        fails, text = mmd_model.FnModel.translate_in_presettings(root)
+        fails, text = mmd_model.FnModel.translate_in_presets(root)
         if fails:
             self.report({'WARNING'}, "Failed to translate %d names, see '%s' in text editor"%(len(fails), text.name))
 
