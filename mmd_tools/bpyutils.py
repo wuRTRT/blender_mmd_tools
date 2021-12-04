@@ -194,12 +194,20 @@ def makeSphere(segment=8, ring_count=5, radius=1.0, target_object=None):
 
     mesh = target_object.data
     bm = bmesh.new()
-    bmesh.ops.create_uvsphere(
-        bm,
-        u_segments=segment,
-        v_segments=ring_count,
-        diameter=radius,
-        )
+    if bpy.app.version >= (3, 0, 0):
+        bmesh.ops.create_uvsphere(
+            bm,
+            u_segments=segment,
+            v_segments=ring_count,
+            radius=radius,
+            )
+    else:
+        bmesh.ops.create_uvsphere(
+            bm,
+            u_segments=segment,
+            v_segments=ring_count,
+            diameter=radius,
+            )
     for f in bm.faces:
         f.smooth = True
     bm.to_mesh(mesh)
