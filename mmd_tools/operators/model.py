@@ -181,7 +181,7 @@ class CreateMMDModelRoot(Operator):
     scale = bpy.props.FloatProperty(
         name='Scale',
         description='Scale',
-        default=1.0,
+        default=0.08,
         )
 
     def execute(self, context):
