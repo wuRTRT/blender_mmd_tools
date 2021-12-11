@@ -3,7 +3,7 @@
 translation_dict = {
     "ja_JP": {
         # Preferences
-        ("*", "View3D > Tool Shelf > MMD Tools Panel"): "3Dビュー > サイドバー > MMD Toolsパネル",
+        ("*", "View3D > Sidebar > MMD Tools Panel"): "3Dビュー > サイドバー > MMD Toolsパネル",
         ("*", "Utility tools for MMD model editing. (UuuNyaa's forked version)"): "MMDモデル編集用のユーティリティーツールです。(UuuNyaaのフォーク版)",
         ("*", "Shared Toon Texture Folder"): "共有トゥーンテクスチャフォルダ",
         ("*", "Base Texture Folder"): "ベーステクスチャフォルダ",
@@ -290,7 +290,7 @@ translation_dict = {
     },
     "zh_CN": {
         # Preferences
-        ("*", "View3D > Tool Shelf > MMD Tools Panel"): "3D视图 > 侧栏 > MMD Tools面板",
+        ("*", "View3D > Sidebar > MMD Tools Panel"): "3D视图 > 侧栏 > MMD Tools面板",
         ("*", "Utility tools for MMD model editing. (UuuNyaa's forked version)"): "用于MMD模型编辑的实用工具。(UuuNyaa的分叉版本)",
         ("*", "Shared Toon Texture Folder"): "共用的卡通纹理文件夹",
         ("*", "Base Texture Folder"): "基线纹理文件夹",
