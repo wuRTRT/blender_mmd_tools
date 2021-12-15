@@ -52,6 +52,8 @@ else:
     from . import operators
     from . import panels
 
+import os
+
 if bpy.app.version < (2, 80, 0):
     bl_info['blender'] = (2, 70, 0)
 
@@ -75,6 +77,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             description=('Directory path to toon textures. This is normally the ' +
                          '"Data" directory within of your MikuMikuDance directory'),
             subtype='DIR_PATH',
+            default=os.path.join(os.path.dirname(__file__), 'externals', 'MikuMikuDance'),
             )
     base_texture_folder = bpy.props.StringProperty(
             name='Base Texture Folder',
@@ -85,7 +88,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             name='Dictionary Folder',
             description='Path for searching csv dictionaries',
             subtype='DIR_PATH',
-            default=__file__[:-11],
+            default=os.path.dirname(__file__),
             )
 
     # for add-on updater
@@ -97,8 +100,6 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, "enable_mmd_model_creation_features")
-        layout.prop(self, "enable_mmd_scene_creation_features")
         layout.prop(self, "shared_toon_folder")
         layout.prop(self, "base_texture_folder")
         layout.prop(self, "dictionary_folder")
