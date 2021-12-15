@@ -1033,7 +1033,7 @@ class Model:
             if old_bone_name in mesh.vertex_groups:
                 mesh.vertex_groups[old_bone_name].name = new_bone_name
 
-    def build(self):
+    def build(self, non_collision_distance_scale):
         rigidbody_world_enabled = rigid_body.setRigidBodyWorldEnabled(False)
         if self.__root.mmd_root.is_built:
             self.clean()
@@ -1043,7 +1043,7 @@ class Model:
         logging.info('****************************************')
         start_time = time.time()
         self.__preBuild()
-        self.buildRigids(bpyutils.addon_preferences('non_collision_threshold', 1.5))
+        self.buildRigids(non_collision_distance_scale)
         self.buildJoints()
         self.__postBuild()
         logging.info(' Finished building in %f seconds.', time.time() - start_time)
@@ -1354,7 +1354,7 @@ class Model:
         logging.debug(' finish in %f seconds.', time.time() - start_time)
         logging.debug('-'*60)
 
-    def buildRigids(self, distance_of_ignore_collisions=1.5):
+    def buildRigids(self, non_collision_distance_scale=1.5):
         logging.debug('--------------------------------')
         logging.debug(' Build riggings of rigid bodies')
         logging.debug('--------------------------------')
@@ -1391,7 +1391,7 @@ class Model:
                         joint.rigid_body_constraint.disable_collisions = True
                     else:
                         distance = (obj_a.location - obj_b.location).length
-                        if distance < distance_of_ignore_collisions * (self.__getRigidRange(obj_a) + self.__getRigidRange(obj_b)) * 0.5:
+                        if distance < non_collision_distance_scale * (self.__getRigidRange(obj_a) + self.__getRigidRange(obj_b)) * 0.5:
                             nonCollisionJointTable.append((obj_a, obj_b))
                     non_collision_pairs.add(pair)
         for cnt, i in enumerate(rigid_objects):

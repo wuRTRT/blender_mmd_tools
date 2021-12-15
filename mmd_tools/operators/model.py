@@ -62,10 +62,17 @@ class BuildRig(Operator):
     bl_description = 'Translate physics of selected object into format usable by Blender'
     bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
 
+    non_collision_distance_scale: bpy.props.FloatProperty(
+        name='Non-Collision Distance Scale',
+        description='The distance scale for creating extra non-collision constraints while building physics',
+        min=0, soft_max=10,
+        default=1.5,
+    )
+
     def execute(self, context):
         root = mmd_model.Model.findRoot(context.active_object)
         rig = mmd_model.Model(root)
-        rig.build()
+        rig.build(self.non_collision_distance_scale)
         SceneOp(context).active_object = root
         return {'FINISHED'}
 

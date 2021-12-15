@@ -87,13 +87,6 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
             subtype='DIR_PATH',
             default=__file__[:-11],
             )
-    non_collision_threshold = bpy.props.FloatProperty(
-            name='Non-Collision Threshold',
-            description='The distance threshold for creating extra non-collision constraints while building physics',
-            min=0,
-            soft_max=10,
-            default=1.5,
-            )
 
     # for add-on updater
     updater_branch_to_update = bpy.props.EnumProperty(
@@ -104,10 +97,11 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
+        layout.prop(self, "enable_mmd_model_creation_features")
+        layout.prop(self, "enable_mmd_scene_creation_features")
         layout.prop(self, "shared_toon_folder")
         layout.prop(self, "base_texture_folder")
         layout.prop(self, "dictionary_folder")
-        layout.prop(self, "non_collision_threshold")
 
 
         # add-on updater
