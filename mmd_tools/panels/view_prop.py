@@ -2,13 +2,17 @@
 
 from bpy.types import Panel
 
-from mmd_tools import register_wrap
+from mmd_tools import bpyutils, register_wrap
 from mmd_tools.core.model import Model, FnModel
 from mmd_tools.core.sdef import FnSDEF
 
 class _PanelBase(object):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
+
+    @classmethod
+    def poll(cls, _context):
+        return bpyutils.addon_preferences('enable_mmd_model_creation_features', True)
 
 @register_wrap
 class MMDModelObjectDisplayPanel(_PanelBase, Panel):
@@ -17,7 +21,7 @@ class MMDModelObjectDisplayPanel(_PanelBase, Panel):
 
     @classmethod
     def poll(cls, context):
-        return Model.findRoot(context.active_object)
+        return super().poll(cls) and Model.findRoot(context.active_object)
 
     def draw(self, context):
         layout = self.layout

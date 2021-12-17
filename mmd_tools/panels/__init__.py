@@ -23,6 +23,7 @@ else:
         prop_material,
         prop_object,
         tool,
+        panel_scene,
         util_tools,
         view_prop,
         view_header

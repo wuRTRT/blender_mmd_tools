@@ -3,8 +3,7 @@
 import bpy
 from bpy.types import Panel, Menu, UIList
 
-from mmd_tools import register_wrap
-from mmd_tools import operators
+from mmd_tools import bpyutils, operators, register_wrap
 from mmd_tools.utils import ItemOp
 from mmd_tools.bpyutils import SceneOp
 import mmd_tools.core.model as mmd_model
@@ -34,11 +33,15 @@ class _PanelBase(object):
     bl_region_type = 'TOOLS' if bpy.app.version < (2, 80, 0) else 'UI'
     bl_category = 'MMD'
 
+    @classmethod
+    def poll(cls, _context):
+        return bpyutils.addon_preferences('enable_mmd_model_creation_features', True)
+
 
 @register_wrap
 class MMDToolsObjectPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_object'
-    bl_label = 'Operator'
+    bl_label = 'Model Creation'
     bl_context = ''
 
     def draw(self, context):
@@ -47,41 +50,14 @@ class MMDToolsObjectPanel(_PanelBase, Panel):
         layout = self.layout
 
         col = layout.column(align=True)
-        row = col.row(align=True)
-        row.operator('mmd_tools.create_mmd_model_root_object', text='Create Model', icon='OUTLINER_OB_ARMATURE')
-        row.operator('mmd_tools.convert_to_mmd_model', text='Convert Model', icon='OUTLINER_OB_ARMATURE')
-        row.operator('mmd_tools.rigid_body_world_update', text='', icon='PHYSICS')
-
-        col = layout.column(align=True)
-        col.operator('mmd_tools.convert_materials_for_cycles', text='Convert Materials For Cycles')
-        col.operator('mmd_tools.separate_by_materials', text='Separate By Materials')
+        col.operator('mmd_tools.create_mmd_model_root_object', text='Create Model', icon='OUTLINER_OB_ARMATURE')
+        col.operator('mmd_tools.convert_to_mmd_model', text='Convert Model', icon='ARMATURE_DATA')
 
         root = mmd_model.Model.findRoot(active_obj)
         if root:
-            col.operator('mmd_tools.join_meshes')
             col.operator('mmd_tools.attach_meshes')
             col.operator('mmd_tools.translate_mmd_model', text='Translation')
             col.operator('mmd_tools.show_global_translation_popup', text='(Experimental) Global Translation')
-
-            row = _layout_split(layout, factor=1/3, align=False)
-
-            col = row.column(align=True)
-            col.label(text='Bone Constraints:', icon='CONSTRAINT_BONE')
-            col.operator('mmd_tools.apply_additional_transform', text='Apply')
-            col.operator('mmd_tools.clean_additional_transform', text='Clean')
-
-            col = row.column(align=True)
-            col.active = getattr(context.scene.rigidbody_world, 'enabled', False)
-            sub_row = col.row(align=True)
-            sub_row.label(text='Physics:', icon='PHYSICS')
-            if not root.mmd_root.is_built:
-                sub_row.label(icon='ERROR')
-            col.operator('mmd_tools.build_rig', text='Build')
-            col.operator('mmd_tools.clean_rig', text='Clean')
-
-            col = row.column(align=True)
-            col.label(text='Edge Preview:', icon='MATERIAL')
-            col.operator_enum('mmd_tools.edge_preview_setup', 'action')
 
         row = layout.row()
 

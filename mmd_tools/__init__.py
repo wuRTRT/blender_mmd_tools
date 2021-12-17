@@ -72,6 +72,10 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
     # when defining this in a submodule of a python package.
     bl_idname = __name__
 
+    enable_mmd_model_creation_features = bpy.props.BoolProperty(
+            name="Enable MMD Model Creation Features",
+            default=True,
+            )
     shared_toon_folder = bpy.props.StringProperty(
             name="Shared Toon Texture Folder",
             description=('Directory path to toon textures. This is normally the ' +
@@ -100,6 +104,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
+        layout.prop(self, "enable_mmd_model_creation_features")
         layout.prop(self, "shared_toon_folder")
         layout.prop(self, "base_texture_folder")
         layout.prop(self, "dictionary_folder")
@@ -189,10 +194,27 @@ def menu_view3d_object(self, context):
     self.layout.separator()
     self.layout.operator('mmd_tools.clean_shape_keys')
 
-def header_view3d_pose_draw(self, context):
-    obj = context.active_object
-    if obj and obj.type == 'ARMATURE' and obj.mode == 'POSE':
-        self.layout.operator('mmd_tools.flip_pose', text='', icon='ARROW_LEFTRIGHT')
+def menu_view3d_select_object(self, context):
+    self.layout.separator()
+    self.layout.operator_context = 'EXEC_DEFAULT'
+    operator = self.layout.operator('mmd_tools.rigid_body_select', text='Select MMD Rigid Body')
+    operator.properties = set(['collision_group_number', 'shape'])
+
+def menu_view3d_pose_context_menu(self, context):
+    self.layout.operator('mmd_tools.flip_pose', text='MMD Flip Pose', icon='ARROW_LEFTRIGHT')
+
+def panel_view3d_shading(self, context):
+    if context.space_data.shading.type != 'SOLID':
+        return
+
+    col = self.layout.column(align=True)
+    col.label(text='MMD Shading Presets')
+    row = col.row(align=True)
+    row.operator('mmd_tools.set_glsl_shading', text='GLSL')
+    row.operator('mmd_tools.set_shadeless_glsl_shading', text='Shadeless')
+    row = col.row(align=True)
+    row.operator('mmd_tools.reset_shading', text='Reset')
+
 
 @persistent
 def load_handler(dummy):
@@ -207,18 +229,18 @@ def register():
     print(__name__, 'registed %d classes'%len(__bl_classes))
     properties.register()
     bpy.app.handlers.load_post.append(load_handler)
-    bpy.types.VIEW3D_HT_header.append(header_view3d_pose_draw)
     bpy.types.VIEW3D_MT_object.append(menu_view3d_object)
+    bpy.types.VIEW3D_MT_select_object.append(menu_view3d_select_object)
+    bpy.types.VIEW3D_MT_pose_context_menu.append(menu_view3d_pose_context_menu)
+    bpy.types.VIEW3D_PT_shading.append(panel_view3d_shading)
     if bpy.app.version < (2, 80, 0):
         bpy.types.INFO_MT_file_import.append(menu_func_import)
         bpy.types.INFO_MT_file_export.append(menu_func_export)
         bpy.types.INFO_MT_armature_add.append(menu_func_armature)
-        #bpy.context.user_preferences.system.use_scripts_auto_execute = True
     else:
         bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
         bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
         bpy.types.VIEW3D_MT_armature_add.append(menu_func_armature)
-        #bpy.context.preferences.filepaths.use_scripts_auto_execute = True
 
     from mmd_tools.m17n import translation_dict
     bpy.app.translations.register(bl_info['name'], translation_dict)
@@ -238,8 +260,10 @@ def unregister():
         bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
         bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
         bpy.types.VIEW3D_MT_armature_add.remove(menu_func_armature)
+    bpy.types.VIEW3D_PT_shading.remove(panel_view3d_shading)
+    bpy.types.VIEW3D_MT_pose_context_menu.remove(menu_view3d_pose_context_menu)
+    bpy.types.VIEW3D_MT_select_object.remove(menu_view3d_select_object)
     bpy.types.VIEW3D_MT_object.remove(menu_view3d_object)
-    bpy.types.VIEW3D_HT_header.remove(header_view3d_pose_draw)
     bpy.app.handlers.load_post.remove(load_handler)
     properties.unregister()
     for cls in reversed(__bl_classes):

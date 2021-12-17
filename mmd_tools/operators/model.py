@@ -594,3 +594,49 @@ class ExecuteTranslationScriptOperator(bpy.types.Operator):
             self.report({'WARNING'}, "Failed to translate %d names, see '%s' in text editor"%(len(fails), text.name))
 
         return {'FINISHED'}
+
+
+@register_wrap
+class AssembleAll(Operator):
+    bl_idname = 'mmd_tools.assemble_all'
+    bl_label = 'Assemble All'
+    bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
+
+    def execute(self, context):
+        active_object = context.active_object
+        root_object = mmd_model.Model.findRoot(context.active_object)
+        rig = mmd_model.Model(root_object)
+
+        rig.applyAdditionalTransformConstraints()
+        rig.build(1.5)
+        rig.morph_slider.bind()
+
+        root_object.mmd_root.use_sdef = True
+        bpy.ops.mmd_tools.sdef_bind()
+        root_object.mmd_root.use_property_driver = True
+
+        SceneOp(context).active_object = active_object
+
+        return {'FINISHED'}
+
+@register_wrap
+class DisassembleAll(Operator):
+    bl_idname = 'mmd_tools.disassemble_all'
+    bl_label = 'Disassemble All'
+    bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
+
+    def execute(self, context):
+        active_object = context.active_object
+        root_object = mmd_model.Model.findRoot(context.active_object)
+        rig = mmd_model.Model(root_object)
+
+        root_object.mmd_root.use_property_driver = False
+        bpy.ops.mmd_tools.sdef_unbind()
+        root_object.mmd_root.use_sdef = False
+        rig.morph_slider.unbind()
+        rig.clean()
+        rig.cleanAdditionalTransformConstraints()
+
+        SceneOp(context).active_object = active_object
+
+        return {'FINISHED'}
