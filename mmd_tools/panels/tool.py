@@ -51,36 +51,17 @@ class MMDToolsObjectPanel(_PanelBase, Panel):
 
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.label(text='Model:', icon='OUTLINER_OB_ARMATURE')
-        cell = row.row(align=True)
-        cell.operator('mmd_tools.import_model', text='', icon='IMPORT')
-        cell.operator('mmd_tools.export_pmx', text='', icon='EXPORT')
-
-        col = layout.column(align=True)
-        row = col.row(align=True)
-        row.operator('mmd_tools.create_mmd_model_root_object', text='Create', icon='OUTLINER_OB_ARMATURE')
-        row.operator('mmd_tools.convert_to_mmd_model', text='Convert', icon='ARMATURE_DATA')
+        row.operator('mmd_tools.create_mmd_model_root_object', text='Create Model', icon='OUTLINER_OB_ARMATURE')
+        row.operator('mmd_tools.convert_to_mmd_model', text='Convert Model', icon='ARMATURE_DATA')
 
         root = mmd_model.Model.findRoot(active_obj)
-        if root:
-            col.operator('mmd_tools.attach_meshes', text='Attach Meshes')
-            row = col.row(align=True)
-            row.operator('mmd_tools.translate_mmd_model', text='Translate')
-            row.operator('mmd_tools.show_global_translation_popup', text='', icon='WINDOW')
-
-        col = layout.column(align=True)
+        col = col.column(align=True)
+        col.enabled = root is not None
+        col.operator('mmd_tools.attach_meshes', text='Attach Meshes', icon='OUTLINER_OB_MESH')
         row = col.row(align=True)
-        row.label(text='Motion:', icon='ANIM')
-        cell = row.row(align=True)
-        cell.operator('mmd_tools.import_vmd', text='', icon='IMPORT')
-        cell.operator('mmd_tools.export_vmd', text='', icon='EXPORT')
+        row.operator('mmd_tools.translate_mmd_model', text='Translate', icon='SYNTAX_ON')
+        row.operator('mmd_tools.show_global_translation_popup', text='', icon='WINDOW')
 
-        col = layout.column(align=True)
-        row = col.row(align=True)
-        row.label(text='Pose:', icon='POSE_HLT')
-        cell = row.row(align=True)
-        cell.operator('mmd_tools.import_vpd', text='', icon='IMPORT')
-        cell.operator('mmd_tools.export_vpd', text='', icon='EXPORT')
 
 
 @register_wrap

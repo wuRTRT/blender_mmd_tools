@@ -54,12 +54,22 @@ class MMDToolsSceneSetupPanel(Panel):
     def draw(self, context: bpy.types.Context):
         layout = self.layout
 
-        col = layout.column(align=True)
-        col.label(text='Import:', icon='IMPORT')
-        row = col.row(align=True)
-        row.operator('mmd_tools.import_model', text='Model', icon='OUTLINER_OB_ARMATURE')
-        row.operator('mmd_tools.import_vmd', text='Motion', icon='ANIM')
-        row.operator('mmd_tools.import_vpd', text='Pose', icon='POSE_HLT')
+        row = layout.row()
+
+        col = row.column(align=True)
+        col.label(text='Model:', icon='OUTLINER_OB_ARMATURE')
+        col.operator('mmd_tools.import_model', text='Import')
+        col.operator('mmd_tools.export_pmx', text='Export')
+
+        col = row.column(align=True)
+        col.label(text='Motion:', icon='ANIM')
+        col.operator('mmd_tools.import_vmd', text='Import')
+        col.operator('mmd_tools.export_vmd', text='Export')
+
+        col = row.column(align=True)
+        col.label(text='Pose:', icon='POSE_HLT')
+        col.operator('mmd_tools.import_vpd', text='Import')
+        col.operator('mmd_tools.export_vpd', text='Export')
 
         col = layout.column(align=True)
         row = col.row(align=False)
