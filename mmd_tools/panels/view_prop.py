@@ -14,7 +14,6 @@ class _PanelBase(object):
     def poll(cls, _context):
         return bpyutils.addon_preferences('enable_mmd_model_creation_features', True)
 
-@register_wrap
 class MMDModelObjectDisplayPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_root_object_display'
     bl_label = 'MMD Display'
@@ -71,7 +70,6 @@ class MMDModelObjectDisplayPanel(_PanelBase, Panel):
                     ic = 'ERROR' if ik_map[ik][-1] else 'NONE'
                     row.prop(ik, 'mmd_ik_toggle', text=ik.name, toggle=True, icon=ic)
 
-@register_wrap
 class MMDViewPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_view'
     bl_label = 'MMD Shading'
@@ -86,7 +84,6 @@ class MMDViewPanel(_PanelBase, Panel):
         r = c.row(align=True)
         r.operator('mmd_tools.reset_shading', text='Reset')
 
-@register_wrap
 class MMDSDEFPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_sdef'
     bl_label = 'MMD SDEF Driver'

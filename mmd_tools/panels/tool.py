@@ -48,18 +48,19 @@ class MMDToolsObjectPanel(_PanelBase, Panel):
         active_obj = context.active_object
 
         layout = self.layout
-
         col = layout.column(align=True)
-        row = col.row(align=True)
+        grid = col.grid_flow(row_major=True)
+        row = grid.row(align=True)
         row.operator('mmd_tools.create_mmd_model_root_object', text='Create Model', icon='OUTLINER_OB_ARMATURE')
         row.operator('mmd_tools.convert_to_mmd_model', text='Convert Model', icon='ARMATURE_DATA')
 
         root = mmd_model.Model.findRoot(active_obj)
-        col = col.column(align=True)
-        col.enabled = root is not None
-        col.operator('mmd_tools.attach_meshes', text='Attach Meshes', icon='OUTLINER_OB_MESH')
-        row = col.row(align=True)
-        row.operator('mmd_tools.translate_mmd_model', text='Translate', icon='SYNTAX_ON')
+        row = grid.row(align=True)
+        row.enabled = root is not None
+        row.operator('mmd_tools.attach_meshes', text='Attach Meshes', icon='OUTLINER_OB_MESH')
+
+        row = grid.row(align=True)
+        row.operator('mmd_tools.translate_mmd_model', text='Translate', icon='HELP')
         row.operator('mmd_tools.show_global_translation_popup', text='', icon='WINDOW')
 
 

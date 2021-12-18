@@ -52,6 +52,38 @@ class ConvertMaterialsForCycles(Operator):
         return {'FINISHED'}
 
 @register_wrap
+class ConvertMaterials(Operator):
+    bl_idname = 'mmd_tools.convert_materials'
+    bl_label = 'Convert Materials'
+    bl_description = 'Convert materials of selected objects.'
+    bl_options = {'REGISTER', 'UNDO'}
+
+    use_principled: bpy.props.BoolProperty(
+        name='Convert to Principled BSDF',
+        description='Convert MMD shader nodes to Principled BSDF as well if enabled',
+        default=True,
+        options={'SKIP_SAVE'},
+        )
+
+    clean_nodes: bpy.props.BoolProperty(
+        name='Clean Nodes',
+        description='Remove redundant nodes as well if enabled. Disable it to keep node data.',
+        default=True,
+        options={'SKIP_SAVE'},
+        )
+
+    @classmethod
+    def poll(cls, context):
+        return next((x for x in context.selected_objects if x.type == 'MESH'), None)
+
+    def execute(self, context):
+        for obj in context.selected_objects:
+            if obj.type != 'MESH':
+                continue
+            cycles_converter.convertToBlenderShader(obj, use_principled=self.use_principled, clean_nodes=self.clean_nodes)
+        return {'FINISHED'}
+
+@register_wrap
 class _OpenTextureBase(object):
     """ Create a texture for mmd model material.
     """
