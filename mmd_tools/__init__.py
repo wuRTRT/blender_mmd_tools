@@ -3,7 +3,7 @@
 bl_info = {
     "name": "mmd_tools",
     "author": "sugiany",
-    "version": (1, 0, 2),
+    "version": (1, 1, 0),
     "blender": (2, 83, 0),
     "location": "View3D > Sidebar > MMD Tools Panel",
     "description": "Utility tools for MMD model editing. (UuuNyaa's forked version)",
@@ -231,6 +231,7 @@ def register():
     bpy.app.handlers.load_post.append(load_handler)
     bpy.types.VIEW3D_MT_object.append(menu_view3d_object)
     bpy.types.VIEW3D_MT_select_object.append(menu_view3d_select_object)
+    bpy.types.VIEW3D_MT_pose.append(menu_view3d_pose_context_menu)
     bpy.types.VIEW3D_MT_pose_context_menu.append(menu_view3d_pose_context_menu)
     bpy.types.VIEW3D_PT_shading.append(panel_view3d_shading)
     if bpy.app.version < (2, 80, 0):
@@ -262,6 +263,7 @@ def unregister():
         bpy.types.VIEW3D_MT_armature_add.remove(menu_func_armature)
     bpy.types.VIEW3D_PT_shading.remove(panel_view3d_shading)
     bpy.types.VIEW3D_MT_pose_context_menu.remove(menu_view3d_pose_context_menu)
+    bpy.types.VIEW3D_MT_pose.remove(menu_view3d_pose_context_menu)
     bpy.types.VIEW3D_MT_select_object.remove(menu_view3d_select_object)
     bpy.types.VIEW3D_MT_object.remove(menu_view3d_object)
     bpy.app.handlers.load_post.remove(load_handler)

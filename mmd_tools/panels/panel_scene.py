@@ -4,7 +4,7 @@ from typing import Dict
 
 import bpy
 from bpy.types import Panel
-from mmd_tools import bpyutils, register_wrap
+from mmd_tools import register_wrap
 from mmd_tools.core import model
 from mmd_tools.core.sdef import FnSDEF
 
@@ -121,65 +121,64 @@ class MMDToolsModelSetupPanel(Panel):
         col.label(text=mmd_root.name, icon='OUTLINER_OB_ARMATURE')
         col.operator('mmd_tools.show_global_translation_popup', text='(Experimental) Global Translation')
 
-        col = layout.column(align=True)
-        col.label(text='Model Assembly:', icon='MODIFIER_ON')
-
+        col = layout.column(align=False)
         row = col.row(align=True)
-        row.operator('mmd_tools.assemble_all', text='Assemble All', icon='SETTINGS')
+        row.label(text='Assembly:', icon='MODIFIER_ON')
+
+        grid = col.row()
+
+        row = grid.row(align=True)
+        row.operator('mmd_tools.assemble_all', text='All', icon='SETTINGS')
         row.operator('mmd_tools.disassemble_all', text='', icon='TRASH')
 
-        row = col.row(align=True)
-        row.label(text='', icon='BLANK1')
-        row.operator('mmd_tools.apply_additional_transform', text='Bone Constraints', icon='CONSTRAINT_BONE')
-        row.operator('mmd_tools.clean_additional_transform', text='', icon='TRASH')
-
-        row = col.row(align=True)
-        row.active = getattr(context.scene.rigidbody_world, 'enabled', False)
-        if not mmd_root.is_built:
-            row.label(icon='ERROR')
-        else:
-            row.label(text='', icon='BLANK1')
-        row.operator('mmd_tools.build_rig', text='Physics',  icon='PHYSICS')
-        row.operator('mmd_tools.clean_rig', text='', icon='TRASH')
-
-        row = col.row(align=True)
-        row.label(text='', icon='BLANK1')
-        row.operator('mmd_tools.morph_slider_setup', text='Morph Placeholder', icon='SHAPEKEY_DATA').type = 'BIND'
-        row.operator('mmd_tools.morph_slider_setup', text='', icon='TRASH').type = 'UNBIND'
-
-        row = col.row(align=True)
+        row = grid.row(align=True)
+        row.operator('mmd_tools.sdef_bind', text='SDEF', icon='MOD_SIMPLEDEFORM')
         if len(FnSDEF.g_verts) > 0:
             row.operator('mmd_tools.sdef_cache_reset', text='', icon='FILE_REFRESH')
-        else:
-            row.label(text='', icon='BLANK1')
-        row.operator('mmd_tools.sdef_bind', text='SDEF Driver', icon='MOD_SIMPLEDEFORM')
         row.operator('mmd_tools.sdef_unbind', text='', icon='TRASH')
 
-        row = col.row(align=True)
-        row.label(text='', icon='BLANK1')
-        row.prop(mmd_root, 'use_property_driver', text='Property Drivers', toggle=True, icon='DRIVER')
+        grid = col.row()
+        row = grid.row(align=True)
+        row.operator('mmd_tools.apply_additional_transform', text='Bone', icon='CONSTRAINT_BONE')
+        row.operator('mmd_tools.clean_additional_transform', text='', icon='TRASH')
+
+        row = grid.row(align=True)
+        row.operator('mmd_tools.morph_slider_setup', text='Morph', icon='SHAPEKEY_DATA').type = 'BIND'
+        row.operator('mmd_tools.morph_slider_setup', text='', icon='TRASH').type = 'UNBIND'
+
+        grid = col.row()
+        row = grid.row(align=True)
+        row.active = getattr(context.scene.rigidbody_world, 'enabled', False)
+        if not mmd_root.is_built:
+            row.operator('mmd_tools.build_rig', text='Physics', icon='PHYSICS', depress=False)
+        else:
+            row.operator('mmd_tools.clean_rig', text='Physics', icon='PHYSICS', depress=True)
+
+        row = grid.row(align=True)
+        row.prop(mmd_root, 'use_property_driver', text='Property', toggle=True, icon='DRIVER')
 
         col = layout.column(align=True)
-        col.label(text='Visibility:', icon='HIDE_OFF')
-        row = col.row(align=True)
-        row.prop(mmd_root, 'show_meshes', text='Mesh', toggle=True, icon='MESH_DATA')
-        row.prop(mmd_root, 'show_armature', text='Armature', toggle=True, icon='ARMATURE_DATA')
-        row.prop(mmd_root, 'show_temporary_objects', text='Temporary Object', toggle=True, icon='EMPTY_AXIS')
         row = col.row(align=False)
-        cell = row.row(align=True)
-        cell.prop(mmd_root, 'show_rigid_bodies', text='Rigid Body', toggle=True, icon='RIGID_BODY')
-        cell.prop(mmd_root, 'show_names_of_rigid_bodies', text='', toggle=True, icon_only=True, icon='COPY_ID')
-        cell = row.row(align=True)
-        cell.prop(mmd_root, 'show_joints', text='Joint', toggle=True, icon='RIGID_BODY_CONSTRAINT')
-        cell.prop(mmd_root, 'show_names_of_joints', text='', toggle=True, icon_only=True, icon='COPY_ID')
-        row = col.row(align=True)
-        row.enabled = False
+        row.label(text='Visibility:', icon='HIDE_OFF')
         row.operator('mmd_tools.separate_by_materials', text='Reset')
+
+        row = col.row(align=True)
+        row.prop(mmd_root, 'show_meshes', toggle=True, icon_only=True, icon='MESH_DATA')
+        row.prop(mmd_root, 'show_armature', toggle=True, icon_only=True, icon='ARMATURE_DATA')
+        row = row.row()
+        row.prop(mmd_root, 'show_temporary_objects', toggle=True, icon_only=True, icon='EMPTY_AXIS')
+        cell = row.row(align=True)
+        cell.prop(mmd_root, 'show_rigid_bodies', toggle=True, icon_only=True, icon='RIGID_BODY')
+        cell.prop(mmd_root, 'show_names_of_rigid_bodies', toggle=True, icon_only=True, icon='SHORTDISPLAY')
+        cell = row.row(align=True)
+        cell.prop(mmd_root, 'show_joints', toggle=True, icon_only=True, icon='RIGID_BODY_CONSTRAINT')
+        cell.prop(mmd_root, 'show_names_of_joints', toggle=True, icon_only=True, icon='SHORTDISPLAY')
 
         col = layout.column(align=True)
         col.label(text='Mesh:', icon='MESH_DATA')
-        col.operator('mmd_tools.separate_by_materials', text='Separate By Materials')
-        col.operator('mmd_tools.join_meshes')
+        row = col.row(align=True)
+        row.operator('mmd_tools.separate_by_materials', text='Separate', icon='MOD_EXPLODE')
+        row.operator('mmd_tools.join_meshes', text='Join', icon='MESH_CUBE')
 
         col = layout.column(align=False)
         col.label(text='Material:', icon='MATERIAL')

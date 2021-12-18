@@ -50,31 +50,37 @@ class MMDToolsObjectPanel(_PanelBase, Panel):
         layout = self.layout
 
         col = layout.column(align=True)
-        col.operator('mmd_tools.create_mmd_model_root_object', text='Create Model', icon='OUTLINER_OB_ARMATURE')
-        col.operator('mmd_tools.convert_to_mmd_model', text='Convert Model', icon='ARMATURE_DATA')
+        row = col.row(align=True)
+        row.label(text='Model:', icon='OUTLINER_OB_ARMATURE')
+        cell = row.row(align=True)
+        cell.operator('mmd_tools.import_model', text='', icon='IMPORT')
+        cell.operator('mmd_tools.export_pmx', text='', icon='EXPORT')
+
+        col = layout.column(align=True)
+        row = col.row(align=True)
+        row.operator('mmd_tools.create_mmd_model_root_object', text='Create', icon='OUTLINER_OB_ARMATURE')
+        row.operator('mmd_tools.convert_to_mmd_model', text='Convert', icon='ARMATURE_DATA')
 
         root = mmd_model.Model.findRoot(active_obj)
         if root:
-            col.operator('mmd_tools.attach_meshes')
-            col.operator('mmd_tools.translate_mmd_model', text='Translation')
-            col.operator('mmd_tools.show_global_translation_popup', text='(Experimental) Global Translation')
+            col.operator('mmd_tools.attach_meshes', text='Attach Meshes')
+            row = col.row(align=True)
+            row.operator('mmd_tools.translate_mmd_model', text='Translate')
+            row.operator('mmd_tools.show_global_translation_popup', text='', icon='WINDOW')
 
-        row = layout.row()
+        col = layout.column(align=True)
+        row = col.row(align=True)
+        row.label(text='Motion:', icon='ANIM')
+        cell = row.row(align=True)
+        cell.operator('mmd_tools.import_vmd', text='', icon='IMPORT')
+        cell.operator('mmd_tools.export_vmd', text='', icon='EXPORT')
 
-        col = row.column(align=True)
-        col.label(text='Model:', icon='OUTLINER_OB_ARMATURE')
-        col.operator('mmd_tools.import_model', text='Import')
-        col.operator('mmd_tools.export_pmx', text='Export')
-
-        col = row.column(align=True)
-        col.label(text='Motion:', icon='ANIM')
-        col.operator('mmd_tools.import_vmd', text='Import')
-        col.operator('mmd_tools.export_vmd', text='Export')
-
-        col = row.column(align=True)
-        col.label(text='Pose:', icon='POSE_HLT')
-        col.operator('mmd_tools.import_vpd', text='Import')
-        col.operator('mmd_tools.export_vpd', text='Export')
+        col = layout.column(align=True)
+        row = col.row(align=True)
+        row.label(text='Pose:', icon='POSE_HLT')
+        cell = row.row(align=True)
+        cell.operator('mmd_tools.import_vpd', text='', icon='IMPORT')
+        cell.operator('mmd_tools.export_vpd', text='', icon='EXPORT')
 
 
 @register_wrap
