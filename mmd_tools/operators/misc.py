@@ -133,7 +133,6 @@ class CleanShapeKeys(Operator):
 class SeparateByMaterials(Operator):
     bl_idname = 'mmd_tools.separate_by_materials'
     bl_label = 'Separate By Materials'
-    bl_description = 'Separate By materials'
     bl_options = {'REGISTER', 'UNDO'}
 
     clean_shape_keys = bpy.props.BoolProperty(
