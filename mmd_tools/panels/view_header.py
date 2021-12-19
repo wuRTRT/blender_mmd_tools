@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# SUPPORT_UNTIL: 3.3 LTS
 
 from bpy.types import Header
 
