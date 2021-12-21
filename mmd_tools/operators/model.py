@@ -504,10 +504,14 @@ class MMD_TOOLS_UL_PoseBones(bpy.types.UIList):
 
 
 @register_wrap
-class ShowGlobalTranslationPopup(bpy.types.Operator):
-    bl_idname = 'mmd_tools.show_global_translation_popup'
-    bl_label = 'Show Global Translation Popup'
+class GlobalTranslationPopup(bpy.types.Operator):
+    bl_idname = 'mmd_tools.global_translation_popup'
+    bl_label = 'Global Translation Popup'
     bl_options = {'REGISTER'}
+
+    @classmethod
+    def poll(cls, context):
+        return mmd_model.FnModel.find_root(context.active_object) is not None
 
     def draw(self, _context):
         layout = self.layout

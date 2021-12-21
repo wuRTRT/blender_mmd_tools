@@ -61,7 +61,7 @@ class MMDToolsObjectPanel(_PanelBase, Panel):
 
         row = grid.row(align=True)
         row.operator('mmd_tools.translate_mmd_model', text='Translate', icon='HELP')
-        row.operator('mmd_tools.show_global_translation_popup', text='', icon='WINDOW')
+        row.operator('mmd_tools.global_translation_popup', text='', icon='WINDOW')
 
 
 
