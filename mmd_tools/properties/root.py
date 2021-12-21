@@ -123,7 +123,7 @@ def _toggleVisibilityOfJoints(self, context):
 def _toggleVisibilityOfTemporaryObjects(self, context):
     root = self.id_data
     hide = not self.show_temporary_objects
-    for i in mmd_model.Model(root).temporaryObjects(rigid_track_only=True):
+    for i in mmd_model.Model(root).temporaryObjects():
         i.hide = hide
     if hide and context.active_object is None:
         SceneOp(context).active_object = root

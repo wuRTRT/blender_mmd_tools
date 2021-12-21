@@ -58,6 +58,20 @@ class ResetObjectVisibility(bpy.types.Operator):
         mmd_root_object = model.Model.findRoot(active_object)
         mmd_root = mmd_root_object.mmd_root
 
+        mmd_root_object.hide = False
+
+        rigid_group_object = model.FnModel.find_rigid_group(mmd_root_object)
+        if rigid_group_object:
+            rigid_group_object.hide = True
+
+        joint_group_object = model.FnModel.find_joint_group(mmd_root_object)
+        if joint_group_object:
+            joint_group_object.hide = True
+
+        find_temporary_group_object = model.FnModel.find_temporary_group(mmd_root_object)
+        if find_temporary_group_object:
+            find_temporary_group_object.hide = True
+
         mmd_root.show_meshes = True
         mmd_root.show_armature = True
         mmd_root.show_temporary_objects = False
@@ -283,5 +297,5 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
         col = self.layout.column(align=True)
         col.label(text='Misc:', icon='TOOL_SETTINGS')
         grid = col.grid_flow(row_major=True)
-        grid.row(align=True).operator('mmd_tools.show_global_translation_popup', text='(Experimental) Global Translation')
+        grid.row(align=True).operator('mmd_tools.global_translation_popup', text='(Experimental) Global Translation')
         grid.row(align=True).operator('mmd_tools.change_mmd_ik_loop_factor', text='Change MMD IK Loop Factor')

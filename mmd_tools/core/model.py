@@ -533,6 +533,10 @@ class FnModel:
     def find_joint_group(root) -> Union[bpy.types.Object, None]:
         return next(filter(lambda o: o.type == 'EMPTY' and o.mmd_type == 'JOINT_GRP_OBJ', root.children), None)
 
+    @staticmethod
+    def find_temporary_group(root) -> Union[bpy.types.Object, None]:
+        return next(filter(lambda o: o.type == 'EMPTY' and o.mmd_type == 'TEMPORARY_GRP_OBJ', root.children), None)
+
     @classmethod
     def all_children(cls, obj:bpy.types.Object) -> Iterable[bpy.types.Object]:
         child: bpy.types.Object
@@ -934,9 +938,7 @@ class Model:
 
     def temporaryGroupObject(self):
         if self.__temporary_grp is None:
-            for i in filter(lambda x: x.mmd_type == 'TEMPORARY_GRP_OBJ', self.__root.children):
-                self.__temporary_grp = i
-                break
+            self.__temporary_grp = FnModel.find_temporary_group(self.__root)
             if self.__temporary_grp is None:
                 temporarys = bpy.data.objects.new(name='temporary', object_data=None)
                 SceneOp(bpy.context).link_object(temporarys)
