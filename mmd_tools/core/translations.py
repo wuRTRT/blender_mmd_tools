@@ -681,8 +681,8 @@ class FnTranslations:
                     'name_j': name_j if name_j != '' else name,
                     'name_e': name_e if name_e != '' else name,
                     'org_name': org_name,
-                    'org_name_j': org_name_j if org_name_j != '' else org_name,
-                    'org_name_e': org_name_e if org_name_e != '' else org_name,
+                    'org_name_j': org_name_j,
+                    'org_name_e': org_name_e,
                 }
             ))
 

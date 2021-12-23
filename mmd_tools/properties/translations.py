@@ -48,6 +48,9 @@ OPERATION_SCRIPT_PRESETS: Dict[str, Tuple[str, str, str, int]] = {
     'TO_ENGLISH': ('BLENDER', 'Translate to English', 'to_english(name)', 2),
     'TO_MMD_LR': ('JAPANESE', 'Blender L/R to MMD L/R', 'to_mmd_lr(name)', 3),
     'TO_BLENDER_LR': ('BLENDER', 'MMD L/R to Blender L/R', 'to_blender_lr(name_j)', 4),
+    'RESTORE_BLENDER': ('BLENDER', 'Restore Blender Names', 'org_name', 5),
+    'RESTORE_JAPANESE': ('JAPANESE', 'Restore Japanese MMD Names', 'org_name_j', 6),
+    'RESTORE_ENGLISH': ('ENGLISH', 'Restore English MMD Names', 'org_name_e', 7),
 }
 
 OPERATION_SCRIPT_PRESET_ITEMS: List[Tuple[str, str, str, int]] = [
