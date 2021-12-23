@@ -181,6 +181,25 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
         self.draw_material(context, mmd_root_object)
         self.draw_misc(context, mmd_root_object)
 
+    def draw_visibility(self, context, mmd_root_object):
+        col = self.layout.column(align=True)
+        row = col.row(align=False)
+        row.label(text='Visibility:', icon='HIDE_OFF')
+        row.operator('mmd_tools.reset_object_visibility', text='Reset')
+
+        mmd_root = mmd_root_object.mmd_root
+        row = col.row(align=False)
+        cell = row.row(align=True)
+        cell.prop(mmd_root, 'show_meshes', toggle=True, icon_only=True, icon='MESH_DATA')
+        cell.prop(mmd_root, 'show_armature', toggle=True, icon_only=True, icon='ARMATURE_DATA')
+        cell.prop(mmd_root, 'show_temporary_objects', toggle=True, icon_only=True, icon='EMPTY_AXIS')
+        cell = row.row(align=True)
+        cell.prop(mmd_root, 'show_rigid_bodies', toggle=True, icon_only=True, icon='RIGID_BODY')
+        cell.prop(mmd_root, 'show_names_of_rigid_bodies', toggle=True, icon_only=True, icon='SHORTDISPLAY')
+        cell = row.row(align=True)
+        cell.prop(mmd_root, 'show_joints', toggle=True, icon_only=True, icon='RIGID_BODY_CONSTRAINT')
+        cell.prop(mmd_root, 'show_names_of_joints', toggle=True, icon_only=True, icon='SHORTDISPLAY')
+
     def draw_assembly(self, context, mmd_root_object):
         col = self.layout.column(align=False)
         row = col.row(align=True)
@@ -217,25 +236,6 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
 
         row = grid.row(align=True)
         row.prop(mmd_root, 'use_property_driver', text='Property', toggle=True, icon='DRIVER')
-
-    def draw_visibility(self, context, mmd_root_object):
-        col = self.layout.column(align=True)
-        row = col.row(align=False)
-        row.label(text='Visibility:', icon='HIDE_OFF')
-        row.operator('mmd_tools.reset_object_visibility', text='Reset')
-
-        mmd_root = mmd_root_object.mmd_root
-        row = col.row(align=False)
-        cell = row.row(align=True)
-        cell.prop(mmd_root, 'show_meshes', toggle=True, icon_only=True, icon='MESH_DATA')
-        cell.prop(mmd_root, 'show_armature', toggle=True, icon_only=True, icon='ARMATURE_DATA')
-        cell.prop(mmd_root, 'show_temporary_objects', toggle=True, icon_only=True, icon='EMPTY_AXIS')
-        cell = row.row(align=True)
-        cell.prop(mmd_root, 'show_rigid_bodies', toggle=True, icon_only=True, icon='RIGID_BODY')
-        cell.prop(mmd_root, 'show_names_of_rigid_bodies', toggle=True, icon_only=True, icon='SHORTDISPLAY')
-        cell = row.row(align=True)
-        cell.prop(mmd_root, 'show_joints', toggle=True, icon_only=True, icon='RIGID_BODY_CONSTRAINT')
-        cell.prop(mmd_root, 'show_names_of_joints', toggle=True, icon_only=True, icon='SHORTDISPLAY')
 
     def draw_ik_toggle(self, context, mmd_root_object):
         col = self.layout.column(align=True)

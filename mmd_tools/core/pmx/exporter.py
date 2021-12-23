@@ -14,7 +14,7 @@ from mmd_tools.core import pmx
 from mmd_tools.core.bone import FnBone
 from mmd_tools.core.material import FnMaterial
 from mmd_tools.core.morph import FnMorph
-from mmd_tools.core.model import FnModel
+from mmd_tools.core.translations import FnTranslations
 from mmd_tools.core.sdef import FnSDEF
 from mmd_tools.core.vmd.importer import BoneConverter, BoneConverterPoseMode
 from mmd_tools import bpyutils
@@ -1206,7 +1206,12 @@ class __PmxExporter:
                 m.show_viewport = show
 
     def __translate_armature(self, root_object: bpy.types.Object):
-        FnModel.translate_in_presets(root_object)
+        FnTranslations.clear_data(root_object.mmd_data_query)
+        FnTranslations.collect_data(root_object.mmd_data_query)
+        FnTranslations.update_query(root_object.mmd_data_query)
+        FnTranslations.execute_translation_batch(root_object)
+        FnTranslations.apply_translations(root_object)
+        FnTranslations.clear_data(root_object.mmd_data_query)
 
     def execute(self, filepath, **args):
         root = args.get('root', None)

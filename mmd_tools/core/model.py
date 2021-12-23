@@ -2,11 +2,8 @@
 
 import itertools
 import logging
-import re
 import time
-from abc import ABC, abstractmethod, abstractproperty
-from enum import Enum
-from typing import TYPE_CHECKING, Callable, Dict, Iterable, Set, Tuple, Union
+from typing import Iterable, Union
 
 import bpy
 import mathutils
@@ -15,502 +12,9 @@ from mmd_tools.bpyutils import Props, SceneOp, matmul
 from mmd_tools.core import rigid_body
 from mmd_tools.core.bone import FnBone
 from mmd_tools.core.morph import FnMorph
-from mmd_tools.translations import DictionaryEnum
-from mmd_tools.utils import convertLRToName, convertNameToLR
-
-if TYPE_CHECKING:
-    from mmd_tools.properties.morph import _MorphBase
-    from mmd_tools.properties.rigid_body import MMDRigidBody
-    from mmd_tools.properties.root import MMDDataQuery, MMDDataReference, MMDRoot
-
-def isRigidBodyObject(obj):
-    return obj and obj.mmd_type == 'RIGID_BODY'
-
-def isJointObject(obj):
-    return obj and obj.mmd_type == 'JOINT'
-
-def isTemporaryObject(obj):
-    return obj and obj.mmd_type in {'TRACK_TARGET', 'NON_COLLISION_CONSTRAINT', 'SPRING_CONSTRAINT', 'SPRING_GOAL'}
-
-
-def getRigidBodySize(obj):
-    assert(obj.mmd_type == 'RIGID_BODY')
-
-    x0, y0, z0 = obj.bound_box[0]
-    x1, y1, z1 = obj.bound_box[6]
-    assert(x1 >= x0 and y1 >= y0 and z1 >= z0)
-
-    shape = obj.mmd_rigid.shape
-    if shape == 'SPHERE':
-        radius = (z1 - z0)/2
-        return (radius, 0.0, 0.0)
-    elif shape == 'BOX':
-        x, y, z = (x1 - x0)/2, (y1 - y0)/2, (z1 - z0)/2
-        return (x, y, z)
-    elif shape == 'CAPSULE':
-        diameter = (x1 - x0)
-        radius = diameter/2
-        height = abs((z1 - z0) - diameter)
-        return (radius, height, 0.0)
-    else:
-        raise Exception('Invalid shape type.')
 
 class InvalidRigidSettingException(ValueError):
     pass
-
-
-
-class MMDDataType(Enum):
-    BONE = 'Bones'
-    MORPH = 'Morphs'
-    MATERIAL = 'Materials'
-    DISPLAY = 'Display'
-    PHYSICS = 'Physics'
-    INFO = 'Information'
-
-
-class MMDDataHandlerABC(ABC):
-    @classmethod
-    @property
-    @abstractmethod
-    def type_name(cls) -> str:
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def draw_item(self, layout: bpy.types.UILayout, mmd_data_ref: 'MMDDataReference'):
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def update_index(mmd_data_ref: 'MMDDataReference'):
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def update_query(mmd_data_query: 'MMDDataQuery', check_data_visible: Callable[[bool, bool], bool], check_blank_name: Callable[[str, str], bool]):
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def set_names(mmd_data_ref: 'MMDDataReference', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
-        pass
-
-    @staticmethod
-    @abstractmethod
-    def get_names(mmd_data_ref: 'MMDDataReference') -> Tuple[str, str, str]:
-        """Returns (name, name_j, name_e)"""
-        pass
-
-
-class MMDBoneHandler(MMDDataHandlerABC):
-    @classmethod
-    @property
-    def type_name(cls) -> str:
-        return MMDDataType.BONE.name
-
-    @staticmethod
-    def draw_item(layout: bpy.types.UILayout, mmd_data_ref: 'MMDDataReference'):
-        pose_bone: bpy.types.PoseBone = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        row = layout.row(align=True)
-        row.label(text='', icon='BONE_DATA')
-        row.prop(pose_bone, 'name', text='')
-        row.prop(pose_bone.mmd_bone, 'name_j', text='')
-        row.prop(pose_bone.mmd_bone, 'name_e', text='')
-        row.prop(pose_bone.bone, 'select', text='', emboss=False, icon_only=True, icon='RESTRICT_SELECT_OFF' if pose_bone.bone.select else 'RESTRICT_SELECT_ON')
-        row.prop(pose_bone.bone, 'hide', text='', emboss=False, icon_only=True, icon='HIDE_ON' if pose_bone.bone.hide else 'HIDE_OFF')
-
-    @staticmethod
-    def update_index(mmd_data_ref: 'MMDDataReference'):
-        bpy.context.view_layer.objects.active = mmd_data_ref.object
-        mmd_data_ref.object.id_data.data.bones.active = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path).bone
-
-    @staticmethod
-    def update_query(mmd_data_query: 'MMDDataQuery', check_data_visible: Callable[[bool, bool], bool], check_blank_name: Callable[[str, str], bool]):
-        armature_object: bpy.types.Object = FnModel.find_armature(mmd_data_query.id_data)
-        pose_bone: bpy.types.PoseBone
-        for index, pose_bone in enumerate(armature_object.pose.bones):
-            if check_data_visible(pose_bone.bone.select, pose_bone.bone.hide):
-                continue
-
-            if check_blank_name(pose_bone.mmd_bone.name_j, pose_bone.mmd_bone.name_e):
-                continue
-
-            mmd_data_ref: 'MMDDataReference' = mmd_data_query.result_data.add()
-            mmd_data_ref.type = MMDDataType.BONE.name
-            mmd_data_ref.object = armature_object
-            mmd_data_ref.data_path = f'pose.bones[{index}]'
-
-    @staticmethod
-    def set_names(mmd_data_ref: 'MMDDataReference', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
-        pose_bone: bpy.types.PoseBone = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        if name is not None:
-            pose_bone.name = name
-        if name_j is not None:
-            pose_bone.mmd_bone.name_j = name_j
-        if name_e is not None:
-            pose_bone.mmd_bone.name_e = name_e
-
-    @staticmethod
-    def get_names(mmd_data_ref: 'MMDDataReference') -> Tuple[str, str, str]:
-        pose_bone: bpy.types.PoseBone = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        return (pose_bone.name, pose_bone.mmd_bone.name_j, pose_bone.mmd_bone.name_e)
-
-
-class MMDMorphHandler(MMDDataHandlerABC):
-    @classmethod
-    @property
-    def type_name(cls) -> str:
-        return MMDDataType.MORPH.name
-
-    @staticmethod
-    def draw_item(layout: bpy.types.UILayout, mmd_data_ref: 'MMDDataReference'):
-        morph: _MorphBase = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        row = layout.row(align=True)
-        row.label(text='', icon='SHAPEKEY_DATA')
-        row.label(text=morph.name)
-        row.prop(morph, 'name', text='')
-        row.prop(morph, 'name_e', text='')
-        row.label(text='', icon='BLANK1')
-        row.label(text='', icon='BLANK1')
-
-    MORPH_DATA_PATH_EXTRACT = re.compile(r"mmd_root\.(?P<morphs_name>[^\[]*)\[(?P<index>\d*)\]")
-
-    @staticmethod
-    def update_index(mmd_data_ref: 'MMDDataReference'):
-        match = MMDMorphHandler.MORPH_DATA_PATH_EXTRACT.match(mmd_data_ref.data_path)
-        if not match:
-            return
-
-        mmd_data_ref.object.mmd_root.active_morph_type = match['morphs_name']
-        mmd_data_ref.object.mmd_root.active_morph = int(match['index'])
-
-    @staticmethod
-    def update_query(mmd_data_query: 'MMDDataQuery', _check_data_visible: Callable[[bool, bool], bool], check_blank_name: Callable[[str, str], bool]):
-        root_object: bpy.types.Object = mmd_data_query.id_data
-        mmd_root: MMDRoot = root_object.mmd_root
-
-        for morphs_name, morphs in {
-            'material_morphs': mmd_root.material_morphs,
-            'uv_morphs': mmd_root.uv_morphs,
-            'bone_morphs': mmd_root.bone_morphs,
-            'vertex_morphs': mmd_root.vertex_morphs,
-            'group_morphs': mmd_root.group_morphs,
-        }.items():
-            morph: _MorphBase
-            for index, morph in enumerate(morphs):
-                if check_blank_name(morph.name, morph.name_e):
-                    continue
-                mmd_data_ref: 'MMDDataReference' = mmd_data_query.result_data.add()
-                mmd_data_ref.type = MMDDataType.MORPH.name
-                mmd_data_ref.object = root_object
-                mmd_data_ref.data_path = f'mmd_root.{morphs_name}[{index}]'
-
-    @staticmethod
-    def set_names(mmd_data_ref: 'MMDDataReference', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
-        morph: _MorphBase = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        if name is not None:
-            morph.name = name
-        if name_j is not None:
-            morph.name = name_j
-        if name_e is not None:
-            morph.name_e = name_e
-
-    @staticmethod
-    def get_names(mmd_data_ref: 'MMDDataReference') -> Tuple[str, str, str]:
-        morph: _MorphBase = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        return (morph.name, morph.name, morph.name_e)
-
-
-class MMDMaterialHandler(MMDDataHandlerABC):
-    @classmethod
-    @property
-    def type_name(cls) -> str:
-        return MMDDataType.MATERIAL.name
-
-    @staticmethod
-    def draw_item(layout: bpy.types.UILayout, mmd_data_ref: 'MMDDataReference'):
-        mesh_object: bpy.types.Object = mmd_data_ref.object
-        material: bpy.types.Material = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        row = layout.row(align=True)
-        row.label(text='', icon='MATERIAL_DATA')
-        row.prop(material, 'name', text='')
-        row.prop(material.mmd_material, 'name_j', text='')
-        row.prop(material.mmd_material, 'name_e', text='')
-        row.prop(mesh_object, 'select', text='', emboss=False, icon_only=True, icon='RESTRICT_SELECT_OFF' if mesh_object.select else 'RESTRICT_SELECT_ON')
-        row.prop(mesh_object, 'hide', text='', emboss=False, icon_only=True, icon='HIDE_ON' if mesh_object.hide else 'HIDE_OFF')
-
-    MATERIAL_DATA_PATH_EXTRACT = re.compile(r"data\.materials\[(?P<index>\d*)\]")
-
-    @staticmethod
-    def update_index(mmd_data_ref: 'MMDDataReference'):
-        id_data: bpy.types.Object = mmd_data_ref.object
-        bpy.context.view_layer.objects.active = id_data
-
-        match = MMDMaterialHandler.MATERIAL_DATA_PATH_EXTRACT.match(mmd_data_ref.data_path)
-        if not match:
-            return
-
-        id_data.active_material_index = int(match['index'])
-
-    @staticmethod
-    def update_query(mmd_data_query: 'MMDDataQuery', check_data_visible: Callable[[bool, bool], bool], check_blank_name: Callable[[str, str], bool]):
-        checked_materials: Set[bpy.types.Material] = set()
-        mesh_object: bpy.types.Object
-        for mesh_object in FnModel.child_meshes(FnModel.find_armature(mmd_data_query.id_data)):
-            if check_data_visible(mesh_object.select, mesh_object.hide):
-                continue
-
-            material: bpy.types.Material
-            for index, material in enumerate(mesh_object.data.materials):
-                if material in checked_materials:
-                    continue
-
-                checked_materials.add(material)
-
-                if not hasattr(material, 'mmd_material'):
-                    continue
-
-                if check_blank_name(material.mmd_material.name_j, material.mmd_material.name_e):
-                    continue
-
-                mmd_data_ref: 'MMDDataReference' = mmd_data_query.result_data.add()
-                mmd_data_ref.type = MMDDataType.MATERIAL.name
-                mmd_data_ref.object = mesh_object
-                mmd_data_ref.data_path = f'data.materials[{index}]'
-
-    @staticmethod
-    def set_names(mmd_data_ref: 'MMDDataReference', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
-        material: bpy.types.Material = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        if name is not None:
-            material.name = name
-        if name_j is not None:
-            material.mmd_material.name_j = name_j
-        if name_e is not None:
-            material.mmd_material.name_e = name_e
-
-    @staticmethod
-    def get_names(mmd_data_ref: 'MMDDataReference') -> Tuple[str, str, str]:
-        material: bpy.types.Material = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        return (material.name, material.mmd_material.name_j, material.mmd_material.name_e)
-
-
-class MMDDisplayHandler(MMDDataHandlerABC):
-    @classmethod
-    @property
-    def type_name(cls) -> str:
-        return MMDDataType.DISPLAY.name
-
-    @staticmethod
-    def draw_item(layout: bpy.types.UILayout, mmd_data_ref: 'MMDDataReference'):
-        bone_group: bpy.types.BoneGroup = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        row = layout.row(align=True)
-        row.label(text='', icon='GROUP_BONE')
-        row.prop(bone_group, 'name', text='')
-        row.label(text=bone_group.name)
-        row.label(text='')
-        row.label(text='', icon='BLANK1')
-        row.label(text='', icon='BLANK1')
-
-    DISPLAY_DATA_PATH_EXTRACT = re.compile(r"pose\.bone_groups\[(?P<index>\d*)\]")
-
-    @staticmethod
-    def update_index(mmd_data_ref: 'MMDDataReference'):
-        id_data: bpy.types.Object = mmd_data_ref.object
-        bpy.context.view_layer.objects.active = id_data
-
-        match = MMDDisplayHandler.DISPLAY_DATA_PATH_EXTRACT.match(mmd_data_ref.data_path)
-        if not match:
-            return
-
-        id_data.pose.bone_groups.active_index = int(match['index'])
-
-    @staticmethod
-    def update_query(mmd_data_query: 'MMDDataQuery', check_data_visible: Callable[[bool, bool], bool], check_blank_name: Callable[[str, str], bool]):
-        armature_object: bpy.types.Object = FnModel.find_armature(mmd_data_query.id_data)
-        bone_group: bpy.types.BoneGroup
-        for index, bone_group in enumerate(armature_object.pose.bone_groups):
-            if check_blank_name(bone_group.name, ''):
-                continue
-
-            mmd_data_ref: 'MMDDataReference' = mmd_data_query.result_data.add()
-            mmd_data_ref.type = MMDDataType.DISPLAY.name
-            mmd_data_ref.object = armature_object
-            mmd_data_ref.data_path = f'pose.bone_groups[{index}]'
-
-    @staticmethod
-    def set_names(mmd_data_ref: 'MMDDataReference', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
-        bone_group: bpy.types.BoneGroup = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        if name is not None:
-            bone_group.name = name
-
-    @staticmethod
-    def get_names(mmd_data_ref: 'MMDDataReference') -> Tuple[str, str, str]:
-        bone_group: bpy.types.BoneGroup = mmd_data_ref.object.path_resolve(mmd_data_ref.data_path)
-        return (bone_group.name, bone_group.name, '')
-
-
-class MMDPhysicsHandler(MMDDataHandlerABC):
-    @classmethod
-    @property
-    def type_name(cls) -> str:
-        return MMDDataType.PHYSICS.name
-
-    @staticmethod
-    def draw_item(layout: bpy.types.UILayout, mmd_data_ref: 'MMDDataReference'):
-        mesh_object: bpy.types.Object = mmd_data_ref.object
-
-        if mesh_object.mmd_type == 'RIGID_BODY':
-            row = layout.row(align=True)
-            row.label(text='', icon='MESH_ICOSPHERE')
-            row.prop(mesh_object, 'name', text='')
-            row.prop(mesh_object.mmd_rigid, 'name_j', text='')
-            row.prop(mesh_object.mmd_rigid, 'name_e', text='')
-            row.prop(mesh_object, 'select', text='', emboss=False, icon_only=True, icon='RESTRICT_SELECT_OFF' if mesh_object.select else 'RESTRICT_SELECT_ON')
-            row.prop(mesh_object, 'hide', text='', emboss=False, icon_only=True, icon='HIDE_ON' if mesh_object.hide else 'HIDE_OFF')
-
-        elif mesh_object.mmd_type == 'JOINT':
-            row = layout.row(align=True)
-            row.label(text='', icon='CONSTRAINT')
-            row.prop(mesh_object, 'name', text='')
-            row.prop(mesh_object.mmd_joint, 'name_j', text='')
-            row.prop(mesh_object.mmd_joint, 'name_e', text='')
-            row.prop(mesh_object, 'select', text='', emboss=False, icon_only=True, icon='RESTRICT_SELECT_OFF' if mesh_object.select else 'RESTRICT_SELECT_ON')
-            row.prop(mesh_object, 'hide', text='', emboss=False, icon_only=True, icon='HIDE_ON' if mesh_object.hide else 'HIDE_OFF')
-
-    @staticmethod
-    def update_index(mmd_data_ref: 'MMDDataReference'):
-        bpy.context.view_layer.objects.active = mmd_data_ref.object
-
-    @staticmethod
-    def update_query(mmd_data_query: 'MMDDataQuery', check_data_visible: Callable[[bool, bool], bool], check_blank_name: Callable[[str, str], bool]):
-        root_object: bpy.types.Object = mmd_data_query.id_data
-        model = Model(root_object)
-
-        mesh_object: bpy.types.Object
-        for mesh_object in model.rigidBodies():
-            if check_data_visible(mesh_object.select_get(), mesh_object.hide_get()):
-                continue
-
-            mmd_rigid: MMDRigidBody = mesh_object.mmd_rigid
-            if check_blank_name(mmd_rigid.name_j, mmd_rigid.name_e):
-                continue
-
-            mmd_data_ref: 'MMDDataReference' = mmd_data_query.result_data.add()
-            mmd_data_ref.type = MMDDataType.PHYSICS.name
-            mmd_data_ref.object = mesh_object
-            mmd_data_ref.data_path = 'mmd_rigid'
-
-        mesh_object: bpy.types.Object
-        for mesh_object in model.joints():
-            if check_data_visible(mesh_object.select_get(), mesh_object.hide_get()):
-                continue
-
-            mmd_joint: MMDRigidBody = mesh_object.mmd_joint
-            if check_blank_name(mmd_joint.name_j, mmd_joint.name_e):
-                continue
-
-            mmd_data_ref: 'MMDDataReference' = mmd_data_query.result_data.add()
-            mmd_data_ref.type = MMDDataType.PHYSICS.name
-            mmd_data_ref.object = mesh_object
-            mmd_data_ref.data_path = 'mmd_joint'
-
-    @staticmethod
-    def set_names(mmd_data_ref: 'MMDDataReference', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
-        mesh_object: bpy.types.Object = mmd_data_ref.object
-
-        if mesh_object.mmd_type == 'RIGID_BODY':
-            mmd_object = mesh_object.mmd_rigid
-        elif mesh_object.mmd_type == 'JOINT':
-            mmd_object = mesh_object.mmd_joint
-
-        if name is not None:
-            mesh_object.name = name
-        if name_j is not None:
-            mmd_object.name_j = name_j
-        if name_e is not None:
-            mmd_object.name_e = name_e
-
-    @staticmethod
-    def get_names(mmd_data_ref: 'MMDDataReference') -> Tuple[str, str, str]:
-        mesh_object: bpy.types.Object = mmd_data_ref.object
-
-        if mesh_object.mmd_type == 'RIGID_BODY':
-            mmd_object = mesh_object.mmd_rigid
-        elif mesh_object.mmd_type == 'JOINT':
-            mmd_object = mesh_object.mmd_joint
-
-        return (mesh_object.name, mmd_object.name_j, mmd_object.name_e)
-
-
-class MMDInfoHandler(MMDDataHandlerABC):
-    @classmethod
-    @property
-    def type_name(cls) -> str:
-        return MMDDataType.INFO.name
-
-    TYPE_TO_ICONS = {
-        'EMPTY': 'EMPTY_DATA',
-        'ARMATURE': 'ARMATURE_DATA',
-        'MESH': 'MESH_DATA',
-    }
-
-    @staticmethod
-    def draw_item(layout: bpy.types.UILayout, mmd_data_ref: 'MMDDataReference'):
-        info_object: bpy.types.Object = mmd_data_ref.object
-        row = layout.row(align=True)
-        row.label(text='', icon=MMDInfoHandler.TYPE_TO_ICONS.get(info_object.type, 'OBJECT_DATA'))
-        row.prop(info_object, 'name', text='')
-        row.label(text=info_object.name)
-        row.label(text='')
-        row.prop(info_object, 'select', text='', emboss=False, icon_only=True, icon='RESTRICT_SELECT_OFF' if info_object.select else 'RESTRICT_SELECT_ON')
-        row.prop(info_object, 'hide', text='', emboss=False, icon_only=True, icon='HIDE_ON' if info_object.hide else 'HIDE_OFF')
-
-    @staticmethod
-    def update_index(mmd_data_ref: 'MMDDataReference'):
-        bpy.context.view_layer.objects.active = mmd_data_ref.object
-
-    @staticmethod
-    def update_query(mmd_data_query: 'MMDDataQuery', check_data_visible: Callable[[bool, bool], bool], check_blank_name: Callable[[str, str], bool]):
-        root_object: bpy.types.Object = mmd_data_query.id_data
-        armature_object: bpy.types.Object = FnModel.find_armature(root_object)
-
-        info_object: bpy.types.Object
-        for info_object in itertools.chain([root_object, armature_object], FnModel.child_meshes(armature_object)):
-            if check_data_visible(info_object.select, info_object.hide):
-                continue
-
-            if check_blank_name(info_object.name, ''):
-                continue
-
-            mmd_data_ref: 'MMDDataReference' = mmd_data_query.result_data.add()
-            mmd_data_ref.type = MMDInfoHandler.type_name
-            mmd_data_ref.object = info_object
-            mmd_data_ref.data_path = ''
-
-    @staticmethod
-    def set_names(mmd_data_ref: 'MMDDataReference', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
-        info_object: bpy.types.Object = mmd_data_ref.object
-        if name is not None:
-            info_object.name = name
-
-    @staticmethod
-    def get_names(mmd_data_ref: 'MMDDataReference') -> Tuple[str, str, str]:
-        info_object: bpy.types.Object = mmd_data_ref.object
-        return (info_object.name, info_object.name, '')
-
-
-MMD_DATA_HANDLERS: Set[MMDDataHandlerABC] = {
-    MMDBoneHandler,
-    MMDMorphHandler,
-    MMDMaterialHandler,
-    MMDDisplayHandler,
-    MMDPhysicsHandler,
-    MMDInfoHandler,
-}
-
-MMD_DATA_TYPE_TO_HANDLERS: Dict[str, MMDDataHandlerABC] = {h.type_name: h for h in MMD_DATA_HANDLERS}
-
 
 class FnModel:
     @classmethod
@@ -549,45 +53,55 @@ class FnModel:
         return filter(lambda x: x.type == 'MESH' and x.mmd_type == 'NONE', cls.all_children(obj))
 
     @staticmethod
-    def translate_in_presets(root_object: bpy.types.Object) -> Tuple[Dict[str, str], Union[bpy.types.Text, None]]:
-        mmd_data_query: MMDDataQuery = root_object.mmd_data_query
-        operation_script = mmd_data_query.operation_script
-        if not operation_script:
-            return ({}, None)
+    def is_rigid_body_object(obj):
+        return obj and obj.mmd_type == 'RIGID_BODY'
 
-        translator = DictionaryEnum.get_translator(mmd_data_query.dictionary)
-        def translate(name: str) -> str:
-            if translator:
-                return translator.translate(name, name)
-            return name
+    @staticmethod
+    def is_joint_object(obj):
+        return obj and obj.mmd_type == 'JOINT'
 
-        operation_script_ast = compile(mmd_data_query.operation_script, '<string>', 'eval')
-        operation_target: str = mmd_data_query.operation_target
+    @staticmethod
+    def is_temporary_object(obj):
+        return obj and obj.mmd_type in {'TRACK_TARGET', 'NON_COLLISION_CONSTRAINT', 'SPRING_CONSTRAINT', 'SPRING_GOAL'}
 
-        mmd_data_ref: 'MMDDataReference'
-        for mmd_data_ref in mmd_data_query.result_data:
-            handler: MMDDataHandlerABC = MMD_DATA_TYPE_TO_HANDLERS[mmd_data_ref.type]
-            name, name_j, name_e = handler.get_names(mmd_data_ref)
-            translated_name = str(eval(
-                operation_script_ast,
-                {'__builtins__': {}},
-                {
-                    'to_english': translate,
-                    'to_mmd_lr': convertLRToName,
-                    'to_blender_lr': convertNameToLR,
-                    'name': name,
-                    'name_j': name_j,
-                    'name_e': name_e,
-                }
-            ))
-            handler.set_names(
-                mmd_data_ref,
-                translated_name if operation_target == 'BLENDER' else None,
-                translated_name if operation_target == 'JAPANESE' else None,
-                translated_name if operation_target == 'ENGLISH' else None,
-            )
+    @staticmethod
+    def get_rigid_body_size(obj):
+        assert(obj.mmd_type == 'RIGID_BODY')
 
-        return (translator.fails, translator.save_fails())
+        x0, y0, z0 = obj.bound_box[0]
+        x1, y1, z1 = obj.bound_box[6]
+        assert(x1 >= x0 and y1 >= y0 and z1 >= z0)
+
+        shape = obj.mmd_rigid.shape
+        if shape == 'SPHERE':
+            radius = (z1 - z0)/2
+            return (radius, 0.0, 0.0)
+        elif shape == 'BOX':
+            x, y, z = (x1 - x0)/2, (y1 - y0)/2, (z1 - z0)/2
+            return (x, y, z)
+        elif shape == 'CAPSULE':
+            diameter = (x1 - x0)
+            radius = diameter/2
+            height = abs((z1 - z0) - diameter)
+            return (radius, height, 0.0)
+        else:
+            raise Exception('Invalid shape type.')
+
+# SUPPORT_UNTIL: 4.3 LTS
+def isRigidBodyObject(obj):
+    return FnModel.is_rigid_body_object(obj)
+
+# SUPPORT_UNTIL: 4.3 LTS
+def isJointObject(obj):
+    return FnModel.is_joint_object(obj)
+
+# SUPPORT_UNTIL: 4.3 LTS
+def isTemporaryObject(obj):
+    return FnModel.is_temporary_object(obj)
+
+# SUPPORT_UNTIL: 4.3 LTS
+def getRigidBodySize(obj):
+    return FnModel.get_rigid_body_size(obj)
 
 
 class Model:

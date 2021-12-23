@@ -11,6 +11,7 @@ if "bpy" in locals():
     importlib.reload(prop_material)
     importlib.reload(prop_object)
     importlib.reload(tool)
+    importlib.reload(panel_scene)
     importlib.reload(util_tools)
     importlib.reload(view_prop)
     importlib.reload(view_header)

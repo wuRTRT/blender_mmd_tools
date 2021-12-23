@@ -11,6 +11,7 @@ if "bpy" in locals():
     importlib.reload(material)
     importlib.reload(bone)
     importlib.reload(rigid_body)
+    importlib.reload(translations)
 else:
     import bpy
     from . import (
@@ -20,6 +21,7 @@ else:
         material,
         bone,
         rigid_body,
+        translations,
         )
 
 __properties = {
@@ -52,7 +54,7 @@ __properties = {
         'mmd_rigid': bpy.props.PointerProperty(type=rigid_body.MMDRigidBody),
         'mmd_joint': bpy.props.PointerProperty(type=rigid_body.MMDJoint),
         'is_mmd_glsl_light': bpy.props.BoolProperty(name='is_mmd_glsl_light', default=False),
-        'mmd_data_query': bpy.props.PointerProperty(type=root.MMDDataQuery),
+        'mmd_data_query': bpy.props.PointerProperty(type=translations.MMDDataQuery),
         },
     bpy.types.Material: {
         'mmd_material': bpy.props.PointerProperty(type=material.MMDMaterial),
