@@ -5,6 +5,7 @@ translation_dict = {
         # Preferences
         ("*", "View3D > Sidebar > MMD Tools Panel"): "3Dビュー > サイドバー > MMD Toolsパネル",
         ("*", "Utility tools for MMD model editing. (UuuNyaa's forked version)"): "MMDモデル編集用のユーティリティーツールです。(UuuNyaaのフォーク版)",
+        ("*", "Enable MMD Model Production Features"): "MMDモデル製作機能を有効化",
         ("*", "Shared Toon Texture Folder"): "共有トゥーンテクスチャフォルダ",
         ("*", "Base Texture Folder"): "ベーステクスチャフォルダ",
         ("*", "Dictionary Folder"): "辞書フォルダ",
@@ -25,7 +26,8 @@ translation_dict = {
         ("*", "Updated to {}. ({})"): "{}へ更新しました。({})",
         ("*", "Failed to update {}. ({})"): "更新に失敗しました。{} ({})",
 
-        # 3D Viewport > Sidebar > MMD > Operator Panel
+        # 3D Viewport > Sidebar > MMD > Model Production
+        ("*", "Model Production"): "モデル製作",
         ("Operator", "Create Model"): "モデルを作成",
         ("Operator", "Create a MMD Model Root Object"): "MMDモデルルートオブジェクトを作成",
         ("*", "Name(Eng)"): "名前(英語)",
@@ -35,16 +37,11 @@ translation_dict = {
         ("*", "Ambient Color Source"): "アンビエントカラーソース",
         ("*", "Edge Threshold"): "輪郭しきい値",
         ("*", "Minimum Edge Alpha"): "最小輪郭アルファ",
+        ("*", "Middle Joint Bones Lock"): "中間関節ボーンをロック",
 
-        ("Operator", "Convert Materials For Cycles"): "マテリアルをCycles用に変換",
-        ("*", "Convert to Principled BSDF"): "プリンシプルBSDFへ変換",
-        ("*", "Clean Nodes"): "ノードをクリーン",
-        ("Operator", "Separate By Materials"): "マテリアルで分解",
-        ("*", "Clean Shape Keys"): "シェイプキーをクリーン",
-        ("Operator", "Join Meshes"): "メッシュを統合",
-        ("*", "Sort Shape Keys"): "シェイプキーをソート",
-        ("Operator", "Attach Meshes to Model"): "メッシュをモデルに取付",
-        ("Operator", "Translation"): "翻訳",
+        ("Operator", "Attach Meshes"): "メッシュを取付",
+
+        ("Operator", "Translate"): "翻訳",
         ("Operator", "Translate a MMD Model"): "MMDモデルを翻訳",
         ("Operator", "(Experimental) Global Translation"): "(実験的) 全体翻訳",
         ("*", "Dictionary"): "辞書",
@@ -54,15 +51,39 @@ translation_dict = {
         ("*", "Use Morph Prefix"): "モーフ接頭辞を使用",
         ("*", "Allow Fails"): "失敗を許可",
 
-        ("*", "Bone Constraints:"): "ボーンコンストレイント:",
-        ("*", "Physics:"): "物理演算:",
-        ("Operator", "Build"): "構築",
-        ("*", "Edge Preview:"): "輪郭プレビュー:",
-        ("*", "Create"): "生成",
-        ("*", "Clean"): "クリーン",
-        ("*", "Model:"): "モデル:",
+        # 3D Viewport > Sidebar > MMD > Model Setup
+        ("*", "Model Setup"): "モデル設定",
+        ("*", "Assembly:"): "組み立て:",
+        ("Operator", "Physics"): "物理演算",
 
+        ("Operator", "SDEF"): "SDEF",
+        ("Operator", "Bind SDEF Driver"): "SDEFドライバーをバインド",
+        ("*", "- Auto -"): "自動",
+        ("*", "Bulk"): "バルク",
+        ("*", "Skip"): "スキップ",
+
+        ("*", "IK Toggle:"): "IK切替え:",
+
+        ("*", "Mesh:"): "メッシュ:",
+        ("Operator", "Separate by Materials"): "マテリアルで分解",
+        ("Operator", "Join"): "統合",
+        ("*", "Sort Shape Keys"): "シェイプキーをソート",
+
+        ("*", "Material:"): "マテリアル:",
+        ("Operator", "Edge Preview"): "輪郭プレビュー",
+        ("Operator", "Convert to Blender"): "Blender用に変換",
+        ("Operator", "Convert Materials"): "マテリアルを変換",
+        ("*", "Convert to Principled BSDF"): "プリンシプルBSDFへ変換",
+        ("*", "Clean Nodes"): "ノードをクリーン",
+
+        ("*", "Misc:"): "その他:",
+
+        # 3D Viewport > Sidebar > MMD > Scene Setup
+        ("*", "Scene Setup"): "シーン設定",
         ("Operator", "Import"): "インポート",
+        ("Operator", "Export"): "エクスポート",
+
+        ("*", "Model:"): "モデル:",
         ("*", "Types"): "タイプ",
         ("*", "Morphs"): "モーフ",
         ("*", "Clean Model"): "モデルをクリーン",
@@ -99,6 +120,13 @@ translation_dict = {
         ("*", "Current Pose"): "現在のポーズ",
         ("*", "Active Pose"): "アクティブなポーズ",
         ("*", "All Poses"): "全てのポーズ",
+
+        ("*", "Timeline:"): "タイムライン:",
+
+        ("*", "Rigid Body Physics:"): "リジッドボディ物理演算:",
+        ("Operator", "Update World"): "ワールドを更新",
+        ("*", "Substeps"): "サブステップ",
+        ("*", "Iteration"): "反復数",
 
         # 3D Viewport > Sidebar > MMD > Display Panel
         ("*", "Display Panel"): "表示パネル",
@@ -142,6 +170,7 @@ translation_dict = {
         ("*", "Active Model"): "選択中のモデル",
         ("*", "All Models"): "全てのモデル",
         ("Operator", "Select Similar..."): "類似を選択...",
+        ("Operator", "Select Rigid Body"): "リジッドボディを選択",
         ("*", "Collision Group"): "コリジョングループ",
         ("*", "Collision Group Mask"): "コリジョングループマスク",
         ("*", "Rigid Type"): "リジッドタイプ",
@@ -179,18 +208,18 @@ translation_dict = {
         ("*", "Sphere Texture"): "スフィアテクスチャ",
         ("*", "Property Drivers"): "プロパティドライバー",
 
-        # 3D Viewport > Sidebar > Misc > MMD Shading Panel
-        ("*", "MMD Shading"): "MMDシェーディング",
+        # 3D Viewport > Shading
+        ("*", "MMD Shading Presets"): "MMDシェーディングプリセット",
         ("Operator", "Shadeless"): "影なし",
 
-        # 3D Viewport > Sidebar > Misc > MMD SDEF Driver Panel
-        ("*", "MMD SDEF Driver"): "MMD SDEFドライバー",
-        ("Operator", "Bind"): "バインド",
-        ("Operator", "Unbind"): "アンバインド",
-        ("*", "Bind SDEF Driver"): "SDEFドライバーをバインド",
-        ("*", "- Auto -"): "自動",
-        ("*", "Bulk"): "バルク",
-        ("*", "Skip"): "スキップ",
+        # 3D Viewport > Menu > Object
+        ("Operator", "Clean Shape Keys"): "シェイプキーをクリーン",
+
+        # 3D Viewport > Menu > Pose
+        ("Operator", "MMD Flip Pose"): "MMDポーズを反転",
+
+        # 3D Viewport > Menu > Select
+        ("Operator", "Select MMD Rigid Body"): "MMDリジッドボディ選択",
 
         # Properties > Object Properties > MMD Lamp Tools
         ("*", "MMD Lamp Tools"): "MMD照明ツール",
@@ -273,18 +302,22 @@ translation_dict = {
         ("*", "Sphere Mul/Add"): "スフィア 乗算/加算",
         ("*", "SubTex UV"): "サブテクスチャUV",
 
-        # Operator Popup > Show Global Translation Popup
-        ("Operator", "Show Global Translation Popup"): "全体翻訳ポップアップを表示",
+        # Operator Popup > Global Translation Popup
+        ("Operator", "Global Translation Popup"): "全体翻訳ポップアップ",
         ("*", "is Blank:"): "空白のみ:",
         ("*", "Japanese"): "日本語",
         ("*", "English"): "英語",
+        ("*", "Select the target column for Batch Operations:"): "一括操作の対象列を選択:",
         ("*", "Blender Name (name)"): "Blender名称 (name)",
-        ("*", "Japanese Name (name_j)"): "日本語名称 (name_j)",
-        ("*", "English Name (name_e)"): "英語名称 (name_e)",
+        ("*", "Japanese MMD Name (name_j)"): "日本語MMD名称 (name_j)",
+        ("*", "English MMD Name (name_e)"): "英語MMD名称 (name_e)",
         ("*", "Batch Operation:"): "一括操作:",
         ("*", "Translate to English"): "英語へ翻訳",
         ("*", "Blender L/R to MMD L/R"): "Blenderの左右をMMDの左右へ",
         ("*", "MMD L/R to Blender L/R"): "MMDの左右をBlenderの左右へ",
+        ("*", "Restore Blender Names"): "Blender名称を復元",
+        ("*", "Restore Japanese MMD Names"): "日本語MMD名称を復元",
+        ("*", "Restore English MMD Names"): "英語MMD名称を復元",
         ("Operator", "Execute"): "実行",
         ("*", "Dictionaries:"): "辞書:",
     },
@@ -292,6 +325,7 @@ translation_dict = {
         # Preferences
         ("*", "View3D > Sidebar > MMD Tools Panel"): "3D视图 > 侧栏 > MMD Tools面板",
         ("*", "Utility tools for MMD model editing. (UuuNyaa's forked version)"): "用于MMD模型编辑的实用工具。(UuuNyaa的分叉版本)",
+        ("*", "Enable MMD Model Production Features"): "开启MMD模型生产功能",
         ("*", "Shared Toon Texture Folder"): "共用的卡通纹理文件夹",
         ("*", "Base Texture Folder"): "基线纹理文件夹",
         ("*", "Dictionary Folder"): "辞書文件夹",
@@ -312,7 +346,8 @@ translation_dict = {
         ("*", "Updated to {}. ({})"): "{}へ更新しました。({})",
         ("*", "Failed to update {}. ({})"): "更新に失敗しました。{} ({})",
 
-        # 3D Viewport > Sidebar > MMD > Operator Panel
+        # 3D Viewport > Sidebar > MMD > Model Production
+        ("*", "Model Production"): "模型生产",
         ("Operator", "Create Model"): "创建新的模型",
         ("Operator", "Create a MMD Model Root Object"): "创建一个MMD模型的根物体",
         ("*", "Name(Eng)"): "名称(英文)",
@@ -322,16 +357,11 @@ translation_dict = {
         ("*", "Ambient Color Source"): "环境色源",
         ("*", "Edge Threshold"): "边缘阈值",
         ("*", "Minimum Edge Alpha"): "最小边缘Alpha",
+        ("*", "Middle Joint Bones Lock"): "中间关节骨锁定",
 
-        ("Operator", "Convert Materials For Cycles"): "转换材质给Cycles",
-        ("*", "Convert to Principled BSDF"): "转换为原理化BSDF",
-        ("*", "Clean Nodes"): "清理节点",
-        ("Operator", "Separate By Materials"): "按材质分开",
-        ("*", "Clean Shape Keys"): "清理形态键",
-        ("Operator", "Join Meshes"): "合并网格",
-        ("*", "Sort Shape Keys"): "排列形态键",
-        ("Operator", "Attach Meshes to Model"): "将网格附上到模型",
-        ("Operator", "Translation"): "翻译",
+        ("Operator", "Attach Meshes"): "连接网格",
+
+        ("Operator", "Translate"): "翻译",
         ("Operator", "Translate a MMD Model"): "翻译一个MMD模型",
         ("Operator", "(Experimental) Global Translation"): "(实验的) 全球翻译",
         ("*", "Dictionary"): "词典",
@@ -341,15 +371,39 @@ translation_dict = {
         ("*", "Use Morph Prefix"): "使用变形前缀",
         ("*", "Allow Fails"): "允许失败",
 
-        ("*", "Bone Constraints:"): "骨骼约束:",
-        ("*", "Physics:"): "物理:",
-        ("Operator", "Build"): "建立",
-        ("*", "Edge Preview:"): "边缘预览:",
-        ("*", "Create"): "创建",
-        ("*", "Clean"): "清空",
-        ("*", "Model:"): "模型:",
+        # 3D Viewport > Sidebar > MMD > Model Setup
+        ("*", "Model Setup"): "模型设定",
+        ("*", "Assembly:"): "装配:",
+        ("Operator", "Physics"): "物理",
 
+        ("Operator", "SDEF"): "SDEF",
+        ("Operator", "Bind SDEF Driver"): "绑定SDEF驱动器",
+        ("*", "- Auto -"): "自动",
+        ("*", "Bulk"): "散装",
+        ("*", "Skip"): "略过",
+
+        ("*", "IK Toggle:"): "IK切换:",
+
+        ("*", "Mesh:"): "网格:",
+        ("Operator", "Separate by Materials"): "按材质分开",
+        ("Operator", "Join"): "合并",
+        ("*", "Sort Shape Keys"): "排列形态键",
+
+        ("*", "Material:"): "材质:",
+        ("Operator", "Edge Preview"): "边缘预览",
+        ("Operator", "Convert to Blender"): "转换给Blender",
+        ("Operator", "Convert Materials"): "转换材质",
+        ("*", "Convert to Principled BSDF"): "转换为原理化BSDF",
+        ("*", "Clean Nodes"): "清理节点",
+
+        ("*", "Misc:"): "杂项:",
+
+        # 3D Viewport > Sidebar > MMD > Scene Setup
+        ("*", "Scene Setup"): "场景设定",
         ("Operator", "Import"): "导入",
+        ("Operator", "Export"): "导出",
+
+        ("*", "Model:"): "模型:",
         ("*", "Types"): "类型",
         ("*", "Morphs"): "变形",
         ("*", "Clean Model"): "清空模型",
@@ -386,6 +440,13 @@ translation_dict = {
         ("*", "Current Pose"): "当前的姿态",
         ("*", "Active Pose"): "活动的姿态",
         ("*", "All Poses"): "全部姿态",
+
+        ("*", "Timeline:"): "时间线:",
+
+        ("*", "Rigid Body Physics:"): "刚体物理:",
+        ("Operator", "Update World"): "更新世界",
+        ("*", "Substeps"): "子步数",
+        ("*", "Iteration"): "迭代",
 
         # 3D Viewport > Sidebar > MMD > Display Panel
         ("*", "Display Panel"): "显示面板",
@@ -429,6 +490,7 @@ translation_dict = {
         ("*", "Active Model"): "活动的模型",
         ("*", "All Models"): "全部模型",
         ("Operator", "Select Similar..."): "选择类似...",
+        ("Operator", "Select Rigid Body"): "选择刚体",
         ("*", "Collision Group"): "碰撞组",
         ("*", "Collision Group Mask"): "碰撞组遮罩",
         ("*", "Rigid Type"): "刚类型",
@@ -466,18 +528,22 @@ translation_dict = {
         ("*", "Sphere Texture"): "球体纹理",
         ("*", "Property Drivers"): "属性驱动器",
 
+        # 3D Viewport > Shading
+        ("*", "MMD Shading Presets"): "MMD着色预设",
+        ("Operator", "Shadeless"): "无明暗",
+
+        # 3D Viewport > Menu > Object
+        ("Operator", "Clean Shape Keys"): "清理形态键",
+
+        # 3D Viewport > Menu > Pose
+        ("Operator", "MMD Flip Pose"): "MMD翻转姿态",
+
+        # 3D Viewport > Menu > Select
+        ("Operator", "Select MMD Rigid Body"): "选择MMD刚体",
+
         # 3D Viewport > Sidebar > Misc > MMD Shading Panel
         ("*", "MMD Shading"): "MMD着色",
         ("Operator", "Shadeless"): "无明暗",
-
-        # 3D Viewport > Sidebar > Misc > MMD SDEF Driver Panel
-        ("*", "MMD SDEF Driver"): "MMD SDEF驱动器",
-        ("Operator", "Bind"): "绑定",
-        ("Operator", "Unbind"): "解绑",
-        ("*", "Bind SDEF Driver"): "绑定SDEF驱动器",
-        ("*", "- Auto -"): "自动",
-        ("*", "Bulk"): "散装",
-        ("*", "Skip"): "略过",
 
         # Properties > Object Properties > MMD Lamp Tools
         ("*", "MMD Lamp Tools"): "MMD照明工具",
@@ -560,18 +626,22 @@ translation_dict = {
         ("*", "Sphere Mul/Add"): "球体 乘法/加法",
         ("*", "SubTex UV"): "次纹理UV",
 
-        # Operator Popup > Show Global Translation Popup
-        ("Operator", "Show Global Translation Popup"): "显示全球翻译对话框",
+        # Operator Popup > Global Translation Popup
+        ("Operator", "Global Translation Popup"): "全球翻译对话框",
         ("*", "is Blank:"): "是空白:",
         ("*", "Japanese"): "日文",
         ("*", "English"): "英文",
+        ("*", "Select the target column for Batch Operations:"): "选择批量操作的目标列:",
         ("*", "Blender Name (name)"): "Blender名称 (name)",
-        ("*", "Japanese Name (name_j)"): "日文名称 (name_j)",
-        ("*", "English Name (name_e)"): "英文名称 (name_e)",
+        ("*", "Japanese MMD Name (name_j)"): "日文MMD名称 (name_j)",
+        ("*", "English MMD Name (name_e)"): "英文MMD名称 (name_e)",
         ("*", "Batch Operation:"): "批量操作:",
         ("*", "Translate to English"): "翻译成英文",
         ("*", "Blender L/R to MMD L/R"): "将Blender的左右改为MMD的左右",
         ("*", "MMD L/R to Blender L/R"): "将MMD的左右改为Blender的左右",
+        ("*", "Restore Blender Names"): "恢复Blender名称",
+        ("*", "Restore Japanese MMD Names"): "名称日文MMD名称",
+        ("*", "Restore English MMD Names"): "名称英文MMD名称",
         ("Operator", "Execute"): "执行",
         ("*", "Dictionaries:"): "词典:",
     },

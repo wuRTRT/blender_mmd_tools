@@ -35,13 +35,13 @@ class _PanelBase(object):
 
     @classmethod
     def poll(cls, _context):
-        return bpyutils.addon_preferences('enable_mmd_model_creation_features', True)
+        return bpyutils.addon_preferences('enable_mmd_model_production_features', True)
 
 
 @register_wrap
-class MMDToolsObjectPanel(_PanelBase, Panel):
-    bl_idname = 'OBJECT_PT_mmd_tools_object'
-    bl_label = 'Model Creation'
+class MMDModelProductionPanel(_PanelBase, Panel):
+    bl_idname = 'OBJECT_PT_mmd_tools_model_production'
+    bl_label = 'Model Production'
     bl_context = ''
 
     def draw(self, context):

@@ -174,8 +174,8 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
         col = self.layout.column(align=True)
         col.label(text=mmd_root_object.mmd_root.name, icon='OUTLINER_OB_ARMATURE')
 
-        self.draw_assembly(context, mmd_root_object)
         self.draw_visibility(context, mmd_root_object)
+        self.draw_assembly(context, mmd_root_object)
         self.draw_ik_toggle(context, mmd_root_object)
         self.draw_mesh(context, mmd_root_object)
         self.draw_material(context, mmd_root_object)

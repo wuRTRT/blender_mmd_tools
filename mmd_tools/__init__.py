@@ -72,8 +72,8 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
     # when defining this in a submodule of a python package.
     bl_idname = __name__
 
-    enable_mmd_model_creation_features = bpy.props.BoolProperty(
-            name="Enable MMD Model Creation Features",
+    enable_mmd_model_production_features = bpy.props.BoolProperty(
+            name="Enable MMD Model Production Features",
             default=True,
             )
     shared_toon_folder = bpy.props.StringProperty(
@@ -104,7 +104,7 @@ class MMDToolsAddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, "enable_mmd_model_creation_features")
+        layout.prop(self, "enable_mmd_model_production_features")
         layout.prop(self, "shared_toon_folder")
         layout.prop(self, "base_texture_folder")
         layout.prop(self, "dictionary_folder")

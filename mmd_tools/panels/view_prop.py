@@ -13,7 +13,7 @@ class _PanelBase(object):
 
     @classmethod
     def poll(cls, _context):
-        return bpyutils.addon_preferences('enable_mmd_model_creation_features', True)
+        return bpyutils.addon_preferences('enable_mmd_model_production_features', True)
 
 class MMDModelObjectDisplayPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_root_object_display'
