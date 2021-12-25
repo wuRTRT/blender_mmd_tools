@@ -37,6 +37,7 @@ translation_dict = {
         ("*", "Ambient Color Source"): "アンビエントカラーソース",
         ("*", "Edge Threshold"): "輪郭しきい値",
         ("*", "Minimum Edge Alpha"): "最小輪郭アルファ",
+        ("*", "Convert Material Nodes"): "マテリアルノードを変換",
         ("*", "Middle Joint Bones Lock"): "中間関節ボーンをロック",
 
         ("Operator", "Attach Meshes"): "メッシュを取付",
@@ -357,6 +358,7 @@ translation_dict = {
         ("*", "Ambient Color Source"): "环境色源",
         ("*", "Edge Threshold"): "边缘阈值",
         ("*", "Minimum Edge Alpha"): "最小边缘Alpha",
+        ("*", "Convert Material Nodes"): "转换材质节点",
         ("*", "Middle Joint Bones Lock"): "中间关节骨锁定",
 
         ("Operator", "Attach Meshes"): "连接网格",

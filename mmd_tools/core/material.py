@@ -20,8 +20,16 @@ class _FnMaterialBI:
     __SPHERE_TEX_SLOT = 2
     __SPHERE_ALPHA_SLOT = 5
 
+    __NODES_ARE_READONLY = True
+
     def __init__(self, material=None):
         self.__material = material
+        self._nodes_are_readonly = _FnMaterialBI.__NODES_ARE_READONLY
+
+    # SUPPORT_UNTIL: 3.3LTS
+    @classmethod
+    def set_nodes_are_readonly(cls, nodes_are_readonly):
+        _FnMaterialBI.__NODES_ARE_READONLY = nodes_are_readonly
 
     @classmethod
     def from_material_id(cls, material_id):
@@ -169,6 +177,8 @@ class _FnMaterialBI:
         return texture_slot
 
     def remove_texture(self):
+        if self._nodes_are_readonly:
+            return
         self.__remove_texture(self.__BASE_TEX_SLOT)
 
     def __remove_texture(self, index):
@@ -191,6 +201,8 @@ class _FnMaterialBI:
         return self.__get_texture(self.__SPHERE_TEX_SLOT)
 
     def use_sphere_texture(self, use_sphere, obj=None):
+        if self._nodes_are_readonly:
+            return
         if use_sphere:
             self.update_sphere_texture_type(obj)
         else:
@@ -214,6 +226,9 @@ class _FnMaterialBI:
         return texture_slot
 
     def update_sphere_texture_type(self, obj=None):
+        if self._nodes_are_readonly:
+            return
+
         texture_slot = self.__material.texture_slots[self.__SPHERE_TEX_SLOT]
         if not texture_slot:
             self.__remove_texture(self.__SPHERE_ALPHA_SLOT)
@@ -251,6 +266,8 @@ class _FnMaterialBI:
         alpha_slot.uv_layer = texture_slot.uv_layer
 
     def remove_sphere_texture(self):
+        if self._nodes_are_readonly:
+            return
         self.__remove_texture(self.__SPHERE_TEX_SLOT)
         self.__remove_texture(self.__SPHERE_ALPHA_SLOT)
 
@@ -259,6 +276,8 @@ class _FnMaterialBI:
         return self.__get_texture(self.__TOON_TEX_SLOT)
 
     def use_toon_texture(self, use_toon):
+        if self._nodes_are_readonly:
+            return
         self.__use_texture(self.__TOON_TEX_SLOT, use_toon)
 
     def create_toon_texture(self, filepath):
@@ -279,6 +298,8 @@ class _FnMaterialBI:
         return texture_slot
 
     def update_toon_texture(self):
+        if self._nodes_are_readonly:
+            return
         mmd_mat = self.__material.mmd_material
         if mmd_mat.is_shared_toon_texture:
             shared_toon_folder = addon_preferences('shared_toon_folder', '')
@@ -290,6 +311,8 @@ class _FnMaterialBI:
             self.remove_toon_texture()
 
     def remove_toon_texture(self):
+        if self._nodes_are_readonly:
+            return
         self.__remove_texture(self.__TOON_TEX_SLOT)
 
 
@@ -299,15 +322,21 @@ class _FnMaterialBI:
         return [min(1.0,0.5*r+ar), min(1.0,0.5*g+ag), min(1.0,0.5*b+ab)]
 
     def update_ambient_color(self):
+        if self._nodes_are_readonly:
+            return
         self.update_diffuse_color()
 
     def update_diffuse_color(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.__material
         mmd_mat = mat.mmd_material
         mat.diffuse_color[:3] = self._mixDiffuseAndAmbient(mmd_mat)
         mat.diffuse_intensity = 0.8
 
     def update_alpha(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.__material
         mmd_mat = mat.mmd_material
         mat.alpha = mmd_mat.alpha
@@ -318,6 +347,8 @@ class _FnMaterialBI:
         self.update_self_shadow_map()
 
     def update_specular_color(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.__material
         mmd_mat = mat.mmd_material
         mat.specular_color = mmd_mat.specular_color
@@ -325,12 +356,16 @@ class _FnMaterialBI:
         mat.specular_intensity = 0.8
 
     def update_shininess(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.__material
         mmd_mat = mat.mmd_material
         shininess = mmd_mat.shininess
         mat.specular_hardness = shininess
 
     def update_is_double_sided(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.__material
         mmd_mat = mat.mmd_material
         mat.game_settings.use_backface_culling = not mmd_mat.is_double_sided
@@ -339,6 +374,8 @@ class _FnMaterialBI:
         pass
 
     def update_self_shadow_map(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.__material
         mmd_mat = mat.mmd_material
         cast_shadows = mmd_mat.enabled_self_shadow_map if mat.alpha > 1e-3 else False
@@ -349,15 +386,21 @@ class _FnMaterialBI:
             mat.use_cast_shadows = cast_shadows
 
     def update_self_shadow(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.__material
         mmd_mat = mat.mmd_material
         mat.use_shadows = mmd_mat.enabled_self_shadow
         mat.use_transparent_shadows = mmd_mat.enabled_self_shadow
 
     def update_enabled_toon_edge(self):
+        if self._nodes_are_readonly:
+            return
         self.update_edge_color()
 
     def update_edge_color(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.__material
         mmd_mat = mat.mmd_material
         color, alpha = mmd_mat.edge_color[:3], mmd_mat.edge_color[3]
@@ -422,6 +465,8 @@ class _FnMaterialCycles(_FnMaterialBI):
         return _DummyTextureSlot(texture.image)
 
     def remove_texture(self):
+        if self._nodes_are_readonly:
+            return
         self.__remove_texture_node('mmd_base_tex')
 
 
@@ -429,6 +474,8 @@ class _FnMaterialCycles(_FnMaterialBI):
         return self.__get_texture_node('mmd_sphere_tex', use_dummy=True)
 
     def use_sphere_texture(self, use_sphere, obj=None):
+        if self._nodes_are_readonly:
+            return
         if use_sphere:
             self.update_sphere_texture_type(obj)
         else:
@@ -440,6 +487,8 @@ class _FnMaterialCycles(_FnMaterialBI):
         return _DummyTextureSlot(texture.image)
 
     def update_sphere_texture_type(self, obj=None):
+        if self._nodes_are_readonly:
+            return
         sphere_texture_type = int(self.material.mmd_material.sphere_texture_type)
         is_sph_add = (sphere_texture_type == 2)
 
@@ -471,6 +520,8 @@ class _FnMaterialCycles(_FnMaterialBI):
                     links.new(nodes['mmd_tex_uv'].outputs['Sphere UV'], texture.inputs['Vector'])
 
     def remove_sphere_texture(self):
+        if self._nodes_are_readonly:
+            return
         self.__remove_texture_node('mmd_sphere_tex')
 
 
@@ -478,6 +529,8 @@ class _FnMaterialCycles(_FnMaterialBI):
         return self.__get_texture_node('mmd_toon_tex', use_dummy=True)
 
     def use_toon_texture(self, use_toon):
+        if self._nodes_are_readonly:
+            return
         self.__update_shader_input('Toon Tex Fac', use_toon)
 
     def create_toon_texture(self, filepath):
@@ -485,6 +538,8 @@ class _FnMaterialCycles(_FnMaterialBI):
         return _DummyTextureSlot(texture.image)
 
     def remove_toon_texture(self):
+        if self._nodes_are_readonly:
+            return
         self.__remove_texture_node('mmd_toon_tex')
 
 
@@ -518,18 +573,24 @@ class _FnMaterialCycles(_FnMaterialBI):
 
 
     def update_ambient_color(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.material
         mmd_mat = mat.mmd_material
         mat.diffuse_color[:3] = self._mixDiffuseAndAmbient(mmd_mat)
         self.__update_shader_input('Ambient Color', mmd_mat.ambient_color[:]+(1,))
 
     def update_diffuse_color(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.material
         mmd_mat = mat.mmd_material
         mat.diffuse_color[:3] = self._mixDiffuseAndAmbient(mmd_mat)
         self.__update_shader_input('Diffuse Color', mmd_mat.diffuse_color[:]+(1,))
 
     def update_alpha(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.material
         mmd_mat = mat.mmd_material
         if hasattr(mat, 'blend_method'):
@@ -547,12 +608,16 @@ class _FnMaterialCycles(_FnMaterialBI):
         self.update_self_shadow_map()
 
     def update_specular_color(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.material
         mmd_mat = mat.mmd_material
         mat.specular_color = mmd_mat.specular_color
         self.__update_shader_input('Specular Color', mmd_mat.specular_color[:]+(1,))
 
     def update_shininess(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.material
         mmd_mat = mat.mmd_material
         mat.roughness = 1/pow(max(mmd_mat.shininess, 1), 0.37)
@@ -563,6 +628,8 @@ class _FnMaterialCycles(_FnMaterialBI):
         self.__update_shader_input('Reflect', mmd_mat.shininess)
 
     def update_is_double_sided(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.material
         mmd_mat = mat.mmd_material
         if hasattr(mat, 'game_settings'):
@@ -572,6 +639,8 @@ class _FnMaterialCycles(_FnMaterialBI):
         self.__update_shader_input('Double Sided', mmd_mat.is_double_sided)
 
     def update_self_shadow_map(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.material
         mmd_mat = mat.mmd_material
         cast_shadows = mmd_mat.enabled_self_shadow_map if mmd_mat.alpha > 1e-3 else False
@@ -579,6 +648,8 @@ class _FnMaterialCycles(_FnMaterialBI):
             mat.shadow_method = 'HASHED' if cast_shadows else 'NONE'
 
     def update_self_shadow(self):
+        if self._nodes_are_readonly:
+            return
         mat = self.material
         mmd_mat = mat.mmd_material
         self.__update_shader_input('Self Shadow', mmd_mat.enabled_self_shadow)

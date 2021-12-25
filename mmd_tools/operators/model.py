@@ -237,8 +237,8 @@ class ConvertToMMDModel(Operator):
         description='Scaling factor for converting the model',
         default=0.08,
         )
-    convert_materials: bpy.props.BoolProperty(
-        name='Convert Materials',
+    convert_material_nodes: bpy.props.BoolProperty(
+        name='Convert Material Nodes',
         default=True,
         )
     middle_joint_bones_lock: bpy.props.BoolProperty(
@@ -312,8 +312,9 @@ class ConvertToMMDModel(Operator):
                     continue
                 pose_bone.lock_location = (True, True, True)
 
-        if self.convert_materials:
-            from mmd_tools.core.material import FnMaterial
+        from mmd_tools.core.material import FnMaterial
+        FnMaterial.set_nodes_are_readonly(not self.convert_material_nodes)
+        try:
             for m in {x for mesh in meshes for x in mesh.data.materials if x}:
                 FnMaterial.convert_to_mmd_material(m, context)
                 mmd_material = m.mmd_material
@@ -326,7 +327,8 @@ class ConvertToMMDModel(Operator):
                     line_color = list(m.line_color)
                     mmd_material.enabled_toon_edge = line_color[3] >= self.edge_threshold
                     mmd_material.edge_color = line_color[:3] + [max(line_color[3], self.edge_alpha_min)]
-
+        finally:
+            FnMaterial.set_nodes_are_readonly(False)
         from mmd_tools.operators.display_item import DisplayItemQuickSetup
         DisplayItemQuickSetup.load_bone_groups(root.mmd_root, armature)
         rig.initialDisplayFrames(reset=False) # ensure default frames
