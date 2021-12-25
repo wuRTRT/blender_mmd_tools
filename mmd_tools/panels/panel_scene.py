@@ -68,9 +68,9 @@ class ResetObjectVisibility(bpy.types.Operator):
         if joint_group_object:
             joint_group_object.hide = True
 
-        find_temporary_group_object = model.FnModel.find_temporary_group(mmd_root_object)
-        if find_temporary_group_object:
-            find_temporary_group_object.hide = True
+        temporary_group_object = model.FnModel.find_temporary_group(mmd_root_object)
+        if temporary_group_object:
+            temporary_group_object.hide = True
 
         mmd_root.show_meshes = True
         mmd_root.show_armature = True
