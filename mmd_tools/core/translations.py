@@ -628,7 +628,7 @@ MMD_DATA_TYPE_TO_HANDLERS: Dict[str, MMDDataHandlerABC] = {h.type_name: h for h 
 class FnTranslations:
     @staticmethod
     def apply_translations(root_object: bpy.types.Object):
-        mmd_translation: 'MMDTranslation' = root_object.mmd_translation
+        mmd_translation: 'MMDTranslation' = root_object.mmd_root.translation
         mmd_translation_element_index: 'MMDTranslationElementIndex'
         for mmd_translation_element_index in mmd_translation.filtered_translation_element_indices:
             mmd_translation_element: 'MMDTranslationElement' = mmd_translation.translation_elements[mmd_translation_element_index.value]
@@ -643,7 +643,7 @@ class FnTranslations:
 
     @staticmethod
     def execute_translation_batch(root_object: bpy.types.Object) -> Tuple[Dict[str, str], Union[bpy.types.Text, None]]:
-        mmd_translation: 'MMDTranslation' = root_object.mmd_translation
+        mmd_translation: 'MMDTranslation' = root_object.mmd_root.translation
         batch_operation_script = mmd_translation.batch_operation_script
         if not batch_operation_script:
             return ({}, None)

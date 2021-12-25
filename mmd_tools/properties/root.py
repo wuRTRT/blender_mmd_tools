@@ -11,8 +11,8 @@ from mmd_tools.bpyutils import SceneOp
 from mmd_tools.core.material import FnMaterial
 from mmd_tools.core.sdef import FnSDEF
 from mmd_tools.properties.morph import MaterialMorph, UVMorph, BoneMorph, VertexMorph, GroupMorph
+from mmd_tools.properties.translations import MMDTranslation
 import mmd_tools.core.model as mmd_model
-from mmd_tools.properties.translations import MMDTranslation, MMDTranslationElement, MMDTranslationElementIndex
 
 def __driver_variables(id_data, path, index=-1):
     d = id_data.driver_add(path, index)
@@ -447,3 +447,11 @@ class MMDRoot(PropertyGroup):
         set=_setActiveMeshObject,
         get=_getActiveMeshObject,
         )
+
+    #*************************
+    # Translation
+    #*************************
+    translation: bpy.props.PointerProperty(
+        name='Translation',
+        type=MMDTranslation,
+    )

@@ -205,8 +205,8 @@ class RestoreMMDDataReferenceOperator(bpy.types.Operator):
 
     def execute(self, context: bpy.types.Context):
         root_object = FnModel.find_root(context.object)
-        mmd_translation_element_index = root_object.mmd_translation.filtered_translation_element_indices[self.index].value
-        mmd_translation_element = root_object.mmd_translation.translation_elements[mmd_translation_element_index]
+        mmd_translation_element_index = root_object.mmd_root.translation.filtered_translation_element_indices[self.index].value
+        mmd_translation_element = root_object.mmd_root.translation.translation_elements[mmd_translation_element_index]
         setattr(mmd_translation_element, self.prop_name, self.restore_value)
 
         return {'FINISHED'}
@@ -282,11 +282,11 @@ class GlobalTranslationPopup(bpy.types.Operator):
         row.prop(mmd_translation, 'dictionary', text='replace')
 
     def invoke(self, context: bpy.types.Context, _event):
-        root = FnModel.find_root(context.object)
-        if root is None:
+        root_object = FnModel.find_root(context.object)
+        if root_object is None:
             return {'CANCELLED'}
 
-        mmd_translation: 'MMDTranslation' = root.mmd_translation
+        mmd_translation: 'MMDTranslation' = root_object.mmd_root.translation
         self._mmd_translation = mmd_translation
         FnTranslations.clear_data(mmd_translation)
         FnTranslations.collect_data(mmd_translation)
@@ -295,12 +295,12 @@ class GlobalTranslationPopup(bpy.types.Operator):
         return context.window_manager.invoke_props_dialog(self, width=800)
 
     def execute(self, context):
-        root = FnModel.find_root(context.object)
-        if root is None:
+        root_object = FnModel.find_root(context.object)
+        if root_object is None:
             return {'CANCELLED'}
 
-        FnTranslations.apply_translations(root)
-        FnTranslations.clear_data(root.mmd_translation)
+        FnTranslations.apply_translations(root_object)
+        FnTranslations.clear_data(root_object.mmd_root.translation)
 
         return {'FINISHED'}
 

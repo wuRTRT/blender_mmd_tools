@@ -1206,12 +1206,12 @@ class __PmxExporter:
                 m.show_viewport = show
 
     def __translate_armature(self, root_object: bpy.types.Object):
-        FnTranslations.clear_data(root_object.mmd_translation)
-        FnTranslations.collect_data(root_object.mmd_translation)
-        FnTranslations.update_query(root_object.mmd_translation)
+        FnTranslations.clear_data(root_object.mmd_root.translation)
+        FnTranslations.collect_data(root_object.mmd_root.translation)
+        FnTranslations.update_query(root_object.mmd_root.translation)
         FnTranslations.execute_translation_batch(root_object)
         FnTranslations.apply_translations(root_object)
-        FnTranslations.clear_data(root_object.mmd_translation)
+        FnTranslations.clear_data(root_object.mmd_root.translation)
 
     def execute(self, filepath, **args):
         root = args.get('root', None)
