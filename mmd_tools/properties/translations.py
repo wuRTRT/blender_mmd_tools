@@ -5,32 +5,24 @@ from typing import Dict, List, Tuple
 
 import bpy
 from mmd_tools import register_wrap
-from mmd_tools.core.translations import MMDDataType, FnTranslations
+from mmd_tools.core.translations import (FnTranslations,
+                                         MMDTranslationElementType)
 from mmd_tools.translations import DictionaryEnum
 
 
-class MMDDataType(Enum):
-    BONE = 'Bones'
-    MORPH = 'Morphs'
-    MATERIAL = 'Materials'
-    DISPLAY = 'Display'
-    PHYSICS = 'Physics'
-    INFO = 'Information'
-
-
-MMD_DATA_TYPE_ENUM_ITEMS = [
-    (MMDDataType.BONE.name, MMDDataType.BONE.value, 'Bones', 1),
-    (MMDDataType.MORPH.name, MMDDataType.MORPH.value, 'Morphs', 2),
-    (MMDDataType.MATERIAL.name, MMDDataType.MATERIAL.value, 'Materials', 4),
-    (MMDDataType.DISPLAY.name, MMDDataType.DISPLAY.value, 'Display frames', 8),
-    (MMDDataType.PHYSICS.name, MMDDataType.PHYSICS.value, 'Rigidbodies and joints', 16),
-    (MMDDataType.INFO.name, MMDDataType.INFO.value, 'Model name and comments', 32),
+MMD_TRANSLATION_ELEMENT_TYPE_ENUM_ITEMS = [
+    (MMDTranslationElementType.BONE.name, MMDTranslationElementType.BONE.value, 'Bones', 1),
+    (MMDTranslationElementType.MORPH.name, MMDTranslationElementType.MORPH.value, 'Morphs', 2),
+    (MMDTranslationElementType.MATERIAL.name, MMDTranslationElementType.MATERIAL.value, 'Materials', 4),
+    (MMDTranslationElementType.DISPLAY.name, MMDTranslationElementType.DISPLAY.value, 'Display frames', 8),
+    (MMDTranslationElementType.PHYSICS.name, MMDTranslationElementType.PHYSICS.value, 'Rigidbodies and joints', 16),
+    (MMDTranslationElementType.INFO.name, MMDTranslationElementType.INFO.value, 'Model name and comments', 32),
 ]
 
 
 @register_wrap
-class MMDDataReference(bpy.types.PropertyGroup):
-    type: bpy.props.EnumProperty(items=MMD_DATA_TYPE_ENUM_ITEMS)
+class MMDTranslationElement(bpy.types.PropertyGroup):
+    type: bpy.props.EnumProperty(items=MMD_TRANSLATION_ELEMENT_TYPE_ENUM_ITEMS)
     object: bpy.props.PointerProperty(type=bpy.types.Object)
     data_path: bpy.props.StringProperty()
     name: bpy.props.StringProperty()
@@ -39,11 +31,11 @@ class MMDDataReference(bpy.types.PropertyGroup):
 
 
 @register_wrap
-class MMDDataReferenceIndex(bpy.types.PropertyGroup):
+class MMDTranslationElementIndex(bpy.types.PropertyGroup):
     value: bpy.props.IntProperty()
 
 
-OPERATION_SCRIPT_PRESETS: Dict[str, Tuple[str, str, str, int]] = {
+BATCH_OPERATION_SCRIPT_PRESETS: Dict[str, Tuple[str, str, str, int]] = {
     'NOTHING': ('', '', '', 1),
     'TO_ENGLISH': ('BLENDER', 'Translate to English', 'to_english(name)', 2),
     'TO_MMD_LR': ('JAPANESE', 'Blender L/R to MMD L/R', 'to_mmd_lr(name)', 3),
@@ -53,39 +45,43 @@ OPERATION_SCRIPT_PRESETS: Dict[str, Tuple[str, str, str, int]] = {
     'RESTORE_ENGLISH': ('ENGLISH', 'Restore English MMD Names', 'org_name_e', 7),
 }
 
-OPERATION_SCRIPT_PRESET_ITEMS: List[Tuple[str, str, str, int]] = [
+BATCH_OPERATION_SCRIPT_PRESET_ITEMS: List[Tuple[str, str, str, int]] = [
     (k, t[1], t[2], t[3])
-    for k, t in OPERATION_SCRIPT_PRESETS.items()
+    for k, t in BATCH_OPERATION_SCRIPT_PRESETS.items()
 ]
 
 
 @register_wrap
-class MMDDataQuery(bpy.types.PropertyGroup):
+class MMDTranslation(bpy.types.PropertyGroup):
     @staticmethod
-    def _update_index(mmd_data_query: 'MMDDataQuery', _context):
-        FnTranslations.update_index(mmd_data_query)
+    def _update_index(mmd_translation: 'MMDTranslation', _context):
+        FnTranslations.update_index(mmd_translation)
 
     @staticmethod
-    def _collect_data(mmd_data_query: 'MMDDataQuery', _context):
-        FnTranslations.collect_data(mmd_data_query)
+    def _collect_data(mmd_translation: 'MMDTranslation', _context):
+        FnTranslations.collect_data(mmd_translation)
 
     @staticmethod
-    def _update_query(mmd_data_query: 'MMDDataQuery', _context):
-        FnTranslations.update_query(mmd_data_query)
+    def _update_query(mmd_translation: 'MMDTranslation', _context):
+        FnTranslations.update_query(mmd_translation)
 
     @staticmethod
-    def _update_operation_script_preset(mmd_data_query: 'MMDDataQuery', _context):
-        if mmd_data_query.operation_script_preset == 'NOTHING':
+    def _update_batch_operation_script_preset(mmd_translation: 'MMDTranslation', _context):
+        if mmd_translation.batch_operation_script_preset == 'NOTHING':
             return
 
-        id2scripts: Dict[str, str] = {i[0]: i[2] for i in OPERATION_SCRIPT_PRESET_ITEMS}
+        id2scripts: Dict[str, str] = {i[0]: i[2] for i in BATCH_OPERATION_SCRIPT_PRESET_ITEMS}
 
-        operation_script = id2scripts.get(mmd_data_query.operation_script_preset)
-        if operation_script is None:
+        batch_operation_script = id2scripts.get(mmd_translation.batch_operation_script_preset)
+        if batch_operation_script is None:
             return
 
-        mmd_data_query.operation_script = operation_script
-        mmd_data_query.operation_target = OPERATION_SCRIPT_PRESETS[mmd_data_query.operation_script_preset][0]
+        mmd_translation.batch_operation_script = batch_operation_script
+        mmd_translation.batch_operation_target = BATCH_OPERATION_SCRIPT_PRESETS[mmd_translation.batch_operation_script_preset][0]
+
+    translation_elements: bpy.props.CollectionProperty(type=MMDTranslationElement)
+    filtered_translation_element_indices_active_index: bpy.props.IntProperty(update=_update_index.__func__)
+    filtered_translation_element_indices: bpy.props.CollectionProperty(type=MMDTranslationElementIndex)
 
     filter_japanese_blank: bpy.props.BoolProperty(name='Japanese Blank', default=False, update=_update_query.__func__)
     filter_english_blank: bpy.props.BoolProperty(name='English Blank', default=False, update=_update_query.__func__)
@@ -93,21 +89,18 @@ class MMDDataQuery(bpy.types.PropertyGroup):
     filter_selected: bpy.props.BoolProperty(name='Selected', default=False, update=_update_query.__func__)
     filter_visible: bpy.props.BoolProperty(name='Visible', default=False, update=_update_query.__func__)
     filter_types: bpy.props.EnumProperty(
-        items=MMD_DATA_TYPE_ENUM_ITEMS,
+        items=MMD_TRANSLATION_ELEMENT_TYPE_ENUM_ITEMS,
         default={'BONE', 'MORPH', 'MATERIAL', 'DISPLAY', 'PHYSICS', },
         options={'ENUM_FLAG'},
         update=_update_query.__func__,
     )
-    data: bpy.props.CollectionProperty(type=MMDDataReference)
-    result_data_index: bpy.props.IntProperty(update=_update_index.__func__)
-    result_data_indices: bpy.props.CollectionProperty(type=MMDDataReferenceIndex)
 
     dictionary: bpy.props.EnumProperty(
         items=DictionaryEnum.get_dictionary_items,
         name='Dictionary',
     )
 
-    operation_target: bpy.props.EnumProperty(
+    batch_operation_target: bpy.props.EnumProperty(
         items=[
             ('BLENDER', 'Blender Name (name)', '', 1),
             ('JAPANESE', 'Japanese MMD Name (name_j)', '', 2),
@@ -117,11 +110,11 @@ class MMDDataQuery(bpy.types.PropertyGroup):
         default='JAPANESE',
     )
 
-    operation_script_preset: bpy.props.EnumProperty(
-        items=OPERATION_SCRIPT_PRESET_ITEMS,
+    batch_operation_script_preset: bpy.props.EnumProperty(
+        items=BATCH_OPERATION_SCRIPT_PRESET_ITEMS,
         name='Operation Script Preset',
         default='NOTHING',
-        update=_update_operation_script_preset.__func__,
+        update=_update_batch_operation_script_preset.__func__,
     )
 
-    operation_script: bpy.props.StringProperty()
+    batch_operation_script: bpy.props.StringProperty()

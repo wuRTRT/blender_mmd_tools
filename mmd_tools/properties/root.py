@@ -12,7 +12,7 @@ from mmd_tools.core.material import FnMaterial
 from mmd_tools.core.sdef import FnSDEF
 from mmd_tools.properties.morph import MaterialMorph, UVMorph, BoneMorph, VertexMorph, GroupMorph
 import mmd_tools.core.model as mmd_model
-from mmd_tools.properties.translations import MMDDataQuery, MMDDataReference, MMDDataReferenceIndex
+from mmd_tools.properties.translations import MMDTranslation, MMDTranslationElement, MMDTranslationElementIndex
 
 def __driver_variables(id_data, path, index=-1):
     d = id_data.driver_add(path, index)

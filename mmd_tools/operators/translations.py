@@ -9,9 +9,9 @@ from mmd_tools.core.translations import (MMD_DATA_TYPE_TO_HANDLERS,
 from mmd_tools.translations import DictionaryEnum
 
 if TYPE_CHECKING:
-    from mmd_tools.properties.translations import (MMDDataQuery,
-                                                   MMDDataReference,
-                                                   MMDDataReferenceIndex)
+    from mmd_tools.properties.translations import (MMDTranslation,
+                                                   MMDTranslationElement,
+                                                   MMDTranslationElementIndex)
 
 
 @register_wrap
@@ -187,15 +187,15 @@ DEFAULT_SHOW_ROW_COUNT = 20
 
 
 @register_wrap
-class MMD_TOOLS_UL_MMDDataReferenceIndex(bpy.types.UIList):
-    def draw_item(self, context, layout: bpy.types.UILayout, data, mmd_data_ref_index: 'MMDDataReferenceIndex', icon, active_data, active_propname, index: int):
-        mmd_data_ref: 'MMDDataReference' = data.data[mmd_data_ref_index.value]
-        MMD_DATA_TYPE_TO_HANDLERS[mmd_data_ref.type].draw_item(layout, mmd_data_ref, index)
+class MMD_TOOLS_UL_MMDTranslationElementIndex(bpy.types.UIList):
+    def draw_item(self, context, layout: bpy.types.UILayout, data, mmd_translation_element_index: 'MMDTranslationElementIndex', icon, active_data, active_propname, index: int):
+        mmd_translation_element: 'MMDTranslationElement' = data.translation_elements[mmd_translation_element_index.value]
+        MMD_DATA_TYPE_TO_HANDLERS[mmd_translation_element.type].draw_item(layout, mmd_translation_element, index)
 
 
 @register_wrap
 class RestoreMMDDataReferenceOperator(bpy.types.Operator):
-    bl_idname = 'mmd_tools.restore_mmd_data_ref_name'
+    bl_idname = 'mmd_tools.restore_mmd_translation_element_name'
     bl_label = 'Restore this Name'
     bl_options = {'INTERNAL'}
 
@@ -205,9 +205,9 @@ class RestoreMMDDataReferenceOperator(bpy.types.Operator):
 
     def execute(self, context: bpy.types.Context):
         root_object = FnModel.find_root(context.object)
-        data_index = root_object.mmd_data_query.result_data_indices[self.index].value
-        mmd_data_ref = root_object.mmd_data_query.data[data_index]
-        setattr(mmd_data_ref, self.prop_name, self.restore_value)
+        mmd_translation_element_index = root_object.mmd_translation.filtered_translation_element_indices[self.index].value
+        mmd_translation_element = root_object.mmd_translation.translation_elements[mmd_translation_element_index]
+        setattr(mmd_translation_element, self.prop_name, self.restore_value)
 
         return {'FINISHED'}
 
@@ -224,22 +224,22 @@ class GlobalTranslationPopup(bpy.types.Operator):
 
     def draw(self, _context):
         layout = self.layout
-        mmd_data_query = self._mmd_data_query
+        mmd_translation = self._mmd_translation
 
         col = layout.column(align=True)
         col.label(text='Filter', icon='FILTER')
         row = col.row()
-        row.prop(mmd_data_query, 'filter_types')
+        row.prop(mmd_translation, 'filter_types')
 
         group = row.row(align=True, heading='is Blank:')
         group.alignment = 'RIGHT'
-        group.prop(mmd_data_query, 'filter_japanese_blank', toggle=True, text='Japanese')
-        group.prop(mmd_data_query, 'filter_english_blank', toggle=True, text='English')
+        group.prop(mmd_translation, 'filter_japanese_blank', toggle=True, text='Japanese')
+        group.prop(mmd_translation, 'filter_english_blank', toggle=True, text='English')
 
         group = row.row(align=True)
-        group.prop(mmd_data_query, 'filter_restorable', toggle=True, icon='FILE_REFRESH', icon_only=True)
-        group.prop(mmd_data_query, 'filter_selected', toggle=True, icon='RESTRICT_SELECT_OFF', icon_only=True)
-        group.prop(mmd_data_query, 'filter_visible', toggle=True, icon='HIDE_OFF', icon_only=True)
+        group.prop(mmd_translation, 'filter_restorable', toggle=True, icon='FILE_REFRESH', icon_only=True)
+        group.prop(mmd_translation, 'filter_selected', toggle=True, icon='RESTRICT_SELECT_OFF', icon_only=True)
+        group.prop(mmd_translation, 'filter_visible', toggle=True, icon='HIDE_OFF', icon_only=True)
 
         col = layout.column(align=True)
         box = col.box().column(align=True)
@@ -247,50 +247,50 @@ class GlobalTranslationPopup(bpy.types.Operator):
         row.label(text='Select the target column for Batch Operations:', icon='TRACKER')
         row = box.row(align=True)
         row.label(text='', icon='BLANK1')
-        row.prop(mmd_data_query, 'operation_target', expand=True)
+        row.prop(mmd_translation, 'batch_operation_target', expand=True)
         row.label(text='', icon='RESTRICT_SELECT_OFF')
         row.label(text='', icon='HIDE_OFF')
 
-        if len(mmd_data_query.result_data_indices) > DEFAULT_SHOW_ROW_COUNT:
+        if len(mmd_translation.filtered_translation_element_indices) > DEFAULT_SHOW_ROW_COUNT:
             row.label(text='', icon='BLANK1')
 
         col.template_list(
-            "MMD_TOOLS_UL_MMDDataReferenceIndex", "",
-            mmd_data_query, 'result_data_indices',
-            mmd_data_query, 'result_data_index',
+            "MMD_TOOLS_UL_MMDTranslationElementIndex", "",
+            mmd_translation, 'filtered_translation_element_indices',
+            mmd_translation, 'filtered_translation_element_indices_active_index',
             rows=DEFAULT_SHOW_ROW_COUNT,
         )
 
         box = layout.box().column(align=True)
         box.label(text='Batch Operation:', icon='MODIFIER')
-        box.prop(mmd_data_query, 'operation_script', text='', icon='SCRIPT')
+        box.prop(mmd_translation, 'batch_operation_script', text='', icon='SCRIPT')
 
         box.separator()
         row = box.row()
-        row.prop(mmd_data_query, 'operation_script_preset', text='Preset', icon='CON_TRANSFORM_CACHE')
+        row.prop(mmd_translation, 'batch_operation_script_preset', text='Preset', icon='CON_TRANSFORM_CACHE')
         row.operator(ExecuteTranslationBatchOperator.bl_idname, text='Execute')
 
         box.separator()
         translation_box = box.box().column(align=True)
         translation_box.label(text='Dictionaries:', icon='HELP')
         row = translation_box.row()
-        row.prop(mmd_data_query, 'dictionary', text='to_english')
+        row.prop(mmd_translation, 'dictionary', text='to_english')
         # row.operator(ExecuteTranslationScriptOperator.bl_idname, text='Write to .csv')
 
         translation_box.separator()
         row = translation_box.row()
-        row.prop(mmd_data_query, 'dictionary', text='replace')
+        row.prop(mmd_translation, 'dictionary', text='replace')
 
     def invoke(self, context: bpy.types.Context, _event):
         root = FnModel.find_root(context.object)
         if root is None:
             return {'CANCELLED'}
 
-        mmd_data_query: 'MMDDataQuery' = root.mmd_data_query
-        self._mmd_data_query = mmd_data_query
-        FnTranslations.clear_data(mmd_data_query)
-        FnTranslations.collect_data(mmd_data_query)
-        FnTranslations.update_query(mmd_data_query)
+        mmd_translation: 'MMDTranslation' = root.mmd_translation
+        self._mmd_translation = mmd_translation
+        FnTranslations.clear_data(mmd_translation)
+        FnTranslations.collect_data(mmd_translation)
+        FnTranslations.update_query(mmd_translation)
 
         return context.window_manager.invoke_props_dialog(self, width=800)
 
@@ -300,7 +300,7 @@ class GlobalTranslationPopup(bpy.types.Operator):
             return {'CANCELLED'}
 
         FnTranslations.apply_translations(root)
-        FnTranslations.clear_data(root.mmd_data_query)
+        FnTranslations.clear_data(root.mmd_translation)
 
         return {'FINISHED'}
 
