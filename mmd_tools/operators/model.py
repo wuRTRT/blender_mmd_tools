@@ -205,7 +205,7 @@ class ConvertToMMDModel(Operator):
     bl_description = 'Convert active armature with its meshes to a MMD model (experimental)'
     bl_options = {'REGISTER', 'UNDO'}
 
-    ambient_color_source = bpy.props.EnumProperty(
+    ambient_color_source: bpy.props.EnumProperty(
         name='Ambient Color Source',
         description='Select ambient color source',
         items = [
@@ -214,7 +214,7 @@ class ConvertToMMDModel(Operator):
             ],
         default='DIFFUSE',
         )
-    edge_threshold = bpy.props.FloatProperty(
+    edge_threshold: bpy.props.FloatProperty(
         name='Edge Threshold',
         description='MMD toon edge will not be enabled if freestyle line color alpha less than this value',
         min=0,
@@ -223,7 +223,7 @@ class ConvertToMMDModel(Operator):
         step=0.1,
         default=0.1,
         )
-    edge_alpha_min = bpy.props.FloatProperty(
+    edge_alpha_min: bpy.props.FloatProperty(
         name='Minimum Edge Alpha',
         description='Minimum alpha of MMD toon edge color',
         min=0,
@@ -232,7 +232,16 @@ class ConvertToMMDModel(Operator):
         step=0.1,
         default=0.5,
         )
-    middle_joint_bones_lock = bpy.props.BoolProperty(
+    scale: bpy.props.FloatProperty(
+        name='Scale',
+        description='Scaling factor for converting the model',
+        default=0.08,
+        )
+    convert_materials: bpy.props.BoolProperty(
+        name='Convert Materials',
+        default=True,
+        )
+    middle_joint_bones_lock: bpy.props.BoolProperty(
         name='Middle Joint Bones Lock',
         description='Lock specific bones for backward compatibility.',
         default=False,
@@ -250,7 +259,7 @@ class ConvertToMMDModel(Operator):
     def execute(self, context):
         #TODO convert some basic MMD properties
         armature = context.active_object
-        scale = 1
+        scale = self.scale
         model_name = 'New MMD Model'
 
         root = mmd_model.Model.findRoot(armature)
@@ -258,7 +267,7 @@ class ConvertToMMDModel(Operator):
             rig = mmd_model.Model.create(model_name, model_name, scale, armature=armature)
 
         self.__attach_meshes_to(armature, SceneOp(context).id_objects)
-        self.__configure_rig(mmd_model.Model(armature.parent))
+        self.__configure_rig(context, mmd_model.Model(armature.parent))
         return {'FINISHED'}
 
     def __attach_meshes_to(self, armature, objects):
@@ -287,7 +296,7 @@ class ConvertToMMDModel(Operator):
                 x_root.parent = armature
                 x_root.matrix_world = m
 
-    def __configure_rig(self, rig):
+    def __configure_rig(self, context, rig):
         root = rig.rootObject()
         armature = rig.armature()
         meshes = tuple(rig.meshes())
@@ -303,19 +312,20 @@ class ConvertToMMDModel(Operator):
                     continue
                 pose_bone.lock_location = (True, True, True)
 
-        from mmd_tools.core.material import FnMaterial
-        for m in {x for mesh in meshes for x in mesh.data.materials if x}:
-            FnMaterial.convert_to_mmd_material(m)
-            mmd_material = m.mmd_material
-            if self.ambient_color_source == 'MIRROR' and hasattr(m, 'mirror_color'):
-                mmd_material.ambient_color = m.mirror_color
-            else:
-                mmd_material.ambient_color = [0.5*c for c in mmd_material.diffuse_color]
+        if self.convert_materials:
+            from mmd_tools.core.material import FnMaterial
+            for m in {x for mesh in meshes for x in mesh.data.materials if x}:
+                FnMaterial.convert_to_mmd_material(m, context)
+                mmd_material = m.mmd_material
+                if self.ambient_color_source == 'MIRROR' and hasattr(m, 'mirror_color'):
+                    mmd_material.ambient_color = m.mirror_color
+                else:
+                    mmd_material.ambient_color = [0.5*c for c in mmd_material.diffuse_color]
 
-            if hasattr(m, 'line_color'): # freestyle line color
-                line_color = list(m.line_color)
-                mmd_material.enabled_toon_edge = line_color[3] >= self.edge_threshold
-                mmd_material.edge_color = line_color[:3] + [max(line_color[3], self.edge_alpha_min)]
+                if hasattr(m, 'line_color'): # freestyle line color
+                    line_color = list(m.line_color)
+                    mmd_material.enabled_toon_edge = line_color[3] >= self.edge_threshold
+                    mmd_material.edge_color = line_color[:3] + [max(line_color[3], self.edge_alpha_min)]
 
         from mmd_tools.operators.display_item import DisplayItemQuickSetup
         DisplayItemQuickSetup.load_bone_groups(root.mmd_root, armature)

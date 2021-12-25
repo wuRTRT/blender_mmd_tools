@@ -13,6 +13,7 @@ SPHERE_MODE_MULT   = 1
 SPHERE_MODE_ADD    = 2
 SPHERE_MODE_SUBTEX = 3
 
+# SUPPORT_UNTIL: 3.3LTS
 class _FnMaterialBI:
     __BASE_TEX_SLOT = 0
     __TOON_TEX_SLOT = 1
@@ -380,7 +381,7 @@ class _FnMaterialBI:
         pass
 
     @staticmethod
-    def convert_to_mmd_material(material):
+    def convert_to_mmd_material(material, context=bpy.context):
         m, mmd_material = material, material.mmd_material
 
         map_diffuse = next((s.blend_type for s in m.texture_slots if s and s.use_map_color_diffuse), None)
@@ -583,7 +584,7 @@ class _FnMaterialCycles(_FnMaterialBI):
         self.__update_shader_input('Self Shadow', mmd_mat.enabled_self_shadow)
 
     @staticmethod
-    def convert_to_mmd_material(material):
+    def convert_to_mmd_material(material, context=bpy.context):
         m, mmd_material = material, material.mmd_material
 
         if m.use_nodes and next((n for n in m.node_tree.nodes if n.name.startswith('mmd_')), None) is None:
@@ -598,14 +599,23 @@ class _FnMaterialCycles(_FnMaterialBI):
                         return child
                 return None
 
+            active_render_engine = context.engine
+            preferred_output_node_target = {
+                'CYCLES': 'CYCLES',
+                'BLENDER_EEVEE': 'EEVEE',
+            }.get(active_render_engine, 'ALL')
+
             tex_node = None
-            for target in ['ALL', 'EEVEE', 'CYCLES']:
+            for target in [preferred_output_node_target, 'ALL']:
                 output_node = m.node_tree.get_output_node(target)
                 if output_node is None:
                     continue
 
-                if output_node.is_active_output:
-                    tex_node = search_tex_image_node(output_node.inputs[0].links[0].from_node)
+                if not output_node.inputs[0].is_linked:
+                    continue
+
+                tex_node = search_tex_image_node(output_node.inputs[0].links[0].from_node)
+                break
 
             if tex_node is None:
                 tex_node = next((n for n in m.node_tree.nodes if n.bl_idname == 'ShaderNodeTexImage'), None)
