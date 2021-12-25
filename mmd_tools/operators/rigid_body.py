@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import bpy
 import math
-import mathutils
+from typing import Dict
 
+import bpy
+import mmd_tools.core.model as mmd_model
 from bpy.types import Operator
-
-from mmd_tools import register_wrap
-from mmd_tools import utils
+from mmd_tools import register_wrap, utils
 from mmd_tools.bpyutils import Props
 from mmd_tools.core import rigid_body
-import mmd_tools.core.model as mmd_model
+
 
 @register_wrap
 class SelectRigidBody(Operator):
@@ -285,6 +284,38 @@ class RemoveRigidBody(Operator):
         if root:
             utils.selectAObject(root)
         return { 'FINISHED' } 
+
+@register_wrap
+class RigidBodyBake(bpy.types.Operator):
+    bl_idname = 'mmd_tools.ptcache_rigid_body_bake'
+    bl_label = 'Bake'
+    bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
+
+    def execute(self, context: bpy.types.Context):
+        override: Dict = context.copy()
+        override.update({
+            'scene': context.scene,
+            'point_cache': context.scene.rigidbody_world.point_cache
+        })
+        bpy.ops.ptcache.bake(override, 'INVOKE_DEFAULT',  bake=True)
+
+        return {'FINISHED'}
+
+@register_wrap
+class RigidBodyDeleteBake(bpy.types.Operator):
+    bl_idname = 'mmd_tools.ptcache_rigid_body_delete_bake'
+    bl_label = 'Delete Bake'
+    bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
+
+    def execute(self, context: bpy.types.Context):
+        override: Dict = context.copy()
+        override.update({
+            'scene': context.scene,
+            'point_cache': context.scene.rigidbody_world.point_cache
+        })
+        bpy.ops.ptcache.free_bake(override, 'INVOKE_DEFAULT')
+
+        return {'FINISHED'}
 
 @register_wrap
 class AddJoint(Operator): 

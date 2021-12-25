@@ -1,86 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from typing import Dict
-
 import bpy
 from mmd_tools import register_wrap
 from mmd_tools.core import model
 from mmd_tools.core.sdef import FnSDEF
-
-
-@register_wrap
-class RigidBodyBake(bpy.types.Operator):
-    bl_idname = 'mmd_tools.ptcache_rigid_body_bake'
-    bl_label = 'Bake'
-    bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
-
-    def execute(self, context: bpy.types.Context):
-        override: Dict = context.copy()
-        override.update({
-            'scene': context.scene,
-            'point_cache': context.scene.rigidbody_world.point_cache
-        })
-        bpy.ops.ptcache.bake(override, 'INVOKE_DEFAULT',  bake=True)
-
-        return {'FINISHED'}
-
-
-@register_wrap
-class RigidBodyDeleteBake(bpy.types.Operator):
-    bl_idname = 'mmd_tools.ptcache_rigid_body_delete_bake'
-    bl_label = 'Delete Bake'
-    bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
-
-    def execute(self, context: bpy.types.Context):
-        override: Dict = context.copy()
-        override.update({
-            'scene': context.scene,
-            'point_cache': context.scene.rigidbody_world.point_cache
-        })
-        bpy.ops.ptcache.free_bake(override, 'INVOKE_DEFAULT')
-
-        return {'FINISHED'}
-
-
-@register_wrap
-class ResetObjectVisibility(bpy.types.Operator):
-    bl_idname = 'mmd_tools.reset_object_visibility'
-    bl_label = 'Reset Object Visivility'
-    bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
-
-    @classmethod
-    def poll(cls, context: bpy.types.Context):
-        active_object: bpy.types.Object = context.active_object
-        return model.Model.findRoot(active_object) is not None
-
-    def execute(self, context: bpy.types.Context):
-        active_object: bpy.types.Object = context.active_object
-        mmd_root_object = model.Model.findRoot(active_object)
-        mmd_root = mmd_root_object.mmd_root
-
-        mmd_root_object.hide = False
-
-        rigid_group_object = model.FnModel.find_rigid_group(mmd_root_object)
-        if rigid_group_object:
-            rigid_group_object.hide = True
-
-        joint_group_object = model.FnModel.find_joint_group(mmd_root_object)
-        if joint_group_object:
-            joint_group_object.hide = True
-
-        temporary_group_object = model.FnModel.find_temporary_group(mmd_root_object)
-        if temporary_group_object:
-            temporary_group_object.hide = True
-
-        mmd_root.show_meshes = True
-        mmd_root.show_armature = True
-        mmd_root.show_temporary_objects = False
-        mmd_root.show_rigid_bodies = False
-        mmd_root.show_names_of_rigid_bodies = False
-        mmd_root.show_joints = False
-        mmd_root.show_names_of_joints = False
-
-        return {'FINISHED'}
 
 
 @register_wrap
@@ -190,14 +113,14 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
         mmd_root = mmd_root_object.mmd_root
         row = col.row(align=False)
         cell = row.row(align=True)
-        cell.prop(mmd_root, 'show_meshes', toggle=True, icon_only=True, icon='MESH_DATA')
-        cell.prop(mmd_root, 'show_armature', toggle=True, icon_only=True, icon='ARMATURE_DATA')
-        cell.prop(mmd_root, 'show_temporary_objects', toggle=True, icon_only=True, icon='EMPTY_AXIS')
+        cell.prop(mmd_root, 'show_meshes', toggle=True, text='Mesh', icon='MESH_DATA')
+        cell.prop(mmd_root, 'show_armature', toggle=True, text='Armature', icon='ARMATURE_DATA')
+        cell.prop(mmd_root, 'show_temporary_objects', toggle=True, text='Temporary', icon='EMPTY_AXIS')
         cell = row.row(align=True)
-        cell.prop(mmd_root, 'show_rigid_bodies', toggle=True, icon_only=True, icon='RIGID_BODY')
+        cell.prop(mmd_root, 'show_rigid_bodies', toggle=True, text='Rigid Body', icon='RIGID_BODY')
         cell.prop(mmd_root, 'show_names_of_rigid_bodies', toggle=True, icon_only=True, icon='SHORTDISPLAY')
         cell = row.row(align=True)
-        cell.prop(mmd_root, 'show_joints', toggle=True, icon_only=True, icon='RIGID_BODY_CONSTRAINT')
+        cell.prop(mmd_root, 'show_joints', toggle=True, text='Joint', icon='RIGID_BODY_CONSTRAINT')
         cell.prop(mmd_root, 'show_names_of_joints', toggle=True, icon_only=True, icon='SHORTDISPLAY')
 
     def draw_assembly(self, context, mmd_root_object):

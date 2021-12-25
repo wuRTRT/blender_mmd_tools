@@ -324,6 +324,46 @@ class ConvertToMMDModel(Operator):
         root.mmd_root.active_display_item_frame = 0
 
 @register_wrap
+class ResetObjectVisibility(bpy.types.Operator):
+    bl_idname = 'mmd_tools.reset_object_visibility'
+    bl_label = 'Reset Object Visivility'
+    bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
+
+    @classmethod
+    def poll(cls, context: bpy.types.Context):
+        active_object: bpy.types.Object = context.active_object
+        return mmd_model.Model.findRoot(active_object) is not None
+
+    def execute(self, context: bpy.types.Context):
+        active_object: bpy.types.Object = context.active_object
+        mmd_root_object = mmd_model.Model.findRoot(active_object)
+        mmd_root = mmd_root_object.mmd_root
+
+        mmd_root_object.hide = False
+
+        rigid_group_object = mmd_model.FnModel.find_rigid_group(mmd_root_object)
+        if rigid_group_object:
+            rigid_group_object.hide = True
+
+        joint_group_object = mmd_model.FnModel.find_joint_group(mmd_root_object)
+        if joint_group_object:
+            joint_group_object.hide = True
+
+        temporary_group_object = mmd_model.FnModel.find_temporary_group(mmd_root_object)
+        if temporary_group_object:
+            temporary_group_object.hide = True
+
+        mmd_root.show_meshes = True
+        mmd_root.show_armature = True
+        mmd_root.show_temporary_objects = False
+        mmd_root.show_rigid_bodies = False
+        mmd_root.show_names_of_rigid_bodies = False
+        mmd_root.show_joints = False
+        mmd_root.show_names_of_joints = False
+
+        return {'FINISHED'}
+
+@register_wrap
 class AssembleAll(Operator):
     bl_idname = 'mmd_tools.assemble_all'
     bl_label = 'Assemble All'
