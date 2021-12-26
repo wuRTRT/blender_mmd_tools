@@ -54,6 +54,7 @@ translation_dict = {
 
         # 3D Viewport > Sidebar > MMD > Model Setup
         ("*", "Model Setup"): "モデル設定",
+        ("*", "Visibility:"): "可視性:",
         ("*", "Assembly:"): "組み立て:",
         ("Operator", "Physics"): "物理演算",
 
@@ -375,6 +376,7 @@ translation_dict = {
 
         # 3D Viewport > Sidebar > MMD > Model Setup
         ("*", "Model Setup"): "模型设定",
+        ("*", "Visibility:"): "可见性:",
         ("*", "Assembly:"): "装配:",
         ("Operator", "Physics"): "物理",
 
