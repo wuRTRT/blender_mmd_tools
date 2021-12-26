@@ -102,7 +102,10 @@ class CleanShapeKeys(Operator):
 
     @classmethod
     def poll(cls, context):
-        return len(context.selected_objects) > 0
+        for obj in context.selected_objects:
+            if obj.type == 'MESH':
+                return True
+        return False
 
     @staticmethod
     def __can_remove(key_block):
