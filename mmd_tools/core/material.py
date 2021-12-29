@@ -20,7 +20,7 @@ class _FnMaterialBI:
     __SPHERE_TEX_SLOT = 2
     __SPHERE_ALPHA_SLOT = 5
 
-    __NODES_ARE_READONLY = True
+    __NODES_ARE_READONLY = False
 
     def __init__(self, material=None):
         self.__material = material
