@@ -72,10 +72,12 @@ def __patch(properties): # temporary patching, should be removed in the future
     prop_obj['select'] = bpy.props.BoolProperty(
         get=lambda prop: prop.select_get(),
         set=lambda prop, value: prop.select_set(value),
+        options={'SKIP_SAVE', 'ANIMATABLE', 'LIBRARY_EDITABLE', },
         )
     prop_obj['hide'] = bpy.props.BoolProperty(
         get=lambda prop: prop.hide_get(),
         set=lambda prop, value: prop.hide_set(value) or setattr(prop, 'hide_viewport', False),
+        options={'SKIP_SAVE', 'ANIMATABLE', 'LIBRARY_EDITABLE', },
         )
 
 if bpy.app.version >= (2, 80, 0):
