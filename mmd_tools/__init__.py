@@ -3,7 +3,7 @@
 bl_info = {
     "name": "mmd_tools",
     "author": "sugiany",
-    "version": (1, 1, 4),
+    "version": (1, 1, 5),
     "blender": (2, 83, 0),
     "location": "View3D > Sidebar > MMD Tools Panel",
     "description": "Utility tools for MMD model editing. (UuuNyaa's forked version)",
@@ -53,11 +53,23 @@ else:
     from . import panels
 
 import os
+from . import auto_load
 
 if bpy.app.version < (2, 80, 0):
     bl_info['blender'] = (2, 70, 0)
 
 logging.basicConfig(format='%(message)s', level=logging.DEBUG)
+
+def get_register_deps_dict(bl_classes):
+    my_classes = set(bl_classes)
+    my_classes_by_idname = {cls.bl_idname : cls for cls in my_classes if hasattr(cls, "bl_idname")}
+
+    deps_dict = {}
+    for cls in my_classes:
+        deps_dict[cls] = set(auto_load.iter_my_register_deps(cls, my_classes, my_classes_by_idname))
+    return deps_dict
+
+__ordered_bl_classes = auto_load.toposort(get_register_deps_dict(__bl_classes))
 
 def get_update_candidate_branches(_, __):
     updater = operators.addon_updater.AddonUpdaterManager.get_instance()
@@ -222,11 +234,10 @@ def load_handler(dummy):
     FnSDEF.clear_cache()
     FnSDEF.register_driver_function()
 
-
 def register():
-    for cls in __bl_classes:
+    for cls in __ordered_bl_classes:
         bpy.utils.register_class(cls)
-    print(__name__, 'registed %d classes'%len(__bl_classes))
+    print(__name__, 'registed %d classes'%len(__ordered_bl_classes))
     properties.register()
     bpy.app.handlers.load_post.append(load_handler)
     bpy.types.VIEW3D_MT_object.append(menu_view3d_object)
@@ -268,7 +279,7 @@ def unregister():
     bpy.types.VIEW3D_MT_object.remove(menu_view3d_object)
     bpy.app.handlers.load_post.remove(load_handler)
     properties.unregister()
-    for cls in reversed(__bl_classes):
+    for cls in reversed(__ordered_bl_classes):
         bpy.utils.unregister_class(cls)
 
 if __name__ == "__main__":
