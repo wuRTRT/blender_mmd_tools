@@ -61,7 +61,7 @@ class MMDToolsSceneSetupPanel(bpy.types.Panel):
         if rigidbody_world:
             row = col.row(align=True)
             row.prop(rigidbody_world, 'substeps_per_frame', text='Substeps')
-            row.prop(rigidbody_world, 'solver_iterations', text='Iteration')
+            row.prop(rigidbody_world, 'solver_iterations', text='Iterations')
 
             point_cache = rigidbody_world.point_cache
 
@@ -115,7 +115,7 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
         cell = row.row(align=True)
         cell.prop(mmd_root, 'show_meshes', toggle=True, text='Mesh', icon='MESH_DATA')
         cell.prop(mmd_root, 'show_armature', toggle=True, text='Armature', icon='ARMATURE_DATA')
-        cell.prop(mmd_root, 'show_temporary_objects', toggle=True, text='Temporary', icon='EMPTY_AXIS')
+        cell.prop(mmd_root, 'show_temporary_objects', toggle=True, text='Temporary Object', icon='EMPTY_AXIS')
         cell = row.row(align=True)
         cell.prop(mmd_root, 'show_rigid_bodies', toggle=True, text='Rigid Body', icon='RIGID_BODY')
         cell.prop(mmd_root, 'show_names_of_rigid_bodies', toggle=True, icon_only=True, icon='SHORTDISPLAY')

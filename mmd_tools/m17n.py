@@ -128,7 +128,7 @@ translation_dict = {
         ("*", "Rigid Body Physics:"): "リジッドボディ物理演算:",
         ("Operator", "Update World"): "ワールドを更新",
         ("*", "Substeps"): "サブステップ",
-        ("*", "Iteration"): "反復数",
+        ("*", "Iterations"): "反復数",
 
         # 3D Viewport > Sidebar > MMD > Display Panel
         ("*", "Display Panel"): "表示パネル",
@@ -450,7 +450,7 @@ translation_dict = {
         ("*", "Rigid Body Physics:"): "刚体物理:",
         ("Operator", "Update World"): "更新世界",
         ("*", "Substeps"): "子步数",
-        ("*", "Iteration"): "迭代",
+        ("*", "Iterations"): "迭代",
 
         # 3D Viewport > Sidebar > MMD > Display Panel
         ("*", "Display Panel"): "显示面板",
