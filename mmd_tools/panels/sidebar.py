@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import time
+
 import bpy
 from mmd_tools import register_wrap
 from mmd_tools.core import model
 from mmd_tools.core.sdef import FnSDEF
-
 
 @register_wrap
 class MMDToolsSceneSetupPanel(bpy.types.Panel):
@@ -160,12 +161,15 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
         row = grid.row(align=True)
         row.prop(mmd_root, 'use_property_driver', text='Property', toggle=True, icon='DRIVER')
 
-    def draw_ik_toggle(self, context, mmd_root_object):
-        col = self.layout.column(align=True)
-        row = col.row(align=False)
-        row.label(text='IK Toggle:', icon='CON_KINEMATIC')
-        grid = col.grid_flow(row_major=True, align=True)
+    __toggle_items_ttl = 0.0
+    __toggle_items_cache = None
 
+    def __get_toggle_items(self, mmd_root_object: bpy.types.Object):
+        if self.__toggle_items_ttl > time.time():
+            return self.__toggle_items_cache
+        
+        self.__toggle_items_ttl = time.time() + 10
+        self.__toggle_items_cache = []
         armature_object = model.FnModel.find_armature(mmd_root_object)
         pose_bones = armature_object.pose.bones
         ik_map = {
@@ -176,7 +180,7 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
         }
 
         if not ik_map:
-            return
+            return self.__toggle_items_cache
 
         base = sum(b.bone.length for b in ik_map.keys())/len(ik_map)*0.8
 
@@ -190,10 +194,21 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
                 ).add(((px, -py, bx), ik))  # (px, pz, -py, bx, bz, -by)
 
         for _, group in sorted(groups.items()):
-            row = grid.row(align=True)
             for _, ik in sorted(group, key=lambda x: x[0]):
                 ic = 'ERROR' if ik_map[ik][-1] else 'NONE'
-                row.prop(ik, 'mmd_ik_toggle', text=ik.name, toggle=True, icon=ic)
+                self.__toggle_items_cache.append((ik, ic))
+        
+        return self.__toggle_items_cache
+
+
+    def draw_ik_toggle(self, _context, mmd_root_object):
+        col = self.layout.column(align=True)
+        row = col.row(align=False)
+        row.label(text='IK Toggle:', icon='CON_KINEMATIC')
+        grid = col.grid_flow(row_major=True, align=True)
+
+        for ik, ic in self.__get_toggle_items(mmd_root_object):
+            grid.prop(ik, 'mmd_ik_toggle', text=ik.name, toggle=True, icon=ic)
 
     def draw_mesh(self, context, mmd_root_object):
         col = self.layout.column(align=True)
