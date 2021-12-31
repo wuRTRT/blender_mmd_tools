@@ -208,7 +208,7 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
         grid = col.grid_flow(row_major=True, align=True)
 
         for ik, ic in self.__get_toggle_items(mmd_root_object):
-            grid.prop(ik, 'mmd_ik_toggle', text=ik.name, toggle=True, icon=ic)
+            grid.row(align=True).prop(ik, 'mmd_ik_toggle', text=ik.name, toggle=True, icon=ic)
 
     def draw_mesh(self, context, mmd_root_object):
         col = self.layout.column(align=True)
