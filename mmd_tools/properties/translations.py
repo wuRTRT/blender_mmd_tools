@@ -43,6 +43,8 @@ BATCH_OPERATION_SCRIPT_PRESETS: Dict[str, Tuple[str, str, str, int]] = {
     'RESTORE_BLENDER': ('BLENDER', 'Restore Blender Names', 'org_name', 5),
     'RESTORE_JAPANESE': ('JAPANESE', 'Restore Japanese MMD Names', 'org_name_j', 6),
     'RESTORE_ENGLISH': ('ENGLISH', 'Restore English MMD Names', 'org_name_e', 7),
+    'ENGLISH_IF_EMPTY_JAPANESE': (None, 'Copy English MMD Names, if empty copy Japanese MMD Name', 'name_e if name_e else name_j', 8),
+    'JAPANESE_IF_EMPTY_ENGLISH': (None, 'Copy Japanese MMD Names, if empty copy English MMD Name', 'name_j if name_j else name_e', 9),
 }
 
 BATCH_OPERATION_SCRIPT_PRESET_ITEMS: List[Tuple[str, str, str, int]] = [
@@ -77,7 +79,9 @@ class MMDTranslation(bpy.types.PropertyGroup):
             return
 
         mmd_translation.batch_operation_script = batch_operation_script
-        mmd_translation.batch_operation_target = BATCH_OPERATION_SCRIPT_PRESETS[mmd_translation.batch_operation_script_preset][0]
+        batch_operation_target = BATCH_OPERATION_SCRIPT_PRESETS[mmd_translation.batch_operation_script_preset][0]
+        if batch_operation_target:
+            mmd_translation.batch_operation_target = batch_operation_target
 
     translation_elements: bpy.props.CollectionProperty(type=MMDTranslationElement)
     filtered_translation_element_indices_active_index: bpy.props.IntProperty(update=_update_index.__func__)
