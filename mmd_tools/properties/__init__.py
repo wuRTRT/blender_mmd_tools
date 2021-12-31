@@ -1,28 +1,8 @@
 # -*- coding: utf-8 -*-
 
-if "bpy" in locals():
-    if bpy.app.version < (2, 71, 0):
-        import imp as importlib
-    else:
-        import importlib
-    importlib.reload(morph)
-    importlib.reload(root)
-    importlib.reload(camera)
-    importlib.reload(material)
-    importlib.reload(bone)
-    importlib.reload(rigid_body)
-    importlib.reload(translations)
-else:
-    import bpy
-    from . import (
-        morph,
-        root,
-        camera,
-        material,
-        bone,
-        rigid_body,
-        translations,
-        )
+import bpy
+
+from . import bone, camera, material, rigid_body, root, translations
 
 __properties = {
     bpy.types.Object: {
@@ -47,40 +27,43 @@ __properties = {
                 ('NON_COLLISION_CONSTRAINT', 'Non Collision Constraint', '', 52),
                 ('SPRING_CONSTRAINT', 'Spring Constraint', '', 53),
                 ('SPRING_GOAL', 'Spring Goal', '', 54),
-                ]
-            ),
+            ]
+        ),
         'mmd_root': bpy.props.PointerProperty(type=root.MMDRoot),
         'mmd_camera': bpy.props.PointerProperty(type=camera.MMDCamera),
         'mmd_rigid': bpy.props.PointerProperty(type=rigid_body.MMDRigidBody),
         'mmd_joint': bpy.props.PointerProperty(type=rigid_body.MMDJoint),
-        },
+    },
     bpy.types.Material: {
         'mmd_material': bpy.props.PointerProperty(type=material.MMDMaterial),
-        },
+    },
     bpy.types.PoseBone: {
         'mmd_bone': bpy.props.PointerProperty(type=bone.MMDBone),
         'is_mmd_shadow_bone': bpy.props.BoolProperty(name='is_mmd_shadow_bone', default=False),
         'mmd_shadow_bone_type': bpy.props.StringProperty(name='mmd_shadow_bone_type'),
         'mmd_ik_toggle': bone._MMDPoseBoneProp.mmd_ik_toggle,
-        }
     }
+}
 
-def __patch(properties): # temporary patching, should be removed in the future
+
+def __patch(properties):  # temporary patching, should be removed in the future
     prop_obj = properties.setdefault(bpy.types.Object, {})
 
     prop_obj['select'] = bpy.props.BoolProperty(
         get=lambda prop: prop.select_get(),
         set=lambda prop, value: prop.select_set(value),
         options={'SKIP_SAVE', 'ANIMATABLE', 'LIBRARY_EDITABLE', },
-        )
+    )
     prop_obj['hide'] = bpy.props.BoolProperty(
         get=lambda prop: prop.hide_get(),
         set=lambda prop, value: prop.hide_set(value) or setattr(prop, 'hide_viewport', False),
         options={'SKIP_SAVE', 'ANIMATABLE', 'LIBRARY_EDITABLE', },
-        )
+    )
+
 
 if bpy.app.version >= (2, 80, 0):
     __patch(__properties)
+
 
 def register():
     for typ, t in __properties.items():
@@ -88,6 +71,7 @@ def register():
             if hasattr(typ, attr):
                 print(' * warning: overwrite ', typ, attr)
             setattr(typ, attr, prop)
+
 
 def unregister():
     for typ, t in __properties.items():

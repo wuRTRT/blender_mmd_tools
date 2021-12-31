@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from enum import Enum
 from typing import Dict, List, Tuple
 
 import bpy
@@ -8,7 +7,6 @@ from mmd_tools import register_wrap
 from mmd_tools.core.translations import (FnTranslations,
                                          MMDTranslationElementType)
 from mmd_tools.translations import DictionaryEnum
-
 
 MMD_TRANSLATION_ELEMENT_TYPE_ENUM_ITEMS = [
     (MMDTranslationElementType.BONE.name, MMDTranslationElementType.BONE.value, 'Bones', 1),
