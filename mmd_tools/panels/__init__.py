@@ -9,6 +9,7 @@ if "bpy" in locals():
     importlib.reload(prop_camera)
     importlib.reload(prop_lamp)
     importlib.reload(prop_material)
+    importlib.reload(prop_physics)
     importlib.reload(prop_object)
     importlib.reload(tool)
     importlib.reload(sidebar)
@@ -22,6 +23,7 @@ else:
         prop_camera,
         prop_lamp,
         prop_material,
+        prop_physics,
         prop_object,
         tool,
         sidebar,

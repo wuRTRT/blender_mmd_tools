@@ -18,7 +18,7 @@ class ConvertToMMDCamera(Operator):
     scale = FloatProperty(
         name='Scale',
         description='Scaling factor for initializing the camera',
-        default=1.0,
+        default=0.08,
         )
 
     bake_animation = BoolProperty(

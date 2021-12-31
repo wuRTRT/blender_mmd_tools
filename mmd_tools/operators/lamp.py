@@ -9,14 +9,14 @@ from mmd_tools.core.lamp import MMDLamp
 @register_wrap
 class ConvertToMMDLamp(Operator):
     bl_idname = 'mmd_tools.convert_to_mmd_lamp'
-    bl_label = 'Convert to MMD Lamp'
-    bl_description = 'Create a lamp rig for MMD'
+    bl_label = 'Convert to MMD Light'
+    bl_description = 'Create a light rig for MMD'
     bl_options = {'REGISTER', 'UNDO'}
 
     scale = FloatProperty(
         name='Scale',
-        description='Scaling factor for initializing the lamp',
-        default=1.0,
+        description='Scaling factor for initializing the light',
+        default=0.08,
         )
 
     @classmethod

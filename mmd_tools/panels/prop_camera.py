@@ -11,7 +11,7 @@ class MMDCameraPanel(Panel):
     bl_label = 'MMD Camera Tools'
     bl_space_type = 'PROPERTIES'
     bl_region_type = 'WINDOW'
-    bl_context = 'object'
+    bl_context = 'data'
 
     @classmethod
     def poll(cls, context):

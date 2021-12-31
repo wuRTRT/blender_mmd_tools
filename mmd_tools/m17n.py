@@ -225,9 +225,9 @@ translation_dict = {
         # 3D Viewport > Menu > Select
         ("Operator", "Select MMD Rigid Body"): "MMDリジッドボディ選択",
 
-        # Properties > Object Properties > MMD Lamp Tools
-        ("*", "MMD Lamp Tools"): "MMD照明ツール",
-        ("Operator", "Convert to MMD Lamp"): "MMD照明へ変換",
+        # Properties > Object Properties > MMD Light Tools
+        ("*", "MMD Light Tools"): "MMDライトツール",
+        ("Operator", "Convert to MMD Light"): "MMDライトへ変換",
         ("*", "Light Source"): "光源",
 
         # Properties > Object Properties > MMD Camera Tools
@@ -553,9 +553,9 @@ translation_dict = {
         ("*", "MMD Shading"): "MMD着色",
         ("Operator", "Shadeless"): "无明暗",
 
-        # Properties > Object Properties > MMD Lamp Tools
-        ("*", "MMD Lamp Tools"): "MMD照明工具",
-        ("Operator", "Convert to MMD Lamp"): "转换为MMD照明",
+        # Properties > Object Properties > MMD Light Tools
+        ("*", "MMD Light Tools"): "MMD灯光工具",
+        ("Operator", "Convert to MMD Light"): "转换为MMD灯光",
         ("*", "Light Source"): "光源",
 
         # Properties > Object Properties > MMD Camera Tools
