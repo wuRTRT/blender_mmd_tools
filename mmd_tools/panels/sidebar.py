@@ -7,6 +7,7 @@ from mmd_tools import register_wrap
 from mmd_tools.core import model
 from mmd_tools.core.sdef import FnSDEF
 
+
 @register_wrap
 class MMDToolsSceneSetupPanel(bpy.types.Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_scene_setup'
@@ -167,7 +168,7 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
     def __get_toggle_items(self, mmd_root_object: bpy.types.Object):
         if self.__toggle_items_ttl > time.time():
             return self.__toggle_items_cache
-        
+
         self.__toggle_items_ttl = time.time() + 10
         self.__toggle_items_cache = []
         armature_object = model.FnModel.find_armature(mmd_root_object)
@@ -197,9 +198,8 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
             for _, ik in sorted(group, key=lambda x: x[0]):
                 ic = 'ERROR' if ik_map[ik][-1] else 'NONE'
                 self.__toggle_items_cache.append((ik, ic))
-        
-        return self.__toggle_items_cache
 
+        return self.__toggle_items_cache
 
     def draw_ik_toggle(self, _context, mmd_root_object):
         col = self.layout.column(align=True)
