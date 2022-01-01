@@ -383,15 +383,14 @@ class AssembleAll(Operator):
 
     def execute(self, context):
         active_object = context.active_object
-        root_object = mmd_model.Model.findRoot(context.active_object)
+        root_object = mmd_model.Model.findRoot(active_object)
         rig = mmd_model.Model(root_object)
 
         rig.applyAdditionalTransformConstraints()
         rig.build(1.5)
         rig.morph_slider.bind()
 
-        root_object.mmd_root.use_sdef = True
-        bpy.ops.mmd_tools.sdef_bind()
+        bpy.ops.mmd_tools.sdef_bind({'selected_objects': [active_object]})
         root_object.mmd_root.use_property_driver = True
 
         SceneOp(context).active_object = active_object
@@ -406,12 +405,11 @@ class DisassembleAll(Operator):
 
     def execute(self, context):
         active_object = context.active_object
-        root_object = mmd_model.Model.findRoot(context.active_object)
+        root_object = mmd_model.Model.findRoot(active_object)
         rig = mmd_model.Model(root_object)
 
         root_object.mmd_root.use_property_driver = False
-        bpy.ops.mmd_tools.sdef_unbind()
-        root_object.mmd_root.use_sdef = False
+        bpy.ops.mmd_tools.sdef_unbind({'selected_objects': [active_object]})
         rig.morph_slider.unbind()
         rig.clean()
         rig.cleanAdditionalTransformConstraints()
