@@ -323,7 +323,7 @@ class _MorphSlider:
     @staticmethod
     def __add_single_prop(variables, id_obj, data_path, prefix):
         var = variables.new()
-        var.name = prefix + str(len(variables))
+        var.name = f'{prefix}{len(variables)}'
         var.type = 'SINGLE_PROP'
         target = var.targets[0]
         target.id_type = 'OBJECT'

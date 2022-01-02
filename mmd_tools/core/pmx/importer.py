@@ -636,19 +636,26 @@ class PMXImporter:
         # For Cycles, users have to offset or delete those z-fighting faces to fix it manually.
         check = {}
         mi_skip = -1
-        def _rounded_co(co): return tuple(round(v, 6) for v in co)
+        _vi_cache = {}
+        def _rounded_co_vi(vi):
+            if vi not in _vi_cache:
+                vco = vertices[vi].co
+                _vi_cache[vi] = (round(vco[0], 6), round(vco[1], 6), round(vco[2], 6))
+            return _vi_cache[vi]
+
         assert(len(loop_indices) == len(material_indices)*3)
         for i, mi in enumerate(material_indices):
-            if mi > mi_skip:
-                si = 3*i
-                verts = tuple(sorted(_rounded_co(vertices[vi].co) for vi in loop_indices[si:si+3]))
-                if verts not in check:
-                    check[verts] = mi
-                elif check[verts] < mi:
-                    logging.debug(' >> fix blend method of material: %s', materials[mi].name)
-                    materials[mi].blend_method = 'BLEND'
-                    materials[mi].show_transparent_back = False
-                    mi_skip = mi
+            if mi <= mi_skip:
+                continue
+            si = 3*i
+            verts = tuple(sorted((_rounded_co_vi(loop_indices[si]), _rounded_co_vi(loop_indices[si+1]), _rounded_co_vi(loop_indices[si+2]))))
+            if verts not in check:
+                check[verts] = mi
+            elif check[verts] < mi:
+                logging.debug(' >> fix blend method of material: %s', materials[mi].name)
+                materials[mi].blend_method = 'BLEND'
+                materials[mi].show_transparent_back = False
+                mi_skip = mi
 
     def __importVertexMorphs(self):
         mmd_root = self.__root.mmd_root

@@ -49,6 +49,15 @@ class FnModel:
             yield from cls.all_children(child)
 
     @classmethod
+    def filtered_children(cls, filter, obj:bpy.types.Object) -> Iterable[bpy.types.Object]:
+        child: bpy.types.Object
+        for child in obj.children:
+            if filter(child):
+                yield child
+            else:
+                yield from cls.all_children(child)
+
+    @classmethod
     def child_meshes(cls, obj: bpy.types.Object) -> Iterable[bpy.types.Object]:
         return filter(lambda x: x.type == 'MESH' and x.mmd_type == 'NONE', cls.all_children(obj))
 
@@ -509,16 +518,16 @@ class Model:
 
     def rigidBodies(self):
         if self.__root.mmd_root.is_built:
-            return filter(isRigidBodyObject, itertools.chain(FnModel.all_children(self.armature()),FnModel.all_children(self.rigidGroupObject())))
+            return itertools.chain(FnModel.filtered_children(isRigidBodyObject, self.armature()),FnModel.filtered_children(isRigidBodyObject, self.rigidGroupObject()))
         return filter(isRigidBodyObject, FnModel.all_children(self.rigidGroupObject()))
 
     def joints(self):
-        return filter(isJointObject, FnModel.all_children(self.jointGroupObject()))
+        return FnModel.filtered_children(isJointObject, self.jointGroupObject())
 
     def temporaryObjects(self, rigid_track_only=False):
         if rigid_track_only:
-            return filter(isTemporaryObject, FnModel.all_children(self.rigidGroupObject()))
-        return filter(isTemporaryObject, itertools.chain(FnModel.all_children(self.rigidGroupObject()),FnModel.all_children(self.temporaryGroupObject())))
+            return FnModel.filtered_children(isTemporaryObject, self.rigidGroupObject())
+        return itertools.chain(FnModel.filtered_children(isTemporaryObject, self.rigidGroupObject()),FnModel.filtered_children(isTemporaryObject, self.temporaryGroupObject()))
 
     def materials(self):
         """

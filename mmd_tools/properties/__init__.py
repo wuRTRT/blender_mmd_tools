@@ -46,6 +46,11 @@ __properties = {
 }
 
 
+def __set_hide(prop, value):
+    prop.hide_set(value)
+    if getattr(prop, 'hide_viewport'):
+        setattr(prop, 'hide_viewport', False)
+
 def __patch(properties):  # temporary patching, should be removed in the future
     prop_obj = properties.setdefault(bpy.types.Object, {})
 
@@ -56,7 +61,7 @@ def __patch(properties):  # temporary patching, should be removed in the future
     )
     prop_obj['hide'] = bpy.props.BoolProperty(
         get=lambda prop: prop.hide_get(),
-        set=lambda prop, value: prop.hide_set(value) or setattr(prop, 'hide_viewport', False),
+        set=__set_hide,
         options={'SKIP_SAVE', 'ANIMATABLE', 'LIBRARY_EDITABLE', },
     )
 
