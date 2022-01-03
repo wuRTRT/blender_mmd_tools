@@ -55,11 +55,11 @@ class FnModel:
             if filter(child):
                 yield child
             else:
-                yield from cls.all_children(child)
+                yield from cls.filtered_children(filter, child)
 
     @classmethod
     def child_meshes(cls, obj: bpy.types.Object) -> Iterable[bpy.types.Object]:
-        return filter(lambda x: x.type == 'MESH' and x.mmd_type == 'NONE', cls.all_children(obj))
+        return cls.filtered_children(lambda x: x.type == 'MESH' and x.mmd_type == 'NONE', obj)
 
     @staticmethod
     def is_rigid_body_object(obj):
@@ -519,7 +519,7 @@ class Model:
     def rigidBodies(self):
         if self.__root.mmd_root.is_built:
             return itertools.chain(FnModel.filtered_children(isRigidBodyObject, self.armature()),FnModel.filtered_children(isRigidBodyObject, self.rigidGroupObject()))
-        return filter(isRigidBodyObject, FnModel.all_children(self.rigidGroupObject()))
+        return FnModel.filtered_children(isRigidBodyObject, self.rigidGroupObject())
 
     def joints(self):
         return FnModel.filtered_children(isJointObject, self.jointGroupObject())
