@@ -35,6 +35,7 @@ class MMDTranslationElementIndex(bpy.types.PropertyGroup):
 
 BATCH_OPERATION_SCRIPT_PRESETS: Dict[str, Tuple[str, str, str, int]] = {
     'NOTHING': ('', '', '', 1),
+    'CLEAR': (None, 'Clear', '""', 10),
     'TO_ENGLISH': ('BLENDER', 'Translate to English', 'to_english(name)', 2),
     'TO_MMD_LR': ('JAPANESE', 'Blender L/R to MMD L/R', 'to_mmd_lr(name)', 3),
     'TO_BLENDER_LR': ('BLENDER', 'MMD L/R to Blender L/R', 'to_blender_lr(name_j)', 4),
