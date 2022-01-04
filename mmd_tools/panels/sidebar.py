@@ -16,7 +16,15 @@ class MMDToolsSceneSetupPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = 'MMD'
 
+    __LANGUAGE_MANUAL_URL = {
+        'ja_JP': 'https://mmd-blender.fandom.com/ja/wiki/MMD_Tools/%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB',
+    }
+
     def draw(self, context: bpy.types.Context):
+        self.layout.row(align=True).operator(
+            'wm.url_open', text='MMD Tools/Manual', icon='URL'
+        ).url = self.__LANGUAGE_MANUAL_URL.get(context.preferences.view.language, 'https://mmd-blender.fandom.com/wiki/MMD_Tools/Manual')
+
         self.draw_io()
         self.draw_timeline(context)
         self.draw_rigid_body(context)
@@ -93,7 +101,7 @@ class MMDToolsModelSetupPanel(bpy.types.Panel):
         mmd_root_object = model.Model.findRoot(active_object)
 
         if mmd_root_object is None:
-            self.layout.label(text='MMD Model is not selected.', icon='ERROR')
+            self.layout.label(text='Select a MMD Model')
             return
 
         col = self.layout.column(align=True)

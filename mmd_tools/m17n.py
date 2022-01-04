@@ -84,6 +84,7 @@ translation_dict = {
 
         # 3D Viewport > Sidebar > MMD > Scene Setup
         ("*", "Scene Setup"): "シーン設定",
+        ("Operator", "MMD Tools/Manual"): "MMD Tools/マニュアル",
         ("Operator", "Import"): "インポート",
         ("Operator", "Export"): "エクスポート",
 
@@ -411,6 +412,7 @@ translation_dict = {
 
         # 3D Viewport > Sidebar > MMD > Scene Setup
         ("*", "Scene Setup"): "场景设定",
+        ("Operator", "MMD Tools/Manual"): "MMD Tools/使用手册",
         ("Operator", "Import"): "导入",
         ("Operator", "Export"): "导出",
 
