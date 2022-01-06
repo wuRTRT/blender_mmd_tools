@@ -269,7 +269,7 @@ class VMDExporter:
         for bone, bone_curves in anim_bones.items():
             key_name = bone.mmd_bone.name_j or bone.name
             if key_name in vmd_bone_anim:
-                raise ValueError(f'[WARNING] VMD bone name {key_name} collision')
+                raise ValueError(f'VMD bone name {key_name} collision')
 
             frame_keys = vmd_bone_anim[key_name]
 
