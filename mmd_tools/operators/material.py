@@ -72,6 +72,14 @@ class ConvertMaterials(Operator):
         options={'SKIP_SAVE'},
         )
 
+    subsurface: bpy.props.FloatProperty(
+        name='Subsurface',
+        default=0.001,
+        soft_min=0.000, soft_max=1.000,
+        precision=3,
+        options={'SKIP_SAVE'},
+        )
+
     @classmethod
     def poll(cls, context):
         return next((x for x in context.selected_objects if x.type == 'MESH'), None)
@@ -80,7 +88,7 @@ class ConvertMaterials(Operator):
         for obj in context.selected_objects:
             if obj.type != 'MESH':
                 continue
-            cycles_converter.convertToBlenderShader(obj, use_principled=self.use_principled, clean_nodes=self.clean_nodes)
+            cycles_converter.convertToBlenderShader(obj, use_principled=self.use_principled, clean_nodes=self.clean_nodes, subsurface=self.subsurface)
         return {'FINISHED'}
 
 @register_wrap

@@ -106,7 +106,7 @@ def convertToCyclesShader(obj, use_principled=False, clean_nodes=False):
             if clean_nodes:
                 __cleanNodeTree(i.material)
 
-def convertToBlenderShader(obj, use_principled=False, clean_nodes=False):
+def convertToBlenderShader(obj, use_principled=False, clean_nodes=False, subsurface=0.001):
     use_principled = (use_principled and is_principled_bsdf_supported())
     for i in obj.material_slots:
         if not i.material:
@@ -115,7 +115,7 @@ def convertToBlenderShader(obj, use_principled=False, clean_nodes=False):
             i.material.use_nodes = True
             __convertToMMDBasicShader(i.material)
         if use_principled:
-            __convertToPrincipledBsdf(i.material)
+            __convertToPrincipledBsdf(i.material, subsurface)
         if clean_nodes:
             __cleanNodeTree(i.material)
 
@@ -274,7 +274,7 @@ def __convertToMMDBasicShader(material):
         material.node_tree.links.new(out_node.inputs['Color'], mat_node.outputs['Color'])
         material.node_tree.links.new(out_node.inputs['Alpha'], mat_node.outputs['Alpha'])
 
-def __convertToPrincipledBsdf(material):
+def __convertToPrincipledBsdf(material, subsurface):
     node_names = set()
     for s in tuple(n for n in material.node_tree.nodes if isinstance(n, bpy.types.ShaderNodeGroup)):
         if s.node_tree.name == 'MMDBasicShader':
@@ -282,21 +282,21 @@ def __convertToPrincipledBsdf(material):
                 to_node = l.to_node
                 # assuming there is no bpy.types.NodeReroute between MMDBasicShader and MMDAlphaShader
                 if isinstance(to_node, bpy.types.ShaderNodeGroup) and to_node.node_tree.name == 'MMDAlphaShader':
-                    __switchToPrincipledBsdf(material.node_tree, s, to_node)
+                    __switchToPrincipledBsdf(material.node_tree, s, to_node, subsurface=subsurface)
                     node_names.add(to_node.name)
                 else:
-                    __switchToPrincipledBsdf(material.node_tree, s)
+                    __switchToPrincipledBsdf(material.node_tree, s, subsurface=subsurface)
             node_names.add(s.name)
         elif s.node_tree.name == 'MMDShaderDev':
-            __switchToPrincipledBsdf(material.node_tree, s)
+            __switchToPrincipledBsdf(material.node_tree, s, subsurface=subsurface)
             node_names.add(s.name)
     # remove MMD shader nodes
     nodes = material.node_tree.nodes
     for name in node_names:
         nodes.remove(nodes[name])
 
-def __switchToPrincipledBsdf(node_tree, node_basic, node_alpha=None):
-    shader = node_tree.nodes.new('ShaderNodeBsdfPrincipled')
+def __switchToPrincipledBsdf(node_tree, node_basic, node_alpha=None, subsurface=0):
+    shader: bpy.types.ShaderNodeBsdfPrincipled = node_tree.nodes.new('ShaderNodeBsdfPrincipled')
     shader.parent = node_basic.parent
     shader.location.x = node_basic.location.x
     shader.location.y = node_basic.location.y
@@ -314,6 +314,7 @@ def __switchToPrincipledBsdf(node_tree, node_basic, node_alpha=None):
             node_tree.links.new(node_basic.inputs['diffuse'].links[0].from_socket, shader.inputs['Base Color'])
 
     shader.inputs['IOR'].default_value = 1.0
+    shader.inputs['Subsurface'].default_value = subsurface
 
     output_links = node_basic.outputs[0].links
     if node_alpha:
