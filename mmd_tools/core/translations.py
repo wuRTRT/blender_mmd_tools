@@ -4,7 +4,7 @@ import itertools
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import TYPE_CHECKING, Callable, Dict, Set, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Set, Tuple
 
 import bpy
 from mmd_tools.core.model import FnModel, Model
@@ -57,7 +57,7 @@ class MMDDataHandlerABC(ABC):
 
     @classmethod
     @abstractmethod
-    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
+    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Optional[str], name_j: Optional[str], name_e: Optional[str]):
         pass
 
     @classmethod
@@ -163,7 +163,7 @@ class MMDBoneHandler(MMDDataHandlerABC):
             mmd_translation_element_index.value = index
 
     @classmethod
-    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
+    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Optional[str], name_j: Optional[str], name_e: Optional[str]):
         pose_bone: bpy.types.PoseBone = mmd_translation_element.object.path_resolve(mmd_translation_element.data_path)
         if name is not None:
             pose_bone.name = name
@@ -247,7 +247,7 @@ class MMDMorphHandler(MMDDataHandlerABC):
             mmd_translation_element_index.value = index
 
     @classmethod
-    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
+    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Optional[str], name_j: Optional[str], name_e: Optional[str]):
         morph: '_MorphBase' = mmd_translation_element.object.path_resolve(mmd_translation_element.data_path)
         if name is not None:
             morph.name = name
@@ -337,7 +337,7 @@ class MMDMaterialHandler(MMDDataHandlerABC):
             mmd_translation_element_index.value = index
 
     @classmethod
-    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
+    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Optional[str], name_j: Optional[str], name_e: Optional[str]):
         material: bpy.types.Material = mmd_translation_element.object.path_resolve(mmd_translation_element.data_path)
         if name is not None:
             material.name = name
@@ -419,7 +419,7 @@ class MMDDisplayHandler(MMDDataHandlerABC):
             mmd_translation_element_index.value = index
 
     @classmethod
-    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
+    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Optional[str], name_j: Optional[str], name_e: Optional[str]):
         bone_group: bpy.types.BoneGroup = mmd_translation_element.object.path_resolve(mmd_translation_element.data_path)
         if name is not None:
             bone_group.name = name
@@ -511,7 +511,7 @@ class MMDPhysicsHandler(MMDDataHandlerABC):
             mmd_translation_element_index.value = index
 
     @classmethod
-    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
+    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Optional[str], name_j: Optional[str], name_e: Optional[str]):
         obj: bpy.types.Object = mmd_translation_element.object
 
         if FnModel.is_rigid_body_object(obj):
@@ -602,7 +602,7 @@ class MMDInfoHandler(MMDDataHandlerABC):
             mmd_translation_element_index.value = index
 
     @classmethod
-    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Union[str, None], name_j: Union[str, None], name_e: Union[str, None]):
+    def set_names(cls, mmd_translation_element: 'MMDTranslationElement', name: Optional[str], name_j: Optional[str], name_e: Optional[str]):
         info_object: bpy.types.Object = mmd_translation_element.object
         if name is not None:
             info_object.name = name
@@ -642,7 +642,7 @@ class FnTranslations:
             )
 
     @staticmethod
-    def execute_translation_batch(root_object: bpy.types.Object) -> Tuple[Dict[str, str], Union[bpy.types.Text, None]]:
+    def execute_translation_batch(root_object: bpy.types.Object) -> Tuple[Dict[str, str], Optional[bpy.types.Text]]:
         mmd_translation: 'MMDTranslation' = root_object.mmd_root.translation
         batch_operation_script = mmd_translation.batch_operation_script
         if not batch_operation_script:

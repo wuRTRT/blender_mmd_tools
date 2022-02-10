@@ -3,7 +3,7 @@
 import logging
 import math
 import re
-from typing import List, Set, Union
+from typing import List, Optional, Set
 
 import bpy
 import mathutils
@@ -20,8 +20,8 @@ class _FCurve:
 
     def __init__(self, default_value):
         self.__default_value = default_value
-        self.__fcurve: Union[bpy.types.FCurve, None] = None
-        self.__sorted_keyframe_points: Union[List[bpy.types.Keyframe], None] = None
+        self.__fcurve: Optional[bpy.types.FCurve] = None
+        self.__sorted_keyframe_points: Optional[List[bpy.types.Keyframe]] = None
 
     def setFCurve(self, fcurve: bpy.types.FCurve):
         assert(fcurve.is_valid and self.__fcurve is None)

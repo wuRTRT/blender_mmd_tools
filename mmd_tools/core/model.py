@@ -3,7 +3,7 @@
 import itertools
 import logging
 import time
-from typing import Iterable, Union
+from typing import Iterable, Optional
 
 import bpy
 import mathutils
@@ -18,7 +18,7 @@ class InvalidRigidSettingException(ValueError):
 
 class FnModel:
     @classmethod
-    def find_root(cls, obj: bpy.types.Object) -> Union[bpy.types.Object, None]:
+    def find_root(cls, obj: bpy.types.Object) -> Optional[bpy.types.Object]:
         if not obj:
             return None
         if obj.mmd_type == 'ROOT':
@@ -26,19 +26,19 @@ class FnModel:
         return cls.find_root(obj.parent)
 
     @staticmethod
-    def find_armature(root) -> Union[bpy.types.Object, None]:
+    def find_armature(root) -> Optional[bpy.types.Object]:
         return next(filter(lambda o: o.type == 'ARMATURE', root.children), None)
 
     @staticmethod
-    def find_rigid_group(root) -> Union[bpy.types.Object, None]:
+    def find_rigid_group(root) -> Optional[bpy.types.Object]:
         return next(filter(lambda o: o.type == 'EMPTY' and o.mmd_type == 'RIGID_GRP_OBJ', root.children), None)
 
     @staticmethod
-    def find_joint_group(root) -> Union[bpy.types.Object, None]:
+    def find_joint_group(root) -> Optional[bpy.types.Object]:
         return next(filter(lambda o: o.type == 'EMPTY' and o.mmd_type == 'JOINT_GRP_OBJ', root.children), None)
 
     @staticmethod
-    def find_temporary_group(root) -> Union[bpy.types.Object, None]:
+    def find_temporary_group(root) -> Optional[bpy.types.Object]:
         return next(filter(lambda o: o.type == 'EMPTY' and o.mmd_type == 'TEMPORARY_GRP_OBJ', root.children), None)
 
     @classmethod
@@ -419,7 +419,7 @@ class Model:
         return ik_const
 
 
-    def allObjects(self, obj: Union[bpy.types.Object, None]=None) -> Iterable[bpy.types.Object]:
+    def allObjects(self, obj: Optional[bpy.types.Object]=None) -> Iterable[bpy.types.Object]:
         if obj is None:
             obj: bpy.types.Object = self.__root
         yield obj
