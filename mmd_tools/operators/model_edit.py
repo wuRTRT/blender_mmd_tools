@@ -137,6 +137,7 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
             for edit_bone in root_bones:
                 bpy.ops.armature.select_similar({'active_bone': edit_bone}, type='CHILDREN', threshold=0.1)
 
+
         separate_bones: Dict[str, bpy.types.EditBone] = {b.name: b for b in context.selected_bones}
         deform_bones: Dict[str, bpy.types.EditBone] = {b.name: b for b in target_armature_object.data.edit_bones if b.use_deform}
 
@@ -148,9 +149,11 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
         if selected_vertex_count == 0:
             raise MessageException(bpy.app.translations.pgettext_iface("Separate target bones have no weighted meshes: {0}").format(separate_bones.keys()))
 
+
         # separate armature bones
         separate_armature: Optional[bpy.types.Object]
         if self.separate_armature:
+            target_armature_object.select_set(True)
             bpy.ops.armature.separate()
             separate_armature = next(iter([a for a in context.selected_objects if a != target_armature_object]), None)
         bpy.ops.object.mode_set(mode='OBJECT')

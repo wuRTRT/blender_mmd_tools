@@ -76,15 +76,15 @@ class MMDModelProductionPanel(_PanelBase, Panel):
         op.separate_armature = True
         op.include_descendant_bones = True
 
+        row = row.row(align=True)
+        row.operator_context = 'INVOKE_DEFAULT'
+        op = row.operator('mmd_tools.model_separate_by_bones', text='', icon='WINDOW')
+
         row = separate_row.row(align=True)
         row.operator_context = 'EXEC_DEFAULT'
         op = row.operator('mmd_tools.model_separate_by_bones', text='Peel', icon='MOD_EXPLODE')
         op.separate_armature = False
         op.include_descendant_bones = False
-
-        row = separate_row.row(align=True)
-        row.operator_context = 'INVOKE_DEFAULT'
-        op = row.operator('mmd_tools.model_separate_by_bones', text='', icon='WINDOW')
 
         grid.row(align=True).operator('mmd_tools.model_join_by_bones', text='Join', icon='GROUP_BONE')
 

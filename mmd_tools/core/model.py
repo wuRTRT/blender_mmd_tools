@@ -107,7 +107,6 @@ class FnModel:
         parent_armature_object = parent_model.armature()
         bpy.ops.object.transform_apply({
             'active_object': parent_armature_object,
-            'selected_objects': [parent_armature_object],
             'selected_editable_objects': [parent_armature_object],
         }, location=True, rotation=True, scale=True)
 
@@ -119,7 +118,6 @@ class FnModel:
 
             bpy.ops.object.transform_apply({
                 'active_object': child_armature_object,
-                'selected_objects': [child_armature_object],
                 'selected_editable_objects': [child_armature_object],
             }, location=True, rotation=True, scale=True)
 
@@ -128,7 +126,6 @@ class FnModel:
             for mesh in FnModel.child_meshes(child_armature_object):
                 bpy.ops.object.transform_apply({
                     'active_object': mesh,
-                    'selected_objects': [mesh],
                     'selected_editable_objects': [mesh],
                 }, location=True, rotation=True, scale=True)
 
