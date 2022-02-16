@@ -13,8 +13,10 @@ from mmd_tools.core import rigid_body
 from mmd_tools.core.bone import FnBone
 from mmd_tools.core.morph import FnMorph
 
+
 class InvalidRigidSettingException(ValueError):
     pass
+
 
 class FnModel:
     @classmethod
@@ -42,14 +44,14 @@ class FnModel:
         return next(filter(lambda o: o.type == 'EMPTY' and o.mmd_type == 'TEMPORARY_GRP_OBJ', root.children), None)
 
     @classmethod
-    def all_children(cls, obj:bpy.types.Object) -> Iterable[bpy.types.Object]:
+    def all_children(cls, obj: bpy.types.Object) -> Iterable[bpy.types.Object]:
         child: bpy.types.Object
         for child in obj.children:
             yield child
             yield from cls.all_children(child)
 
     @classmethod
-    def filtered_children(cls, filter, obj:bpy.types.Object) -> Iterable[bpy.types.Object]:
+    def filtered_children(cls, filter, obj: bpy.types.Object) -> Iterable[bpy.types.Object]:
         child: bpy.types.Object
         for child in obj.children:
             if filter(child):
@@ -98,30 +100,53 @@ class FnModel:
 
     @staticmethod
     def join_models(parent_root_object: bpy.types.Object, child_root_objects: List[bpy.types.Object]):
-        parent_armature_object = FnModel.find_armature(parent_root_object)
-
-        # join armatures
-        bpy.ops.object.join({
-            'active_object': parent_armature_object,
-            'selected_editable_objects': [parent_armature_object, *[FnModel.find_armature(o) for o in child_root_objects]],
-        })
-
-        # replace mesh armature modifier.object
-        mesh: bpy.types.Object
-        for mesh in FnModel.child_meshes(parent_armature_object):
-            armature_modifier: bpy.types.ArmatureModifier = (
-                mesh.modifiers['mmd_bone_order_override'] if 'mmd_bone_order_override' in mesh.modifiers else
-                mesh.modifiers.new('mmd_bone_order_override', 'ARMATURE')
-            )
-            if armature_modifier.object is None:
-                armature_modifier.object = parent_armature_object
-
         parent_model = Model(parent_root_object)
         parent_rigid_group_object = parent_model.rigidGroupObject()
         parent_joint_group_object = parent_model.jointGroupObject()
 
+        parent_armature_object = parent_model.armature()
+        bpy.ops.object.transform_apply({
+            'active_object': parent_armature_object,
+            'selected_objects': [parent_armature_object],
+            'selected_editable_objects': [parent_armature_object],
+        }, location=True, rotation=True, scale=True)
+
         child_root_object: bpy.types.Object
         for child_root_object in child_root_objects:
+            child_model = Model(child_root_object)
+            child_armature_object = child_model.armature()
+            child_armature_matrix = child_armature_object.matrix_parent_inverse.copy()
+
+            bpy.ops.object.transform_apply({
+                'active_object': child_armature_object,
+                'selected_objects': [child_armature_object],
+                'selected_editable_objects': [child_armature_object],
+            }, location=True, rotation=True, scale=True)
+
+            # replace mesh armature modifier.object
+            mesh: bpy.types.Object
+            for mesh in FnModel.child_meshes(child_armature_object):
+                bpy.ops.object.transform_apply({
+                    'active_object': mesh,
+                    'selected_objects': [mesh],
+                    'selected_editable_objects': [mesh],
+                }, location=True, rotation=True, scale=True)
+
+            # join armatures
+            bpy.ops.object.join({
+                'active_object': parent_armature_object,
+                'selected_editable_objects': [parent_armature_object, child_armature_object],
+            })
+
+            for mesh in FnModel.child_meshes(parent_armature_object):
+                armature_modifier: bpy.types.ArmatureModifier = (
+                    mesh.modifiers['mmd_bone_order_override'] if 'mmd_bone_order_override' in mesh.modifiers else
+                    mesh.modifiers.new('mmd_bone_order_override', 'ARMATURE')
+                )
+                if armature_modifier.object is None:
+                    armature_modifier.object = parent_armature_object
+                    mesh.matrix_parent_inverse = child_armature_matrix
+
             child_model = Model(child_root_object)
             if child_model.hasRigidGroupObject():
                 bpy.ops.object.parent_set({
@@ -153,18 +178,26 @@ class FnModel:
                 bpy.data.objects.remove(child_root_object)
 
 # SUPPORT_UNTIL: 4.3 LTS
+
+
 def isRigidBodyObject(obj):
     return FnModel.is_rigid_body_object(obj)
 
 # SUPPORT_UNTIL: 4.3 LTS
+
+
 def isJointObject(obj):
     return FnModel.is_joint_object(obj)
 
 # SUPPORT_UNTIL: 4.3 LTS
+
+
 def isTemporaryObject(obj):
     return FnModel.is_temporary_object(obj)
 
 # SUPPORT_UNTIL: 4.3 LTS
+
+
 def getRigidBodySize(obj):
     return FnModel.get_rigid_body_size(obj)
 
@@ -474,8 +507,7 @@ class Model:
         ik_const.subtarget = ik_target_name
         return ik_const
 
-
-    def allObjects(self, obj: Optional[bpy.types.Object]=None) -> Iterable[bpy.types.Object]:
+    def allObjects(self, obj: Optional[bpy.types.Object] = None) -> Iterable[bpy.types.Object]:
         if obj is None:
             obj: bpy.types.Object = self.__root
         yield obj
@@ -583,7 +615,7 @@ class Model:
 
     def rigidBodies(self):
         if self.__root.mmd_root.is_built:
-            return itertools.chain(FnModel.filtered_children(isRigidBodyObject, self.armature()),FnModel.filtered_children(isRigidBodyObject, self.rigidGroupObject()))
+            return itertools.chain(FnModel.filtered_children(isRigidBodyObject, self.armature()), FnModel.filtered_children(isRigidBodyObject, self.rigidGroupObject()))
         return FnModel.filtered_children(isRigidBodyObject, self.rigidGroupObject())
 
     def joints(self):
@@ -592,7 +624,7 @@ class Model:
     def temporaryObjects(self, rigid_track_only=False):
         if rigid_track_only:
             return FnModel.filtered_children(isTemporaryObject, self.rigidGroupObject())
-        return itertools.chain(FnModel.filtered_children(isTemporaryObject, self.rigidGroupObject()),FnModel.filtered_children(isTemporaryObject, self.temporaryGroupObject()))
+        return itertools.chain(FnModel.filtered_children(isTemporaryObject, self.rigidGroupObject()), FnModel.filtered_children(isTemporaryObject, self.temporaryGroupObject()))
 
     def materials(self):
         """
@@ -682,7 +714,7 @@ class Model:
         self.__removeTemporaryObjects()
 
         arm = self.armature()
-        if arm is not None: # update armature
+        if arm is not None:  # update armature
             arm.update_tag()
             bpy.context.scene.frame_set(bpy.context.scene.frame_current)
 
@@ -695,7 +727,7 @@ class Model:
 
     def __removeTemporaryObjects(self):
         if bpy.app.version < (2, 78, 0):
-            self.__removeChildrenOfTemporaryGroupObject() # for speeding up only
+            self.__removeChildrenOfTemporaryGroupObject()  # for speeding up only
             for i in self.temporaryObjects():
                 bpy.context.scene.objects.unlink(i)
                 bpy.data.objects.remove(i)
@@ -707,12 +739,12 @@ class Model:
             for i in tmp_objs:
                 for c in i.users_collection:
                     c.objects.unlink(i)
-            bpy.ops.object.delete({'selected_objects':tmp_objs, 'active_object':self.rootObject()})
+            bpy.ops.object.delete({'selected_objects': tmp_objs, 'active_object': self.rootObject()})
             for i in tmp_objs:
                 if i.users < 1:
                     bpy.data.objects.remove(i)
         else:
-            bpy.ops.object.delete({'selected_objects':tuple(self.temporaryObjects()), 'active_object':self.rootObject()})
+            bpy.ops.object.delete({'selected_objects': tuple(self.temporaryObjects()), 'active_object': self.rootObject()})
 
     def __removeChildrenOfTemporaryGroupObject(self):
         tmp_grp_obj = self.temporaryGroupObject()
@@ -739,7 +771,7 @@ class Model:
 
     def __restoreTransforms(self, obj):
         for attr in ('location', 'rotation_euler'):
-            attr_name = '__backup_%s__'%attr
+            attr_name = '__backup_%s__' % attr
             val = obj.get(attr_name, None)
             if val is not None:
                 setattr(obj, attr, val)
@@ -747,8 +779,8 @@ class Model:
 
     def __backupTransforms(self, obj):
         for attr in ('location', 'rotation_euler'):
-            attr_name = '__backup_%s__'%attr
-            if attr_name in obj: # should not happen in normal build/clean cycle
+            attr_name = '__backup_%s__' % attr
+            if attr_name in obj:  # should not happen in normal build/clean cycle
                 continue
             obj[attr_name] = getattr(obj, attr, None)
 
@@ -771,7 +803,7 @@ class Model:
                     for c in arm.pose.bones[bone_name].constraints:
                         if c.type == 'IK':
                             c.mute = True
-                            c.influence = c.influence # trigger update
+                            c.influence = c.influence  # trigger update
                 else:
                     no_parents.append(i)
         # update changes of armature constraints
@@ -889,7 +921,7 @@ class Model:
                     const_type = ('COPY_TRANSFORMS', 'COPY_ROTATION')[rigid_type-1]
                     const = target_bone.constraints.new(const_type)
                     const.mute = True
-                    const.name='mmd_tools_rigid_track'
+                    const.name = 'mmd_tools_rigid_track'
                     const.target = empty
                 else:
                     empty = target_bone.constraints['mmd_tools_rigid_track'].target
@@ -897,7 +929,7 @@ class Model:
                     ori_rb = ori_rigid_obj.rigid_body
                     if ori_rb and rb.mass > ori_rb.mass:
                         logging.debug('        * Bone (%s): change target from [%s] to [%s]',
-                            target_bone.name, ori_rigid_obj.name, rigid_obj.name)
+                                      target_bone.name, ori_rigid_obj.name, rigid_obj.name)
                         # re-parenting
                         rigid_obj.mmd_rigid.bone = bone_name
                         rigid_obj.constraints.remove(relation)
@@ -906,7 +938,7 @@ class Model:
                         ori_rigid_obj.mmd_rigid.bone = bone_name
                     else:
                         logging.debug('        * Bone (%s): track target [%s]',
-                            target_bone.name, ori_rigid_obj.name)
+                                      target_bone.name, ori_rigid_obj.name)
 
         rb.collision_shape = rigid.shape
 
@@ -1013,4 +1045,3 @@ class Model:
         arm = self.armature()
         if arm:
             FnBone.apply_additional_transformation(arm)
-

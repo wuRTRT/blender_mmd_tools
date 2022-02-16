@@ -15,44 +15,6 @@ class MessageException(Exception):
 
 
 @register_wrap
-class ModelJoinOperator(bpy.types.Operator):
-    bl_idname = 'mmd_tools.model_join'
-    bl_label = 'Model Join'
-    bl_options = {'REGISTER', 'UNDO'}
-
-    @classmethod
-    def poll(cls, context: bpy.types.Context):
-        active_object: Optional[bpy.types.Object] = context.active_object
-
-        if context.mode != 'OBJECT':
-            return False
-
-        if active_object is None:
-            return False
-
-        return len(context.selected_objects) > 0
-
-    def execute(self, context: bpy.types.Context):
-        try:
-            self.join(context)
-        except MessageException as ex:
-            self.report(type={'ERROR'}, message=str(ex))
-            return {'CANCELLED'}
-
-        return {'FINISHED'}
-
-    def join(self, context: bpy.types.Context):
-        parent_root_object = FnModel.find_root(context.active_object)
-        child_root_objects = {FnModel.find_root(o) for o in context.selected_objects}
-        child_root_objects.remove(parent_root_object)
-
-        if parent_root_object is None or len(child_root_objects) == 0:
-            raise MessageException("No MMD Models selected")
-
-        FnModel.join_models(parent_root_object, child_root_objects)
-
-
-@register_wrap
 class ModelJoinByBonesOperator(bpy.types.Operator):
     bl_idname = 'mmd_tools.model_join_by_bones'
     bl_label = 'Model Join by Bones'
@@ -64,7 +26,7 @@ class ModelJoinByBonesOperator(bpy.types.Operator):
             ('CONNECTED', 'Connected', ''),
             ('OFFSET', 'Keep Offset', ''),
         ],
-        default='CONNECTED',
+        default='OFFSET',
     )
 
     @classmethod
@@ -84,6 +46,9 @@ class ModelJoinByBonesOperator(bpy.types.Operator):
             return False
 
         return len(context.selected_pose_bones) > 0
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
 
     def execute(self, context: bpy.types.Context):
         try:
@@ -107,20 +72,17 @@ class ModelJoinByBonesOperator(bpy.types.Operator):
         FnModel.join_models(parent_root_object, child_root_objects)
 
         bpy.ops.object.mode_set(mode='EDIT')
-        # bpy.ops.armature.parent_set(type=self.join_type)
+        bpy.ops.armature.parent_set(type='OFFSET')
 
-        # ‘INVOKE_DEFAULT’
-        # ‘INVOKE_REGION_WIN’
-        # ‘INVOKE_REGION_CHANNELS’
-        # ‘INVOKE_REGION_PREVIEW’
-        # ‘INVOKE_AREA’
-        # ‘INVOKE_SCREEN’
-        # ‘EXEC_DEFAULT’
-        # ‘EXEC_REGION_WIN’
-        # ‘EXEC_REGION_CHANNELS’
-        # ‘EXEC_REGION_PREVIEW’
-        # ‘EXEC_AREA’
-        # ‘EXEC_SCREEN’
+        # Connect child bones
+        if self.join_type == 'CONNECTED':
+            parent_edit_bone: bpy.types.EditBone = context.active_bone
+            child_edit_bones: Set[bpy.types.EditBone] = set(context.selected_bones)
+            child_edit_bones.remove(parent_edit_bone)
+
+            child_edit_bone: bpy.types.EditBone
+            for child_edit_bone in child_edit_bones:
+                child_edit_bone.use_connect = True
 
         bpy.ops.object.mode_set(mode='POSE')
 
