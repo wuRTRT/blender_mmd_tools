@@ -37,7 +37,6 @@ class _PanelBase(object):
     def poll(cls, _context):
         return bpyutils.addon_preferences('enable_mmd_model_production_features', True)
 
-
 @register_wrap
 class MMDModelProductionPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_model_production'
@@ -63,7 +62,30 @@ class MMDModelProductionPanel(_PanelBase, Panel):
         row.operator('mmd_tools.translate_mmd_model', text='Translate', icon='HELP')
         row.operator('mmd_tools.global_translation_popup', text='', icon='WINDOW')
 
+        self.draw_edit(context)
 
+    def draw_edit(self, _context):
+        col = self.layout.column(align=True)
+        col.label(text='(Experimental) Model Surgery:', icon='MOD_ARMATURE')
+        grid = col.grid_flow(row_major=True, align=True)
+
+        row = grid.row(align=True)
+        row.operator_context = 'EXEC_DEFAULT'
+        op = row.operator('mmd_tools.model_separate_by_bones', text='Chop', icon='BONE_DATA')
+        op.separate_armature = True
+        op.include_descendant_bones = True
+
+        row = grid.row(align=True)
+        row.operator_context = 'EXEC_DEFAULT'
+        op = row.operator('mmd_tools.model_separate_by_bones', text='Peel', icon='MOD_EXPLODE')
+        op.separate_armature = False
+        op.include_descendant_bones = False
+
+        row = grid.row(align=True)
+        row.operator_context = 'INVOKE_DEFAULT'
+        op = row.operator('mmd_tools.model_separate_by_bones', text='Separate', icon='MOD_EXPLODE')
+
+        grid.row(align=True).operator('mmd_tools.model_join_by_bones', text='Join')
 
 @register_wrap
 class MMD_ROOT_UL_display_item_frames(UIList):

@@ -3,7 +3,7 @@
 import itertools
 import logging
 import time
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional
 
 import bpy
 import mathutils
@@ -95,6 +95,62 @@ class FnModel:
             return (radius, height, 0.0)
         else:
             raise Exception('Invalid shape type.')
+
+    @staticmethod
+    def join_models(parent_root_object: bpy.types.Object, child_root_objects: List[bpy.types.Object]):
+        parent_armature_object = FnModel.find_armature(parent_root_object)
+
+        # join armatures
+        bpy.ops.object.join({
+            'active_object': parent_armature_object,
+            'selected_editable_objects': [parent_armature_object, *[FnModel.find_armature(o) for o in child_root_objects]],
+        })
+
+        # replace mesh armature modifier.object
+        mesh: bpy.types.Object
+        for mesh in FnModel.child_meshes(parent_armature_object):
+            armature_modifier: bpy.types.ArmatureModifier = (
+                mesh.modifiers['mmd_bone_order_override'] if 'mmd_bone_order_override' in mesh.modifiers else
+                mesh.modifiers.new('mmd_bone_order_override', 'ARMATURE')
+            )
+            if armature_modifier.object is None:
+                armature_modifier.object = parent_armature_object
+
+        parent_model = Model(parent_root_object)
+        parent_rigid_group_object = parent_model.rigidGroupObject()
+        parent_joint_group_object = parent_model.jointGroupObject()
+
+        child_root_object: bpy.types.Object
+        for child_root_object in child_root_objects:
+            child_model = Model(child_root_object)
+            if child_model.hasRigidGroupObject():
+                bpy.ops.object.parent_set({
+                    'object': parent_rigid_group_object,
+                    'selected_editable_objects': [parent_rigid_group_object, *child_model.rigidBodies()],
+                }, type='OBJECT', keep_transform=True)
+                bpy.data.objects.remove(child_model.rigidGroupObject())
+
+            if child_model.hasJointGroupObject():
+                bpy.ops.object.parent_set({
+                    'object': parent_joint_group_object,
+                    'selected_editable_objects': [parent_joint_group_object, *child_model.joints()],
+                }, type='OBJECT', keep_transform=True)
+                bpy.data.objects.remove(child_model.jointGroupObject())
+
+            if child_model.hasTemporaryGroupObject():
+                bpy.ops.object.parent_set({
+                    'object': parent_model.temporaryGroupObject(),
+                    'selected_editable_objects': [parent_model.temporaryGroupObject(), *child_model.temporaryObjects()],
+                }, type='OBJECT', keep_transform=True)
+
+                temporary_group_object = child_model.temporaryGroupObject()
+                for obj in list(FnModel.all_children(temporary_group_object)):
+                    bpy.data.objects.remove(obj)
+                bpy.data.objects.remove(temporary_group_object)
+
+            # Remove unused objects from child models
+            if len(child_root_object.children) == 0:
+                bpy.data.objects.remove(child_root_object)
 
 # SUPPORT_UNTIL: 4.3 LTS
 def isRigidBodyObject(obj):
@@ -433,6 +489,9 @@ class Model:
             self.__arm = FnModel.find_armature(self.__root)
         return self.__arm
 
+    def hasRigidGroupObject(self):
+        return FnModel.find_rigid_group(self.__root) is not None
+
     def rigidGroupObject(self):
         if self.__rigid_grp is None:
             self.__rigid_grp = FnModel.find_rigid_group(self.__root)
@@ -446,6 +505,9 @@ class Model:
                 self.__rigid_grp = rigids
         return self.__rigid_grp
 
+    def hasJointGroupObject(self):
+        return FnModel.find_joint_group(self.__root) is not None
+
     def jointGroupObject(self):
         if self.__joint_grp is None:
             self.__joint_grp = FnModel.find_joint_group(self.__root)
@@ -458,6 +520,9 @@ class Model:
                 joints.lock_rotation = joints.lock_location = joints.lock_scale = [True, True, True]
                 self.__joint_grp = joints
         return self.__joint_grp
+
+    def hasTemporaryGroupObject(self):
+        return FnModel.find_temporary_group(self.__root) is not None
 
     def temporaryGroupObject(self):
         if self.__temporary_grp is None:

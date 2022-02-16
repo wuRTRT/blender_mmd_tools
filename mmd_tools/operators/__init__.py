@@ -14,6 +14,7 @@ if "bpy" in locals():
     importlib.reload(material)
     importlib.reload(misc)
     importlib.reload(model)
+    importlib.reload(model_edit)
     importlib.reload(morph)
     importlib.reload(rigid_body)
     importlib.reload(view)
@@ -31,6 +32,7 @@ else:
         material,
         misc,
         model,
+        model_edit,
         morph,
         rigid_body,
         view,
