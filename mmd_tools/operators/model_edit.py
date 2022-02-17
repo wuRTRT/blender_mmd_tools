@@ -108,6 +108,9 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
 
         if active_object.type != 'ARMATURE':
             return False
+        
+        if FnModel.find_root(active_object) is None:
+            return False
 
         return len(context.selected_pose_bones) > 0
 
@@ -144,8 +147,6 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
         mmd_model_mesh_objects: List[bpy.types.Object] = list(mmd_model.meshes())
 
         selected_vertex_count = self.select_weighted_vertices(mmd_model_mesh_objects, separate_bones, deform_bones, weight_threshold)
-        if selected_vertex_count == 0:
-            raise MessageException(bpy.app.translations.pgettext_iface("Separate target bones have no weighted meshes: {0}").format(separate_bones.keys()))
 
         # separate armature bones
         separate_armature: Optional[bpy.types.Object]
@@ -170,17 +171,21 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
                 joint_object.rigid_body_constraint.object2 in separate_rigid_bodies)
         }
 
-        # select meshes
-        obj: bpy.types.Object
-        for obj in context.view_layer.objects:
-            obj.select_set(obj in mmd_model_mesh_objects)
-        context.view_layer.objects.active = mmd_model_mesh_objects[0]
+        separate_meshes: Set[bpy.types.Object]
+        if selected_vertex_count == 0:
+            separate_meshes = set()
+        else:
+            # select meshes
+            obj: bpy.types.Object
+            for obj in context.view_layer.objects:
+                obj.select_set(obj in mmd_model_mesh_objects)
+            context.view_layer.objects.active = mmd_model_mesh_objects[0]
 
-        # separate mesh by selected vertices
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.mesh.separate(type='SELECTED')
-        separate_meshes: Set[bpy.types.Object] = {m for m in context.selected_objects if m.type == 'MESH' and m not in mmd_model_mesh_objects}
-        bpy.ops.object.mode_set(mode='OBJECT')
+            # separate mesh by selected vertices
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.mesh.separate(type='SELECTED')
+            separate_meshes: Set[bpy.types.Object] = {m for m in context.selected_objects if m.type == 'MESH' and m not in mmd_model_mesh_objects}
+            bpy.ops.object.mode_set(mode='OBJECT')
 
         separate_model: Model = Model.create(
             mmd_root_object.mmd_root.name,

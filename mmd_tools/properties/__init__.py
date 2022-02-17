@@ -75,8 +75,6 @@ if bpy.app.version >= (2, 80, 0):
 
 def assign_group(destination: bpy.types.PropertyGroup, source: bpy.types.PropertyGroup, merge: bool = False):
     for name in source.keys():
-        if not hasattr(source, name):
-            continue
         value = getattr(source, name)
         if isinstance(value, bpy.types.PropertyGroup):
             assign_group(getattr(destination, name), value, merge=merge)
