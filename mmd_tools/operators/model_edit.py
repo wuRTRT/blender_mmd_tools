@@ -9,6 +9,7 @@ from mmd_tools import register_wrap
 from mmd_tools.core.model import FnModel, Model
 from mmd_tools.properties import assign
 
+
 class MessageException(Exception):
     """Class for error with message."""
 
@@ -95,6 +96,14 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
     separate_armature: bpy.props.BoolProperty(name='Separate Armature', default=True)
     include_descendant_bones: bpy.props.BoolProperty(name='Include Descendant Bones', default=True)
     weight_threshold: bpy.props.FloatProperty(name='Weight Threshold', default=0.001, min=0.0, max=1.0, precision=4, subtype='FACTOR')
+    boundary_joint_owner: bpy.props.EnumProperty(
+        name='Boundary Joint Owner',
+        items=[
+            ('SOURCE', 'Source Model', ''),
+            ('DESTINATION', 'Destination Model', ''),
+        ],
+        default='DESTINATION',
+    )
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
@@ -108,7 +117,7 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
 
         if active_object.type != 'ARMATURE':
             return False
-        
+
         if FnModel.find_root(active_object) is None:
             return False
 
@@ -163,12 +172,16 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
             if rigid_body_object.mmd_rigid.bone in separate_bones
         }
 
+        boundary_joint_owner_condition = any if self.boundary_joint_owner == 'DESTINATION' else all
+
         # collect separate joints
         separate_joints: Set[bpy.types.Object] = {
             joint_object
             for joint_object in mmd_model.joints()
-            if (joint_object.rigid_body_constraint.object1 in separate_rigid_bodies and
-                joint_object.rigid_body_constraint.object2 in separate_rigid_bodies)
+            if boundary_joint_owner_condition([
+                joint_object.rigid_body_constraint.object1 in separate_rigid_bodies,
+                joint_object.rigid_body_constraint.object2 in separate_rigid_bodies,
+            ])
         }
 
         separate_meshes: Set[bpy.types.Object]

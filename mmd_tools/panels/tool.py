@@ -75,6 +75,7 @@ class MMDModelProductionPanel(_PanelBase, Panel):
         op = row.operator('mmd_tools.model_separate_by_bones', text='Chop', icon='BONE_DATA')
         op.separate_armature = True
         op.include_descendant_bones = True
+        op.boundary_joint_owner = 'DESTINATION'
 
         row = row.row(align=True)
         row.operator_context = 'INVOKE_DEFAULT'
@@ -85,8 +86,11 @@ class MMDModelProductionPanel(_PanelBase, Panel):
         op = row.operator('mmd_tools.model_separate_by_bones', text='Peel', icon='MOD_EXPLODE')
         op.separate_armature = False
         op.include_descendant_bones = False
+        op.boundary_joint_owner = 'DESTINATION'
 
-        grid.row(align=True).operator('mmd_tools.model_join_by_bones', text='Join', icon='GROUP_BONE')
+        row = grid.row(align=True)
+        row.operator_context = 'INVOKE_DEFAULT'
+        row.operator('mmd_tools.model_join_by_bones', text='Join', icon='GROUP_BONE')
 
 @register_wrap
 class MMD_ROOT_UL_display_item_frames(UIList):
