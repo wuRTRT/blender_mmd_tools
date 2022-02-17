@@ -619,9 +619,11 @@ class Model:
         return FnModel.filtered_children(isJointObject, self.jointGroupObject())
 
     def temporaryObjects(self, rigid_track_only=False):
+        rigid_body_objects = FnModel.filtered_children(isTemporaryObject, self.rigidGroupObject()) if self.hasRigidGroupObject() else []
+
         if rigid_track_only:
-            return FnModel.filtered_children(isTemporaryObject, self.rigidGroupObject())
-        return itertools.chain(FnModel.filtered_children(isTemporaryObject, self.rigidGroupObject()), FnModel.filtered_children(isTemporaryObject, self.temporaryGroupObject()))
+            return rigid_body_objects
+        return itertools.chain(rigid_body_objects, FnModel.filtered_children(isTemporaryObject, self.temporaryGroupObject()))
 
     def materials(self):
         """
