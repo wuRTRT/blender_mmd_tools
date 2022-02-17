@@ -203,11 +203,11 @@ class Model:
     def __init__(self, root_obj):
         if root_obj.mmd_type != 'ROOT':
             raise ValueError('must be MMD ROOT type object')
-        self.__root = getattr(root_obj, 'original', root_obj)
-        self.__arm = None
-        self.__rigid_grp = None
-        self.__joint_grp = None
-        self.__temporary_grp = None
+        self.__root: bpy.types.Object = getattr(root_obj, 'original', root_obj)
+        self.__arm: Optional[bpy.types.Object] = None
+        self.__rigid_grp: Optional[bpy.types.Object] = None
+        self.__joint_grp: Optional[bpy.types.Object] = None
+        self.__temporary_grp: Optional[bpy.types.Object] = None
 
     @staticmethod
     def create(name, name_e='', scale=1, obj_name=None, armature=None, add_root_bone=False):
@@ -288,7 +288,7 @@ class Model:
     def loadMorphs(self):
         FnMorph.load_morphs(self)
 
-    def createRigidBodyPool(self, counts):
+    def createRigidBodyPool(self, counts: int) -> List[bpy.types.Object]:
         if counts < 1:
             return []
         obj = bpyutils.createObject(name='Rigidbody', object_data=bpy.data.meshes.new(name='Rigidbody'))
@@ -345,7 +345,7 @@ class Model:
         linear_damping = kwargs.get('linear_damping')
         bounce = kwargs.get('bounce')
 
-        obj = kwargs.get('obj', None)
+        obj: Optional[bpy.types.Object] = kwargs.get('obj', None)
         if obj is None:
             obj, = self.createRigidBodyPool(1)
 

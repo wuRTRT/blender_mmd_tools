@@ -5,10 +5,9 @@ from typing import Dict, List, Optional, Set
 
 import bmesh
 import bpy
-import mmd_tools
 from mmd_tools import register_wrap
-from mmd_tools.core.model import FnModel
-
+from mmd_tools.core.model import FnModel, Model
+from mmd_tools.properties import assign
 
 class MessageException(Exception):
     """Class for error with message."""
@@ -137,18 +136,16 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
             for edit_bone in root_bones:
                 bpy.ops.armature.select_similar({'active_bone': edit_bone}, type='CHILDREN', threshold=0.1)
 
-
         separate_bones: Dict[str, bpy.types.EditBone] = {b.name: b for b in context.selected_bones}
         deform_bones: Dict[str, bpy.types.EditBone] = {b.name: b for b in target_armature_object.data.edit_bones if b.use_deform}
 
-        mmd_root_object: bpy.types.Object = mmd_tools.core.model.FnModel.find_root(context.active_object)
-        mmd_model = mmd_tools.core.model.Model(mmd_root_object)
+        mmd_root_object: bpy.types.Object = FnModel.find_root(context.active_object)
+        mmd_model = Model(mmd_root_object)
         mmd_model_mesh_objects: List[bpy.types.Object] = list(mmd_model.meshes())
 
         selected_vertex_count = self.select_weighted_vertices(mmd_model_mesh_objects, separate_bones, deform_bones, weight_threshold)
         if selected_vertex_count == 0:
             raise MessageException(bpy.app.translations.pgettext_iface("Separate target bones have no weighted meshes: {0}").format(separate_bones.keys()))
-
 
         # separate armature bones
         separate_armature: Optional[bpy.types.Object]
@@ -185,7 +182,7 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
         separate_meshes: Set[bpy.types.Object] = {m for m in context.selected_objects if m.type == 'MESH' and m not in mmd_model_mesh_objects}
         bpy.ops.object.mode_set(mode='OBJECT')
 
-        separate_model = mmd_tools.core.model.Model.create(
+        separate_model: Model = Model.create(
             mmd_root_object.mmd_root.name,
             mmd_root_object.mmd_root.name_e,
             mmd_scale,
@@ -193,7 +190,8 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
         )
 
         separate_model.initialDisplayFrames()
-        separate_model.rootObject().matrix_world = mmd_root_object.matrix_world
+        separate_root_object = separate_model.rootObject()
+        separate_root_object.matrix_world = mmd_root_object.matrix_world
         separate_model_armature = separate_model.armature()
 
         if self.separate_armature:
@@ -225,6 +223,8 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
             'object': separate_model.jointGroupObject(),
             'selected_editable_objects': [separate_model.jointGroupObject(), *separate_joints],
         }, type='OBJECT', keep_transform=True)
+
+        assign(separate_root_object.mmd_root, mmd_root_object.mmd_root)
 
     def select_weighted_vertices(self, mmd_model_mesh_objects: List[bpy.types.Object], separate_bones: Dict[str, bpy.types.EditBone], deform_bones: Dict[str, bpy.types.EditBone], weight_threshold: float) -> int:
         total_selected_vertex_count = 0
