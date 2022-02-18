@@ -3,9 +3,10 @@
 import itertools
 import logging
 import time
-from typing import Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
 import bpy
+import idprop
 import mathutils
 from mmd_tools import bpyutils
 from mmd_tools.bpyutils import Props, SceneOp, matmul
@@ -18,7 +19,79 @@ class InvalidRigidSettingException(ValueError):
     pass
 
 
+def _copy_property_group(destination: bpy.types.PropertyGroup, source: bpy.types.PropertyGroup, overwrite: bool = True, replace_name2values: Dict[str,Dict[Any,Any]] = dict()):
+    destination_rna_properties = destination.bl_rna.properties
+    for name in source.keys():
+        is_attr = hasattr(source, name)
+        value = getattr(source, name) if is_attr else source[name]
+        if isinstance(value, bpy.types.PropertyGroup):
+            _copy_property_group(getattr(destination, name) if is_attr else destination[name], value, overwrite=overwrite, replace_name2values=replace_name2values)
+        elif isinstance(value, bpy.types.bpy_prop_collection):
+            _copy_collection_property(getattr(destination, name) if is_attr else destination[name], value, overwrite=overwrite, replace_name2values=replace_name2values)
+        elif isinstance(value, idprop.types.IDPropertyArray):
+            pass
+            # _copy_collection_property(getattr(destination, name) if is_attr else destination[name], value, overwrite=overwrite, replace_name2values=replace_name2values)
+        else:
+            value2values = replace_name2values.get(name)
+            if value2values is not None:
+                replace_value = value2values.get(value)
+                if replace_value is not None:
+                    value = replace_value
+
+            if overwrite or destination_rna_properties[name].default == getattr(destination, name) if is_attr else destination[name]:
+                if is_attr:
+                    setattr(destination, name, value)
+                else:
+                    destination[name] = value
+
+
+def _copy_collection_property(destination: bpy.types.bpy_prop_collection, source: bpy.types.bpy_prop_collection, overwrite: bool = True, replace_name2values: Dict[str,Dict[Any,Any]] = dict()):
+    if overwrite:
+        destination.clear()
+
+    len_source = len(source)
+    if len_source == 0:
+        return
+
+    source_names: Set[str] = set(source.keys())
+    if len(source_names) == len_source and source[0].name != '':
+        # names work
+        destination_names: Set[str] = set(destination.keys())
+
+        missing_names = source_names - destination_names
+
+        destination_index = 0
+        for name, value in source.items():
+            if name in missing_names:
+                new_element = destination.add()
+                new_element['name'] = name
+
+            _copy_property(destination[name], value, overwrite=overwrite, replace_name2values=replace_name2values)
+            destination.move(destination.find(name), destination_index)
+            destination_index += 1
+    else:
+        # names not work
+        while len_source > len(destination):
+            destination.add()
+
+        for index, name in enumerate(source.keys()):
+            _copy_property(destination[index], source[index], overwrite=True, replace_name2values=replace_name2values)
+
+
+def _copy_property(destination: Union[bpy.types.PropertyGroup, bpy.types.bpy_prop_collection], source: Union[bpy.types.PropertyGroup, bpy.types.bpy_prop_collection], overwrite: bool = True, replace_name2values: Dict[str,Dict[Any,Any]] = dict()):
+    if isinstance(destination, bpy.types.PropertyGroup):
+        _copy_property_group(destination, source, overwrite=overwrite, replace_name2values=replace_name2values)
+    elif isinstance(destination, bpy.types.bpy_prop_collection):
+        _copy_collection_property(destination, source, overwrite=overwrite, replace_name2values=replace_name2values)
+    else:
+        raise ValueError(f'Unsupported destination: {destination}')
+
+
 class FnModel:
+    @staticmethod
+    def copy_mmd_root(destination_root_object: bpy.types.Object, source_root_object: bpy.types.Object, overwrite: bool = True, replace_name2values: Dict[str,Dict[Any,Any]] = dict()):
+        _copy_property(destination_root_object.mmd_root, source_root_object.mmd_root, overwrite=overwrite, replace_name2values=replace_name2values)
+
     @classmethod
     def find_root(cls, obj: bpy.types.Object) -> Optional[bpy.types.Object]:
         if not obj:
@@ -169,6 +242,8 @@ class FnModel:
                 for obj in list(FnModel.all_children(temporary_group_object)):
                     bpy.data.objects.remove(obj)
                 bpy.data.objects.remove(temporary_group_object)
+
+            FnModel.copy_mmd_root(parent_root_object, child_root_object, overwrite=False)
 
             # Remove unused objects from child models
             if len(child_root_object.children) == 0:

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from typing import Any, Set, Union
-
 import bpy
 
 from . import bone, camera, material, rigid_body, root
@@ -71,50 +69,6 @@ def __patch(properties):  # temporary patching, should be removed in the future
 
 if bpy.app.version >= (2, 80, 0):
     __patch(__properties)
-
-
-def assign_group(destination: bpy.types.PropertyGroup, source: bpy.types.PropertyGroup, merge: bool = False):
-    for name in source.keys():
-        value = getattr(source, name)
-        if isinstance(value, bpy.types.PropertyGroup):
-            assign_group(getattr(destination, name), value, merge=merge)
-        elif isinstance(value, bpy.types.bpy_prop_collection):
-            assign_collection(getattr(destination, name), value, merge=merge)
-        else:
-            setattr(destination, name, value)
-
-
-def assign_collection(destination: bpy.types.bpy_prop_collection, source: bpy.types.bpy_prop_collection, merge: bool = False):
-    if not merge:
-        destination.clear()
-
-    destination_names: Set[str] = set(destination.keys())
-    source_names: Set[str] = set(source.keys())
-
-    # remove extras
-    for name in destination_names - source_names:
-        destination.remove(destination.find(name))
-
-    missing_names = source_names - destination_names
-
-    destination_index = 0
-    for name, value in source.items():
-        if name in missing_names:
-            new_element = destination.add()
-            setattr(new_element, 'name', name)
-
-        assign(destination[name], value, merge=merge)
-        destination.move(destination.find(name), destination_index)
-        destination_index += 1
-
-
-def assign(destination: Union[bpy.types.PropertyGroup, bpy.types.bpy_prop_collection], source: Union[bpy.types.PropertyGroup, bpy.types.bpy_prop_collection], merge: bool = False):
-    if isinstance(destination, bpy.types.PropertyGroup):
-        assign_group(destination, source, merge=merge)
-    elif isinstance(destination, bpy.types.bpy_prop_collection):
-        assign_collection(destination, source, merge=merge)
-    else:
-        raise ValueError(f'Unsupported destination: {destination}')
 
 
 def register():
