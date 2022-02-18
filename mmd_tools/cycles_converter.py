@@ -93,18 +93,9 @@ def __cleanNodeTree(material):
 def is_principled_bsdf_supported():
     return hasattr(bpy.types, 'ShaderNodeBsdfPrincipled')
 
-def convertToCyclesShader(obj, use_principled=False, clean_nodes=False):
-    use_principled = (use_principled and is_principled_bsdf_supported())
+def convertToCyclesShader(obj, use_principled=False, clean_nodes=False, subsurface=0.001):
     __switchToCyclesRenderEngine()
-    for i in obj.material_slots:
-        if i.material:
-            if not i.material.use_nodes:
-                i.material.use_nodes = True
-                __convertToMMDBasicShader(i.material)
-            if use_principled:
-                __convertToPrincipledBsdf(i.material)
-            if clean_nodes:
-                __cleanNodeTree(i.material)
+    convertToBlenderShader(obj, use_principled, clean_nodes, subsurface)
 
 def convertToBlenderShader(obj, use_principled=False, clean_nodes=False, subsurface=0.001):
     use_principled = (use_principled and is_principled_bsdf_supported())
