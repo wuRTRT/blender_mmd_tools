@@ -66,7 +66,7 @@ class MMDModelProductionPanel(_PanelBase, Panel):
 
     def draw_edit(self, _context):
         col = self.layout.column(align=True)
-        col.label(text='(Experimental) Model Surgery:', icon='MOD_ARMATURE')
+        col.label(text='Model Surgery:', icon='MOD_ARMATURE')
         grid = col.grid_flow(row_major=True, align=True)
 
         separate_row = grid.row(align=True)

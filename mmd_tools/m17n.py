@@ -52,6 +52,21 @@ translation_dict = {
         ("*", "Use Morph Prefix"): "モーフ接頭辞を使用",
         ("*", "Allow Fails"): "失敗を許可",
 
+        ("*", "Model Surgery:"): "モデル手術",
+        ("Operator", "Chop"): "切断",
+        ("Operator", "Peel"): "はがす",
+        ("Operator", "Model Separate by Bones"): "モデルをボーンで分離",
+        ("*", "Separate Armature"): "アーマチュアを分離する",
+        ("*", "Include Descendant Bones"): "子孫ボーンを含む",
+        ("*", "Weight Threshold"): "ウェイトしきい値",
+        ("*", "Boundary Joint Owner"): "境界ジョイントオーナー",
+        ("*", "Source Model"): "分離元モデル",
+        ("*", "Destination Model"): "分離先モデル",
+
+        ("Operator", "Join"): "統合",
+        ("Operator", "Model Join by Bones"): "モデルをボーンで統合",
+        ("*", "Join Type"): "接続タイプ",
+
         # 3D Viewport > Sidebar > MMD > Model Setup
         ("*", "Model Setup"): "モデル設定",
         ("*", "Visibility:"): "可視性:",
@@ -379,6 +394,21 @@ translation_dict = {
         ("*", "Blender Names"): "Blender名称",
         ("*", "Use Morph Prefix"): "使用变形前缀",
         ("*", "Allow Fails"): "允许失败",
+
+        ("*", "Model Surgery:"): "模型手术",
+        ("Operator", "Chop"): "切断",
+        ("Operator", "Peel"): "剥去",
+        ("Operator", "Model Separate by Bones"): "用骨骼分离模型",
+        ("*", "Separate Armature"): "分离骨架",
+        ("*", "Include Descendant Bones"): "包括后代的骨骼",
+        ("*", "Weight Threshold"): "权重阈值",
+        ("*", "Boundary Joint Owner"): "边界的关节所有者",
+        ("*", "Source Model"): "源模型",
+        ("*", "Destination Model"): "目标模型",
+
+        ("Operator", "Join"): "合并",
+        ("Operator", "Model Join by Bones"): "用骨骼合并模型",
+        ("*", "Join Type"): "接合类型",
 
         # 3D Viewport > Sidebar > MMD > Model Setup
         ("*", "Model Setup"): "模型设定",
