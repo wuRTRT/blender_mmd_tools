@@ -294,18 +294,28 @@ class ChangeMMDIKLoopFactor(Operator):
     def execute(self, context):
         arm = context.active_object
 
-        if '_RNA_UI' not in arm:
-            arm['_RNA_UI'] = {}
-        prop = {}
-        prop['min'] = 1
-        prop['soft_min'] = 1
-        prop['soft_max'] = 10
-        prop['max'] = 100
-        prop['description'] = 'Scaling factor of MMD IK loop'
-        arm['_RNA_UI']['mmd_ik_loop_factor'] = prop
-
         old_factor = max(arm.get('mmd_ik_loop_factor', 1), 1)
         new_factor = arm['mmd_ik_loop_factor'] = self.mmd_ik_loop_factor
+
+        # Reference: https://developer.blender.org/rB8b9a3b94fc148d
+        if hasattr(arm, 'id_properties_ui'):
+            ui_data = arm.id_properties_ui('mmd_ik_loop_factor')
+            ui_data.update(
+                min=1,
+                soft_min=1,
+                soft_max=10,
+                max=100,
+                description='Scaling factor of MMD IK loop',
+                )
+        else:
+            from rna_prop_ui import rna_idprop_ui_prop_get
+            prop = rna_idprop_ui_prop_get(arm, 'mmd_ik_loop_factor', create=True)
+            prop['min'] = 1
+            prop['soft_min'] = 1
+            prop['soft_max'] = 10
+            prop['max'] = 100
+            prop['description'] = 'Scaling factor of MMD IK loop'
+
         if new_factor == old_factor:
             return { 'FINISHED' }
         for b in arm.pose.bones:
