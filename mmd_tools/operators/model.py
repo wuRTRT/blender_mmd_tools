@@ -67,10 +67,18 @@ class BuildRig(Operator):
         default=1.5,
     )
 
+    collision_margin: bpy.props.FloatProperty(
+        name='Collision Margin',
+        description='The collision margin between rigid bodies. If 0, the default value for each shape is adopted.',
+        unit='LENGTH',
+        min=0, soft_max=10,
+        default=1e-06,
+    )
+
     def execute(self, context):
         root = mmd_model.Model.findRoot(context.active_object)
         rig = mmd_model.Model(root)
-        rig.build(self.non_collision_distance_scale)
+        rig.build(self.non_collision_distance_scale, self.collision_margin)
         SceneOp(context).active_object = root
         return {'FINISHED'}
 
@@ -387,7 +395,7 @@ class AssembleAll(Operator):
         rig = mmd_model.Model(root_object)
 
         rig.applyAdditionalTransformConstraints()
-        rig.build(1.5)
+        rig.build(1.5, 1e-06)
         rig.morph_slider.bind()
 
         bpy.ops.mmd_tools.sdef_bind({'selected_objects': [active_object]})

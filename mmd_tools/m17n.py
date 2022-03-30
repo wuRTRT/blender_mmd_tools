@@ -74,6 +74,7 @@ translation_dict = {
         ("Operator", "Physics"): "物理演算",
         ("Operator", "Build Rig"): "ビルドリグ",
         ("*", "Non-Collision Distance Scale"): "非衝突距離スケール",
+        ("*", "Collision Margin"): "衝突マージン",
 
         ("Operator", "SDEF"): "SDEF",
         ("Operator", "Bind SDEF Driver"): "SDEFドライバーをバインド",
@@ -417,6 +418,7 @@ translation_dict = {
         ("Operator", "Physics"): "物理",
         ("Operator", "Build Rig"): "建立骨架",
         ("*", "Non-Collision Distance Scale"): "非碰撞距离缩放",
+        ("*", "Collision Margin"): "碰撞边距",
 
         ("Operator", "SDEF"): "SDEF",
         ("Operator", "Bind SDEF Driver"): "绑定SDEF驱动器",

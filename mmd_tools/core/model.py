@@ -729,7 +729,7 @@ class Model:
             if old_bone_name in mesh.vertex_groups:
                 mesh.vertex_groups[old_bone_name].name = new_bone_name
 
-    def build(self, non_collision_distance_scale):
+    def build(self, non_collision_distance_scale, collision_margin):
         rigidbody_world_enabled = rigid_body.setRigidBodyWorldEnabled(False)
         if self.__root.mmd_root.is_built:
             self.clean()
@@ -739,7 +739,7 @@ class Model:
         logging.info('****************************************')
         start_time = time.time()
         self.__preBuild()
-        self.buildRigids(non_collision_distance_scale)
+        self.buildRigids(non_collision_distance_scale, collision_margin)
         self.buildJoints()
         self.__postBuild()
         logging.info(' Finished building in %f seconds.', time.time() - start_time)
@@ -922,7 +922,7 @@ class Model:
                 if c:
                     c.mute = False
 
-    def updateRigid(self, rigid_obj):
+    def updateRigid(self, rigid_obj: bpy.types.Object, collision_margin: float):
         assert(rigid_obj.mmd_type == 'RIGID_BODY')
         rb = rigid_obj.rigid_body
         if rb is None:
@@ -938,6 +938,10 @@ class Model:
             rb.kinematic = True
         else:
             rb.kinematic = False
+
+        if collision_margin != 0.0:
+            rb.use_margin = True
+            rb.collision_margin = collision_margin
 
         if arm is not None and bone_name != '':
             target_bone = arm.pose.bones[bone_name]
@@ -1050,7 +1054,7 @@ class Model:
         logging.debug(' finish in %f seconds.', time.time() - start_time)
         logging.debug('-'*60)
 
-    def buildRigids(self, non_collision_distance_scale=1.5):
+    def buildRigids(self, non_collision_distance_scale, collision_margin):
         logging.debug('--------------------------------')
         logging.debug(' Build riggings of rigid bodies')
         logging.debug('--------------------------------')
@@ -1092,7 +1096,7 @@ class Model:
                     non_collision_pairs.add(pair)
         for cnt, i in enumerate(rigid_objects):
             logging.info('%3d/%3d: Updating rigid body %s', cnt+1, rigid_object_cnt, i.name)
-            self.updateRigid(i)
+            self.updateRigid(i, collision_margin)
         self.__createNonCollisionConstraint(nonCollisionJointTable)
         return rigid_objects
 
