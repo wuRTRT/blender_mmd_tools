@@ -492,6 +492,7 @@ class UpdateRigidBodyWorld(Operator):
 
         if hasattr(bpy.context.scene.rigidbody_world, 'substeps_per_frame'):
             bpy.context.scene.rigidbody_world.substeps_per_frame = 1
+            bpy.context.scene.rigidbody_world.solver_iterations = 60
 
         return rbw.collection.objects, rbw.constraints.objects
 
