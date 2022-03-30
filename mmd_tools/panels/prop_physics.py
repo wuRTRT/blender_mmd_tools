@@ -2,10 +2,8 @@
 
 import bpy
 import mmd_tools.core.model as mmd_model
-from mmd_tools import register_wrap
 
 
-@register_wrap
 class MMDRigidPanel(bpy.types.Panel):
     bl_idname = 'RIGID_PT_mmd_tools_bone'
     bl_label = 'MMD Rigid Body'
@@ -84,7 +82,6 @@ class MMDRigidPanel(bpy.types.Panel):
         row.prop(obj.rigid_body, 'angular_damping')
 
 
-@register_wrap
 class MMDJointPanel(bpy.types.Panel):
     bl_idname = 'JOINT_PT_mmd_tools_bone'
     bl_label = 'MMD Joint'

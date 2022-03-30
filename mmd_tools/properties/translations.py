@@ -3,7 +3,6 @@
 from typing import Dict, List, Tuple
 
 import bpy
-from mmd_tools import register_wrap
 from mmd_tools.core.translations import (FnTranslations,
                                          MMDTranslationElementType)
 from mmd_tools.translations import DictionaryEnum
@@ -18,7 +17,6 @@ MMD_TRANSLATION_ELEMENT_TYPE_ENUM_ITEMS = [
 ]
 
 
-@register_wrap
 class MMDTranslationElement(bpy.types.PropertyGroup):
     type: bpy.props.EnumProperty(items=MMD_TRANSLATION_ELEMENT_TYPE_ENUM_ITEMS)
     object: bpy.props.PointerProperty(type=bpy.types.Object)
@@ -28,7 +26,6 @@ class MMDTranslationElement(bpy.types.PropertyGroup):
     name_e: bpy.props.StringProperty()
 
 
-@register_wrap
 class MMDTranslationElementIndex(bpy.types.PropertyGroup):
     value: bpy.props.IntProperty()
 
@@ -52,7 +49,6 @@ BATCH_OPERATION_SCRIPT_PRESET_ITEMS: List[Tuple[str, str, str, int]] = [
 ]
 
 
-@register_wrap
 class MMDTranslation(bpy.types.PropertyGroup):
     @staticmethod
     def _update_index(mmd_translation: 'MMDTranslation', _context):

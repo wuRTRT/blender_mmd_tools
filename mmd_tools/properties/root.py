@@ -3,7 +3,7 @@
 """
 import bpy
 import mmd_tools.core.model as mmd_model
-from mmd_tools import register_wrap, utils
+from mmd_tools import utils
 from mmd_tools.bpyutils import SceneOp
 from mmd_tools.core.material import FnMaterial
 from mmd_tools.core.sdef import FnSDEF
@@ -228,7 +228,6 @@ def _getActiveMeshObject(prop):
 # ===========================================
 
 
-@register_wrap
 class MMDDisplayItem(bpy.types.PropertyGroup):
     """ PMX 表示項目(表示枠内の1項目)
     """
@@ -255,7 +254,6 @@ class MMDDisplayItem(bpy.types.PropertyGroup):
     )
 
 
-@register_wrap
 class MMDDisplayItemFrame(bpy.types.PropertyGroup):
     """ PMX 表示枠
 
@@ -289,7 +287,6 @@ class MMDDisplayItemFrame(bpy.types.PropertyGroup):
     )
 
 
-@register_wrap
 class MMDRoot(bpy.types.PropertyGroup):
     """ MMDモデルデータ
 

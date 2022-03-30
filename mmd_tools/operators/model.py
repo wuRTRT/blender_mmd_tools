@@ -3,19 +3,17 @@
 import bpy
 import mmd_tools.core.model as mmd_model
 from bpy.types import Operator
-from mmd_tools import register_wrap
 from mmd_tools.bpyutils import SceneOp
 from mmd_tools.core.bone import FnBone
 
 
-@register_wrap
 class MorphSliderSetup(Operator):
     bl_idname = 'mmd_tools.morph_slider_setup'
     bl_label = 'Morph Slider Setup'
     bl_description = 'Translate MMD morphs of selected object into format usable by Blender'
     bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
 
-    type = bpy.props.EnumProperty(
+    type: bpy.props.EnumProperty(
         name='Type',
         description='Select type',
         items = [
@@ -39,7 +37,6 @@ class MorphSliderSetup(Operator):
         SceneOp(context).active_object = obj
         return {'FINISHED'}
 
-@register_wrap
 class CleanRiggingObjects(Operator):
     bl_idname = 'mmd_tools.clean_rig'
     bl_label = 'Clean Rig'
@@ -53,7 +50,6 @@ class CleanRiggingObjects(Operator):
         SceneOp(context).active_object = root
         return {'FINISHED'}
 
-@register_wrap
 class BuildRig(Operator):
     bl_idname = 'mmd_tools.build_rig'
     bl_label = 'Build Rig'
@@ -82,7 +78,6 @@ class BuildRig(Operator):
         SceneOp(context).active_object = root
         return {'FINISHED'}
 
-@register_wrap
 class CleanAdditionalTransformConstraints(Operator):
     bl_idname = 'mmd_tools.clean_additional_transform'
     bl_label = 'Clean Additional Transform'
@@ -97,7 +92,6 @@ class CleanAdditionalTransformConstraints(Operator):
         SceneOp(context).active_object = obj
         return {'FINISHED'}
 
-@register_wrap
 class ApplyAdditionalTransformConstraints(Operator):
     bl_idname = 'mmd_tools.apply_additional_transform'
     bl_label = 'Apply Additional Transform'
@@ -112,14 +106,13 @@ class ApplyAdditionalTransformConstraints(Operator):
         SceneOp(context).active_object = obj
         return {'FINISHED'}
 
-@register_wrap
 class SetupBoneFixedAxes(Operator):
     bl_idname = 'mmd_tools.bone_fixed_axis_setup'
     bl_label = 'Setup Bone Fixed Axis'
     bl_description = 'Setup fixed axis of selected bones'
     bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
 
-    type = bpy.props.EnumProperty(
+    type: bpy.props.EnumProperty(
         name='Type',
         description='Select type',
         items = [
@@ -143,14 +136,13 @@ class SetupBoneFixedAxes(Operator):
             FnBone.load_bone_fixed_axis(arm, enable=(self.type=='LOAD'))
         return {'FINISHED'}
 
-@register_wrap
 class SetupBoneLocalAxes(Operator):
     bl_idname = 'mmd_tools.bone_local_axes_setup'
     bl_label = 'Setup Bone Local Axes'
     bl_description = 'Setup local axes of each bone'
     bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
 
-    type = bpy.props.EnumProperty(
+    type: bpy.props.EnumProperty(
         name='Type',
         description='Select type',
         items = [
@@ -174,24 +166,23 @@ class SetupBoneLocalAxes(Operator):
             FnBone.load_bone_local_axes(arm, enable=(self.type=='LOAD'))
         return {'FINISHED'}
 
-@register_wrap
 class CreateMMDModelRoot(Operator):
     bl_idname = 'mmd_tools.create_mmd_model_root_object'
     bl_label = 'Create a MMD Model Root Object'
     bl_description = 'Create a MMD model root object with a basic armature'
     bl_options = {'REGISTER', 'UNDO'}
 
-    name_j = bpy.props.StringProperty(
+    name_j: bpy.props.StringProperty(
         name='Name',
         description='The name of the MMD model',
         default='New MMD Model',
         )
-    name_e = bpy.props.StringProperty(
+    name_e: bpy.props.StringProperty(
         name='Name(Eng)',
         description='The english name of the MMD model',
         default='New MMD Model',
         )
-    scale = bpy.props.FloatProperty(
+    scale: bpy.props.FloatProperty(
         name='Scale',
         description='Scale',
         default=0.08,
@@ -206,7 +197,6 @@ class CreateMMDModelRoot(Operator):
         vm = context.window_manager
         return vm.invoke_props_dialog(self)
 
-@register_wrap
 class ConvertToMMDModel(Operator):
     bl_idname = 'mmd_tools.convert_to_mmd_model'
     bl_label = 'Convert to a MMD Model'
@@ -343,7 +333,6 @@ class ConvertToMMDModel(Operator):
         DisplayItemQuickSetup.load_facial_items(root.mmd_root)
         root.mmd_root.active_display_item_frame = 0
 
-@register_wrap
 class ResetObjectVisibility(bpy.types.Operator):
     bl_idname = 'mmd_tools.reset_object_visibility'
     bl_label = 'Reset Object Visivility'
@@ -383,7 +372,6 @@ class ResetObjectVisibility(bpy.types.Operator):
 
         return {'FINISHED'}
 
-@register_wrap
 class AssembleAll(Operator):
     bl_idname = 'mmd_tools.assemble_all'
     bl_label = 'Assemble All'
@@ -405,7 +393,6 @@ class AssembleAll(Operator):
 
         return {'FINISHED'}
 
-@register_wrap
 class DisassembleAll(Operator):
     bl_idname = 'mmd_tools.disassemble_all'
     bl_label = 'Disassemble All'

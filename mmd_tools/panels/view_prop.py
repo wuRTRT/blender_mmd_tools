@@ -3,7 +3,7 @@
 
 from bpy.types import Panel
 
-from mmd_tools import bpyutils, register_wrap
+from mmd_tools import bpyutils
 from mmd_tools.core.model import Model, FnModel
 from mmd_tools.core.sdef import FnSDEF
 
@@ -15,7 +15,7 @@ class _PanelBase(object):
     def poll(cls, _context):
         return bpyutils.addon_preferences('enable_mmd_model_production_features', True)
 
-class MMDModelObjectDisplayPanel(_PanelBase, Panel):
+class MMDModelObjectDisplayPanel(_PanelBase):
     bl_idname = 'OBJECT_PT_mmd_tools_root_object_display'
     bl_label = 'MMD Display'
 
@@ -71,7 +71,7 @@ class MMDModelObjectDisplayPanel(_PanelBase, Panel):
                     ic = 'ERROR' if ik_map[ik][-1] else 'NONE'
                     row.prop(ik, 'mmd_ik_toggle', text=ik.name, toggle=True, icon=ic)
 
-class MMDViewPanel(_PanelBase, Panel):
+class MMDViewPanel(_PanelBase):
     bl_idname = 'OBJECT_PT_mmd_tools_view'
     bl_label = 'MMD Shading'
 
@@ -85,7 +85,7 @@ class MMDViewPanel(_PanelBase, Panel):
         r = c.row(align=True)
         r.operator('mmd_tools.reset_shading', text='Reset')
 
-class MMDSDEFPanel(_PanelBase, Panel):
+class MMDSDEFPanel(_PanelBase):
     bl_idname = 'OBJECT_PT_mmd_tools_sdef'
     bl_label = 'MMD SDEF Driver'
 

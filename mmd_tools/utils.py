@@ -3,7 +3,6 @@ import re
 import os
 
 import bpy
-from mmd_tools import register_wrap
 from mmd_tools.bpyutils import SceneOp
 
 ## 指定したオブジェクトのみを選択状態かつアクティブにする
@@ -245,9 +244,8 @@ class ItemOp:
         items.move(index_end, index)
         return items[index], index
 
-@register_wrap
 class ItemMoveOp:
-    type = bpy.props.EnumProperty(
+    type: bpy.props.EnumProperty(
         name='Type',
         description='Move type',
         items = [

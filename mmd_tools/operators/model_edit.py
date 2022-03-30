@@ -5,7 +5,6 @@ from typing import Dict, List, Optional, Set
 
 import bmesh
 import bpy
-from mmd_tools import register_wrap
 from mmd_tools.core.model import FnModel, Model
 
 
@@ -13,7 +12,6 @@ class MessageException(Exception):
     """Class for error with message."""
 
 
-@register_wrap
 class ModelJoinByBonesOperator(bpy.types.Operator):
     bl_idname = 'mmd_tools.model_join_by_bones'
     bl_label = 'Model Join by Bones'
@@ -86,7 +84,6 @@ class ModelJoinByBonesOperator(bpy.types.Operator):
         bpy.ops.object.mode_set(mode='POSE')
 
 
-@register_wrap
 class ModelSeparateByBonesOperator(bpy.types.Operator):
     bl_idname = 'mmd_tools.model_separate_by_bones'
     bl_label = 'Model Separate by Bones'

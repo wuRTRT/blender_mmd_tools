@@ -4,7 +4,6 @@ from typing import Set
 import bpy
 from bpy.types import Operator
 
-from mmd_tools import register_wrap
 from mmd_tools.core.model import FnModel
 from mmd_tools.core.sdef import FnSDEF
 
@@ -29,7 +28,6 @@ def _get_target_objects(context):
         selected_objects |= set(FnModel.child_meshes(arm))
     return selected_objects, root_objects
 
-@register_wrap
 class ResetSDEFCache(Operator):
     bl_idname = 'mmd_tools.sdef_cache_reset'
     bl_label = 'Reset MMD SDEF cache'
@@ -43,14 +41,13 @@ class ResetSDEFCache(Operator):
         FnSDEF.clear_cache(unused_only=True)
         return {'FINISHED'}
 
-@register_wrap
 class BindSDEF(Operator):
     bl_idname = 'mmd_tools.sdef_bind'
     bl_label = 'Bind SDEF Driver'
     bl_description = 'Bind MMD SDEF data of selected objects'
     bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
 
-    mode = bpy.props.EnumProperty(
+    mode: bpy.props.EnumProperty(
         name='Mode',
         description='Select mode',
         items = [
@@ -60,12 +57,12 @@ class BindSDEF(Operator):
             ],
         default='0',
         )
-    use_skip = bpy.props.BoolProperty(
+    use_skip: bpy.props.BoolProperty(
         name='Skip',
         description='Skip when the bones are not moving',
         default=True,
         )
-    use_scale = bpy.props.BoolProperty(
+    use_scale: bpy.props.BoolProperty(
         name='Scale',
         description='Support bone scaling (slow)',
         default=False,
@@ -86,7 +83,6 @@ class BindSDEF(Operator):
         self.report({'INFO'}, 'Binded %d of %d selected mesh(es)'%(count, len(target_meshes)))
         return {'FINISHED'}
 
-@register_wrap
 class UnbindSDEF(Operator):
     bl_idname = 'mmd_tools.sdef_unbind'
     bl_label = 'Unbind SDEF Driver'

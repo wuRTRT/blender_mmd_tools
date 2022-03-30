@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
 
 import bpy
-from mmd_tools import register_wrap, utils
+from mmd_tools import utils
 from mmd_tools.core.bone import FnBone
 from mmd_tools.core.material import FnMaterial
 from mmd_tools.core.model import Model as FnModel
@@ -17,7 +18,7 @@ def _set_name(prop, value):
     #morph_type = mmd_root.active_morph_type
     morph_type = '%s_morphs' % prop.bl_rna.identifier[:-5].lower()
     # assert(prop.bl_rna.identifier.endswith('Morph'))
-    #print('_set_name:', prop, value, morph_type)
+    #logging.debug('_set_name: %s %s %s', prop, value, morph_type)
     prop_name = prop.get('name', None)
     if prop_name == value:
         return
@@ -68,7 +69,6 @@ def _set_name(prop, value):
     prop['name'] = value
 
 
-@register_wrap
 class _MorphBase:
     name: bpy.props.StringProperty(
         name='Name',
@@ -131,7 +131,6 @@ def _update_bone_morph_data(prop, context):
             bone.rotation_quaternion = prop.rotation.__class__(*prop.rotation.to_axis_angle())  # Fix for consistency
 
 
-@register_wrap
 class BoneMorphData(bpy.types.PropertyGroup):
     """
     """
@@ -165,7 +164,6 @@ class BoneMorphData(bpy.types.PropertyGroup):
     )
 
 
-@register_wrap
 class BoneMorph(_MorphBase, bpy.types.PropertyGroup):
     """Bone Morph
     """
@@ -224,7 +222,6 @@ def _update_material_morph_data(prop, context):
             _MaterialMorph.update_morph_inputs(mat, prop)
 
 
-@register_wrap
 class MaterialMorphData(bpy.types.PropertyGroup):
     """
     """
@@ -367,7 +364,6 @@ class MaterialMorphData(bpy.types.PropertyGroup):
     )
 
 
-@register_wrap
 class MaterialMorph(_MorphBase, bpy.types.PropertyGroup):
     """ Material Morph
     """
@@ -382,7 +378,6 @@ class MaterialMorph(_MorphBase, bpy.types.PropertyGroup):
     )
 
 
-@register_wrap
 class UVMorphOffset(bpy.types.PropertyGroup):
     """UV Morph Offset
     """
@@ -404,7 +399,6 @@ class UVMorphOffset(bpy.types.PropertyGroup):
     )
 
 
-@register_wrap
 class UVMorph(_MorphBase, bpy.types.PropertyGroup):
     """UV Morph
     """
@@ -442,7 +436,6 @@ class UVMorph(_MorphBase, bpy.types.PropertyGroup):
     )
 
 
-@register_wrap
 class GroupMorphOffset(bpy.types.PropertyGroup):
     """Group Morph Offset
     """
@@ -469,7 +462,6 @@ class GroupMorphOffset(bpy.types.PropertyGroup):
     )
 
 
-@register_wrap
 class GroupMorph(_MorphBase, bpy.types.PropertyGroup):
     """Group Morph
     """
@@ -484,7 +476,6 @@ class GroupMorph(_MorphBase, bpy.types.PropertyGroup):
     )
 
 
-@register_wrap
 class VertexMorph(_MorphBase, bpy.types.PropertyGroup):
     """Vertex Morph
     """
