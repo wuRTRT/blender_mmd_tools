@@ -3,7 +3,7 @@
 import bpy
 from bpy.types import Panel, Menu, UIList
 
-from mmd_tools import bpyutils, operators, register_wrap
+from mmd_tools import bpyutils, operators
 from mmd_tools.utils import ItemOp
 from mmd_tools.bpyutils import SceneOp
 import mmd_tools.core.model as mmd_model
@@ -37,7 +37,6 @@ class _PanelBase(object):
     def poll(cls, _context):
         return bpyutils.addon_preferences('enable_mmd_model_production_features', True)
 
-@register_wrap
 class MMDModelProductionPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_model_production'
     bl_label = 'Model Production'
@@ -92,7 +91,6 @@ class MMDModelProductionPanel(_PanelBase, Panel):
         row.operator_context = 'INVOKE_DEFAULT'
         row.operator('mmd_tools.model_join_by_bones', text='Join', icon='GROUP_BONE')
 
-@register_wrap
 class MMD_ROOT_UL_display_item_frames(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         frame = item
@@ -112,9 +110,8 @@ class MMD_ROOT_UL_display_item_frames(UIList):
             layout.alignment = 'CENTER'
             layout.label(text="", icon_value=icon)
 
-@register_wrap
 class MMD_ROOT_UL_display_items(UIList):
-    morph_filter = bpy.props.EnumProperty(
+    morph_filter: bpy.props.EnumProperty(
         name="Morph Filter",
         description='Only show items matching this category',
         options={'ENUM_FLAG'},
@@ -127,7 +124,7 @@ class MMD_ROOT_UL_display_items(UIList):
             ],
         default={'SYSTEM', 'EYEBROW', 'EYE', 'MOUTH', 'OTHER',},
         )
-    mmd_name = bpy.props.EnumProperty(
+    mmd_name: bpy.props.EnumProperty(
         name='MMD Name',
         description='Show JP or EN name of MMD bone',
         items = [
@@ -194,7 +191,6 @@ class MMD_ROOT_UL_display_items(UIList):
         row.prop(self, 'mmd_name', expand=True)
 
 
-@register_wrap
 class MMDDisplayItemFrameMenu(Menu):
     bl_idname = 'OBJECT_MT_mmd_tools_display_item_frame_menu'
     bl_label = 'Display Item Frame Menu'
@@ -206,7 +202,6 @@ class MMDDisplayItemFrameMenu(Menu):
         layout.operator('mmd_tools.display_item_frame_move', icon=TRIA_UP_BAR, text='Move To Top').type = 'TOP'
         layout.operator('mmd_tools.display_item_frame_move', icon=TRIA_DOWN_BAR, text='Move To Bottom').type = 'BOTTOM'
 
-@register_wrap
 class MMDDisplayItemMenu(Menu):
     bl_idname = 'OBJECT_MT_mmd_tools_display_item_menu'
     bl_label = 'Display Item Menu'
@@ -218,7 +213,6 @@ class MMDDisplayItemMenu(Menu):
         layout.operator('mmd_tools.display_item_move', icon=TRIA_UP_BAR, text='Move To Top').type = 'TOP'
         layout.operator('mmd_tools.display_item_move', icon=TRIA_DOWN_BAR, text='Move To Bottom').type = 'BOTTOM'
 
-@register_wrap
 class MMDDisplayItemsPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_display_items'
     bl_label = 'Display Panel'
@@ -279,7 +273,6 @@ class MMDDisplayItemsPanel(_PanelBase, Panel):
         row.operator('mmd_tools.display_item_select_current', text='Select')
 
 
-@register_wrap
 class MMD_TOOLS_UL_Morphs(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         mmd_root = data
@@ -302,7 +295,6 @@ class MMD_TOOLS_UL_Morphs(UIList):
             layout.alignment = 'CENTER'
             layout.label(text="", icon_value=icon)
 
-@register_wrap
 class MMD_TOOLS_UL_MaterialMorphOffsets(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if self.layout_type in {'DEFAULT'}:
@@ -317,7 +309,6 @@ class MMD_TOOLS_UL_MaterialMorphOffsets(UIList):
             layout.alignment = 'CENTER'
             layout.label(text="", icon_value=icon)
 
-@register_wrap
 class MMD_TOOLS_UL_UVMorphOffsets(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if self.layout_type in {'DEFAULT'}:
@@ -329,7 +320,6 @@ class MMD_TOOLS_UL_UVMorphOffsets(UIList):
             layout.alignment = 'CENTER'
             layout.label(text="", icon_value=icon)
 
-@register_wrap
 class MMD_TOOLS_UL_BoneMorphOffsets(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if self.layout_type in {'DEFAULT'}:
@@ -341,7 +331,6 @@ class MMD_TOOLS_UL_BoneMorphOffsets(UIList):
             layout.alignment = 'CENTER'
             layout.label(text="", icon_value=icon)
 
-@register_wrap
 class MMD_TOOLS_UL_GroupMorphOffsets(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if self.layout_type in {'DEFAULT'}:
@@ -359,7 +348,6 @@ class MMD_TOOLS_UL_GroupMorphOffsets(UIList):
             layout.alignment = 'CENTER'
             layout.label(text="", icon_value=icon)
 
-@register_wrap
 class MMDMorphMenu(Menu):
     bl_idname = 'OBJECT_MT_mmd_tools_morph_menu'
     bl_label = 'Morph Menu'
@@ -376,7 +364,6 @@ class MMDMorphMenu(Menu):
         layout.operator('mmd_tools.morph_move', icon=TRIA_UP_BAR, text='Move To Top').type = 'TOP'
         layout.operator('mmd_tools.morph_move', icon=TRIA_DOWN_BAR, text='Move To Bottom').type = 'BOTTOM'
 
-@register_wrap
 class MMDMorphToolsPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_morph_tools'
     bl_label = 'Morph Tools'
@@ -589,9 +576,8 @@ class MMDMorphToolsPanel(_PanelBase, Panel):
         row.prop(item, 'morph_type', text='')
 
 
-@register_wrap
 class UL_ObjectsMixIn(object):
-    model_filter = bpy.props.EnumProperty(
+    model_filter: bpy.props.EnumProperty(
         name="Model Filter",
         description='Show items of active model or all models',
         items = [
@@ -600,7 +586,7 @@ class UL_ObjectsMixIn(object):
             ],
         default='ACTIVE',
         )
-    visible_only = bpy.props.BoolProperty(
+    visible_only: bpy.props.BoolProperty(
         name='Visible Only',
         description='Only show visible items',
         default=False,
@@ -648,7 +634,6 @@ class UL_ObjectsMixIn(object):
             flt_neworder[i_orig] = i_new
         return flt_flags, flt_neworder
 
-@register_wrap
 class MMD_TOOLS_UL_rigidbodies(UIList, UL_ObjectsMixIn):
     mmd_type = 'RIGID_BODY'
     icon = 'MESH_ICOSPHERE'
@@ -661,7 +646,6 @@ class MMD_TOOLS_UL_rigidbodies(UIList, UL_ObjectsMixIn):
         elif not item.mmd_rigid.bone:
             layout.label(icon='BONE_DATA')
 
-@register_wrap
 class MMDRigidbodySelectMenu(Menu):
     bl_idname = 'OBJECT_MT_mmd_tools_rigidbody_select_menu'
     bl_label = 'Rigidbody Select Menu'
@@ -674,7 +658,6 @@ class MMDRigidbodySelectMenu(Menu):
         layout.operator_context = 'EXEC_DEFAULT'
         layout.operator_enum('mmd_tools.rigid_body_select', 'properties')
 
-@register_wrap
 class MMDRigidbodyMenu(Menu):
     bl_idname = 'OBJECT_MT_mmd_tools_rigidbody_menu'
     bl_label = 'Rigidbody Menu'
@@ -687,7 +670,6 @@ class MMDRigidbodyMenu(Menu):
         layout.operator('mmd_tools.object_move', icon=TRIA_UP_BAR, text='Move To Top').type = 'TOP'
         layout.operator('mmd_tools.object_move', icon=TRIA_DOWN_BAR, text='Move To Bottom').type = 'BOTTOM'
 
-@register_wrap
 class MMDRigidbodySelectorPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_rigidbody_list'
     bl_label = 'Rigid Bodies'
@@ -721,7 +703,6 @@ class MMDRigidbodySelectorPanel(_PanelBase, Panel):
         tb1.operator('mmd_tools.object_move', text='', icon='TRIA_DOWN').type = 'DOWN'
 
 
-@register_wrap
 class MMD_TOOLS_UL_joints(UIList, UL_ObjectsMixIn):
     mmd_type = 'JOINT'
     icon = 'CONSTRAINT'
@@ -736,7 +717,6 @@ class MMD_TOOLS_UL_joints(UIList, UL_ObjectsMixIn):
         elif rbc.object1 == rbc.object2:
             layout.label(icon='MESH_CUBE')
 
-@register_wrap
 class MMDJointMenu(Menu):
     bl_idname = 'OBJECT_MT_mmd_tools_joint_menu'
     bl_label = 'Joint Menu'
@@ -747,7 +727,6 @@ class MMDJointMenu(Menu):
         layout.operator('mmd_tools.object_move', icon=TRIA_UP_BAR, text='Move To Top').type = 'TOP'
         layout.operator('mmd_tools.object_move', icon=TRIA_DOWN_BAR, text='Move To Bottom').type = 'BOTTOM'
 
-@register_wrap
 class MMDJointSelectorPanel(_PanelBase, Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_joint_list'
     bl_label = 'Joints'

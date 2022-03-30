@@ -2,7 +2,6 @@
 
 import bpy
 import mmd_tools.core.model as mmd_model
-from mmd_tools import register_wrap
 
 
 class _PanelBase(object):
@@ -11,7 +10,6 @@ class _PanelBase(object):
     bl_context = 'object'
 
 
-@register_wrap
 class MMDModelObjectPanel(_PanelBase, bpy.types.Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_root_object'
     bl_label = 'MMD Model Information'

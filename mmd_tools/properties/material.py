@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
-from mmd_tools import register_wrap, utils
+from mmd_tools import utils
 from mmd_tools.core import material
 from mmd_tools.core.material import FnMaterial
 from mmd_tools.core.model import Model
@@ -85,7 +85,6 @@ def _setNameJ(prop, value):
 # ===========================================
 
 
-@register_wrap
 class MMDMaterial(bpy.types.PropertyGroup):
     """ マテリアル
     """

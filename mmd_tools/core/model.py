@@ -939,7 +939,9 @@ class Model:
         else:
             rb.kinematic = False
 
-        if collision_margin != 0.0:
+        if collision_margin == 0.0:
+            rb.use_margin = False
+        else:
             rb.use_margin = True
             rb.collision_margin = collision_margin
 

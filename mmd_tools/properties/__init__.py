@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import bpy
+import logging
 
-from . import bone, camera, material, rigid_body, root
+import bpy
+from mmd_tools.properties.bone import MMDBone, _mmd_ik_toggle_update
+from mmd_tools.properties.camera import MMDCamera
+from mmd_tools.properties.material import MMDMaterial
+from mmd_tools.properties.rigid_body import MMDJoint, MMDRigidBody
+from mmd_tools.properties.root import MMDRoot
 
 __properties = {
     bpy.types.Object: {
@@ -29,19 +34,24 @@ __properties = {
                 ('SPRING_GOAL', 'Spring Goal', '', 54),
             ]
         ),
-        'mmd_root': bpy.props.PointerProperty(type=root.MMDRoot),
-        'mmd_camera': bpy.props.PointerProperty(type=camera.MMDCamera),
-        'mmd_rigid': bpy.props.PointerProperty(type=rigid_body.MMDRigidBody),
-        'mmd_joint': bpy.props.PointerProperty(type=rigid_body.MMDJoint),
+        'mmd_root': bpy.props.PointerProperty(type=MMDRoot),
+        'mmd_camera': bpy.props.PointerProperty(type=MMDCamera),
+        'mmd_rigid': bpy.props.PointerProperty(type=MMDRigidBody),
+        'mmd_joint': bpy.props.PointerProperty(type=MMDJoint),
     },
     bpy.types.Material: {
-        'mmd_material': bpy.props.PointerProperty(type=material.MMDMaterial),
+        'mmd_material': bpy.props.PointerProperty(type=MMDMaterial),
     },
     bpy.types.PoseBone: {
-        'mmd_bone': bpy.props.PointerProperty(type=bone.MMDBone),
+        'mmd_bone': bpy.props.PointerProperty(type=MMDBone),
         'is_mmd_shadow_bone': bpy.props.BoolProperty(name='is_mmd_shadow_bone', default=False),
         'mmd_shadow_bone_type': bpy.props.StringProperty(name='mmd_shadow_bone_type'),
-        'mmd_ik_toggle': bone._MMDPoseBoneProp.mmd_ik_toggle,
+        'mmd_ik_toggle': bpy.props.BoolProperty(
+            name='MMD IK Toggle',
+            description='MMD IK toggle is used to import/export animation of IK on-off',
+            update=_mmd_ik_toggle_update,
+            default=True,
+        ),
     }
 }
 
@@ -75,8 +85,11 @@ def register():
     for typ, t in __properties.items():
         for attr, prop in t.items():
             if hasattr(typ, attr):
-                print(' * warning: overwrite ', typ, attr)
-            setattr(typ, attr, prop)
+                logging.warning(' * warning: overwrite\t%s\t%s', typ, attr)
+            try:
+                setattr(typ, attr, prop)
+            except:  # pylint: disable=bare-except
+                logging.warning(' * warning: register\t%s\t%s', typ, attr)
 
 
 def unregister():

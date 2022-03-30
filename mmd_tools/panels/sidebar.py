@@ -3,12 +3,10 @@
 import time
 
 import bpy
-from mmd_tools import register_wrap
 from mmd_tools.core import model
 from mmd_tools.core.sdef import FnSDEF
 
 
-@register_wrap
 class MMDToolsSceneSetupPanel(bpy.types.Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_scene_setup'
     bl_label = 'Scene Setup'
@@ -88,7 +86,6 @@ class MMDToolsSceneSetupPanel(bpy.types.Panel):
                 row.operator("mmd_tools.ptcache_rigid_body_bake", text="Bake")
 
 
-@register_wrap
 class MMDToolsModelSetupPanel(bpy.types.Panel):
     bl_idname = 'OBJECT_PT_mmd_tools_model_setup'
     bl_label = 'Model Setup'

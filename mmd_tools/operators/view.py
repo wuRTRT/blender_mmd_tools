@@ -5,7 +5,6 @@ import bpy
 from bpy.types import Operator
 from mathutils import Matrix
 
-from mmd_tools import register_wrap
 from mmd_tools.bpyutils import matmul
 
 
@@ -48,7 +47,6 @@ class _SetShadingBase:
         return {'FINISHED'}
 
 
-@register_wrap
 class SetGLSLShading(Operator, _SetShadingBase):
     bl_idname = 'mmd_tools.set_glsl_shading'
     bl_label = 'GLSL View'
@@ -56,7 +54,6 @@ class SetGLSLShading(Operator, _SetShadingBase):
 
     _shading_mode = 'GLSL'
 
-@register_wrap
 class SetShadelessGLSLShading(Operator, _SetShadingBase):
     bl_idname = 'mmd_tools.set_shadeless_glsl_shading'
     bl_label = 'Shadeless GLSL View'
@@ -64,14 +61,12 @@ class SetShadelessGLSLShading(Operator, _SetShadingBase):
 
     _shading_mode = 'SHADELESS'
 
-@register_wrap
 class ResetShading(Operator, _SetShadingBase):
     bl_idname = 'mmd_tools.reset_shading'
     bl_label = 'Reset View'
     bl_description = 'Reset to default Blender shading'
 
 
-@register_wrap
 class FlipPose(Operator):
     bl_idname = 'mmd_tools.flip_pose'
     bl_label = 'Flip Pose'

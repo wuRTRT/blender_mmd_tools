@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import bpy
-from mmd_tools import bpyutils, register_wrap
+from mmd_tools import bpyutils
 from mmd_tools.core import rigid_body
 from mmd_tools.core.model import FnModel, getRigidBodySize
 
@@ -144,7 +144,6 @@ def _set_rigid_name(prop, value):
     prop['name'] = value
 
 
-@register_wrap
 class MMDRigidBody(bpy.types.PropertyGroup):
     name_j: bpy.props.StringProperty(
         name='Name',
@@ -239,7 +238,6 @@ def _updateSpringAngular(prop, context):
         rbc.spring_stiffness_ang_z = prop.spring_angular[2]
 
 
-@register_wrap
 class MMDJoint(bpy.types.PropertyGroup):
     name_j: bpy.props.StringProperty(
         name='Name',

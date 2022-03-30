@@ -2,7 +2,6 @@
 from typing import TYPE_CHECKING
 
 import bpy
-from mmd_tools import register_wrap
 from mmd_tools.core.model import FnModel, Model
 from mmd_tools.core.translations import (MMD_DATA_TYPE_TO_HANDLERS,
                                          FnTranslations)
@@ -14,7 +13,6 @@ if TYPE_CHECKING:
                                                    MMDTranslationElementIndex)
 
 
-@register_wrap
 class TranslateMMDModel(bpy.types.Operator):
     bl_idname = 'mmd_tools.translate_mmd_model'
     bl_label = 'Translate a MMD Model'
@@ -186,14 +184,12 @@ class TranslateMMDModel(bpy.types.Operator):
 DEFAULT_SHOW_ROW_COUNT = 20
 
 
-@register_wrap
 class MMD_TOOLS_UL_MMDTranslationElementIndex(bpy.types.UIList):
     def draw_item(self, context, layout: bpy.types.UILayout, data, mmd_translation_element_index: 'MMDTranslationElementIndex', icon, active_data, active_propname, index: int):
         mmd_translation_element: 'MMDTranslationElement' = data.translation_elements[mmd_translation_element_index.value]
         MMD_DATA_TYPE_TO_HANDLERS[mmd_translation_element.type].draw_item(layout, mmd_translation_element, index)
 
 
-@register_wrap
 class RestoreMMDDataReferenceOperator(bpy.types.Operator):
     bl_idname = 'mmd_tools.restore_mmd_translation_element_name'
     bl_label = 'Restore this Name'
@@ -212,7 +208,6 @@ class RestoreMMDDataReferenceOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@register_wrap
 class GlobalTranslationPopup(bpy.types.Operator):
     bl_idname = 'mmd_tools.global_translation_popup'
     bl_label = 'Global Translation Popup'
@@ -305,7 +300,6 @@ class GlobalTranslationPopup(bpy.types.Operator):
         return {'FINISHED'}
 
 
-@register_wrap
 class ExecuteTranslationBatchOperator(bpy.types.Operator):
     bl_idname = 'mmd_tools.execute_translation_batch'
     bl_label = 'Execute Translation Batch'

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import bpy
+import logging
 from mmd_tools.core.shader import _NodeGroupUtils
 
 def __switchToCyclesRenderEngine():
@@ -200,8 +201,8 @@ def __convertToMMDBasicShader(material):
                         node_tex = material.node_tree.nodes.new('ShaderNodeMixRGB')
                         try:
                             node_tex.blend_type = j.blend_type
-                        except TypeError as e:
-                            print(node_tex, e)
+                        except TypeError as ex:
+                            logging.exception(node_tex)
                         node_tex.inputs[0].default_value = 1.0
                         node_tex.inputs[1].default_value = shader.inputs[0].default_value
                         node_tex.location.x = tex_img.location.x + 250
@@ -218,8 +219,8 @@ def __convertToMMDBasicShader(material):
                         node_alpha = material.node_tree.nodes.new('ShaderNodeMath')
                         try:
                             node_alpha.operation = j.blend_type
-                        except TypeError as e:
-                            print(node_alpha, e)
+                        except TypeError as ex:
+                            logging.exception(node_alpha)
                         node_alpha.inputs[0].default_value = material.alpha
                         node_alpha.location.x = tex_img.location.x + 250
                         node_alpha.location.y = tex_img.location.y - 500

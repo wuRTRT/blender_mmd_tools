@@ -4,7 +4,6 @@ import math
 
 import bpy
 import mmd_tools.core.camera as mmd_camera
-from mmd_tools import register_wrap
 
 if bpy.app.version < (2, 80, 0):
     def __get_camera(empty):
@@ -51,7 +50,6 @@ def _setIsPerspective(prop, value):
     cam.data.type = 'PERSP' if value else 'ORTHO'
 
 
-@register_wrap
 class MMDCamera(bpy.types.PropertyGroup):
     angle: bpy.props.FloatProperty(
         name='Angle',

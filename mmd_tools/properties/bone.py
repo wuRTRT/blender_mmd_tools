@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-
 import bpy
-from mmd_tools import register_wrap
 from mmd_tools.core.bone import FnBone
 
 
@@ -42,7 +40,6 @@ def _setAdditionalTransformBone(prop, value):
     prop['additional_transform_bone_id'] = bone.bone_id
 
 
-@register_wrap
 class MMDBone(bpy.types.PropertyGroup):
     name_j: bpy.props.StringProperty(
         name='Name',
@@ -198,25 +195,14 @@ def _mmd_ik_toggle_set(prop, v):
 
 def _mmd_ik_toggle_update(prop, context):
     v = prop.mmd_ik_toggle
-    #print('_mmd_ik_toggle_update', v, prop.name)
+    #logging.debug('_mmd_ik_toggle_update %s %s', v, prop.name)
     for b in prop.id_data.pose.bones:
         for c in b.constraints:
             if c.type == 'IK' and c.subtarget == prop.name:
-                #print('   ', b.name, c.name)
+                #logging.debug('   %s %s', b.name, c.name)
                 c.influence = v
                 b = b if c.use_tail else b.parent
                 for b in ([b]+b.parent_recursive)[:c.chain_count]:
                     c = next((c for c in b.constraints if c.type == 'LIMIT_ROTATION' and not c.mute), None)
                     if c:
                         c.influence = v
-
-
-class _MMDPoseBoneProp:
-    mmd_ik_toggle = bpy.props.BoolProperty(
-        name='MMD IK Toggle',
-        description='MMD IK toggle is used to import/export animation of IK on-off',
-        # get=_mmd_ik_toggle_get,
-        # set=_mmd_ik_toggle_set,
-        update=_mmd_ik_toggle_update,
-        default=True,
-    )

@@ -378,9 +378,7 @@ class AddonUpdaterManager:
         return self.__updated
 
 
-from mmd_tools import register_wrap
 
-@register_wrap
 class CheckAddonUpdate(bpy.types.Operator):
     bl_idname = "mmd_tools.check_addon_update"
     bl_label = "Check Update"
@@ -393,14 +391,13 @@ class CheckAddonUpdate(bpy.types.Operator):
 
         return {'FINISHED'}
 
-@register_wrap
 class UpdateAddon(bpy.types.Operator):
     bl_idname = "mmd_tools.update_addon"
     bl_label = "Update"
     bl_description = "Update Add-on"
     bl_options = {'INTERNAL'}
 
-    branch_name = bpy.props.StringProperty(
+    branch_name: bpy.props.StringProperty(
         name="Branch Name",
         description="Branch name to update",
         default="",
