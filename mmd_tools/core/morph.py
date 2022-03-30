@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
+import logging
 import re
 
 import bpy
 from mmd_tools import bpyutils
-from mmd_tools.bpyutils import SceneOp
-from mmd_tools.bpyutils import ObjectOp
-from mmd_tools.bpyutils import TransformConstraintOp
+from mmd_tools.bpyutils import ObjectOp, SceneOp, TransformConstraintOp
+
 
 class FnMorph(object):
 
@@ -347,7 +347,7 @@ class _MorphSlider:
         return (not d or d.driver.expression == ''.join(('*w','+g','v')[-1 if i < 1 else i%2]+str(i+1) for i in range(len(d.driver.variables))))
 
     def __cleanup(self, names_in_use=None):
-        from math import floor, ceil
+        from math import ceil, floor
         names_in_use = names_in_use or {}
         rig = self.__rig
         morph_sliders = self.placeholder()
@@ -521,7 +521,7 @@ class _MorphSlider:
 
         for m in mmd_root.group_morphs:
             if len(m.data) != len(set(m.data.keys())):
-                print(' * Found duplicated morph data in Group Morph "%s"'%m.name)
+                logging.warning(' * Found duplicated morph data in Group Morph "%s"', m.name)
             morph_name = m.name.replace('"', '\\"')
             morph_path = 'data.shape_keys.key_blocks["%s"].value'%morph_name
             for d in m.data:

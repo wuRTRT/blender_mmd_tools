@@ -186,14 +186,14 @@ class _FnMaterialBI:
         if texture_slot:
             tex = texture_slot.texture
             self.__material.texture_slots.clear(index)
-            #print('clear texture: %s  users: %d'%(tex.name, tex.users))
+            #logging.debug('clear texture: %s  users: %d', tex.name, tex.users)
             if tex and tex.users < 1 and tex.type == 'IMAGE':
-                #print(' - remove texture: '+tex.name)
+                #logging.debug(' - remove texture: %s', tex.name)
                 img = tex.image
                 tex.image = None
                 bpy.data.textures.remove(tex)
                 if img and img.users < 1:
-                    #print('    - remove image: '+img.name)
+                    #logging.debug('    - remove image: %s', img.name)
                     bpy.data.images.remove(img)
 
 
@@ -514,7 +514,7 @@ class _FnMaterialCycles(_FnMaterialBI):
                         next(uv_layers, None) # skip base UV
                         subtex_uv = getattr(next(uv_layers, None), 'name', '')
                         if subtex_uv != 'UV1':
-                            print(' * material(%s): object "%s" use UV "%s" for SubTex'%(mat.name, obj.name, subtex_uv))
+                            logging.info(' * material(%s): object "%s" use UV "%s" for SubTex', mat.name, obj.name, subtex_uv)
                     links.new(nodes['mmd_tex_uv'].outputs['SubTex UV'], texture.inputs['Vector'])
                 else:
                     links.new(nodes['mmd_tex_uv'].outputs['Sphere UV'], texture.inputs['Vector'])

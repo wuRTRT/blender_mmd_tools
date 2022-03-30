@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import csv
+import logging
 import time
 
 import bpy
@@ -222,7 +223,7 @@ class MMDTranslator:
         tuples_dict = OrderedDict((row[0], row) for row in self.__csv_tuples if len(row) >= 2 and row[0])
         self.__csv_tuples.clear()
         self.__csv_tuples.extend(tuples_dict.values())
-        print(' - removed items:', count_old-len(self.__csv_tuples), '(of %d)'%count_old)
+        logging.info(' - removed items:\t%d\t(of %d)', count_old-len(self.__csv_tuples), count_old)
 
     def half_to_full(self, name):
         return self.replace_from_tuples(name, jp_half_to_full_tuples)
@@ -258,7 +259,7 @@ class MMDTranslator:
         spamreader = csv.reader(csvfile, delimiter=',', skipinitialspace=True)
         csv_tuples = [tuple(row) for row in spamreader if len(row) >= 2]
         self.__csv_tuples = csv_tuples
-        print(' - load items:', len(self.__csv_tuples))
+        logging.info(' - load items:\t%d', len(self.__csv_tuples))
 
     def save_to_stream(self, csvfile=None):
         csvfile = csvfile or self.get_csv_text()
@@ -268,17 +269,17 @@ class MMDTranslator:
             lineterminator = '\n'
         spamwriter = csv.writer(csvfile, delimiter=',', lineterminator=lineterminator, quoting=csv.QUOTE_ALL)
         spamwriter.writerows(self.__csv_tuples)
-        print(' - save items:', len(self.__csv_tuples))
+        logging.info(' - save items:\t%d', len(self.__csv_tuples))
 
     def load(self, filepath=None):
         filepath = filepath or self.default_csv_filepath()
-        print('Loading csv file:', filepath)
+        logging.info('Loading csv file:\t%s', filepath)
         with open(filepath, 'rt', encoding='utf-8', newline='') as csvfile:
             self.load_from_stream(csvfile)
 
     def save(self, filepath=None):
         filepath = filepath or self.default_csv_filepath()
-        print('Saving csv file:', filepath)
+        logging.info('Saving csv file:\t%s', filepath)
         with open(filepath, 'wt', encoding='utf-8', newline='') as csvfile:
             self.save_to_stream(csvfile)
 
