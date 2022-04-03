@@ -357,6 +357,9 @@ class _MorphSlider:
                 if kb.name not in names_in_use:
                     if kb.name.startswith('mmd_bind'):
                         kb.driver_remove('value')
+                        ms = morph_sliders[kb.relative_key.name]
+                        kb.relative_key.slider_min, kb.relative_key.slider_max = min(ms.slider_min, floor(ms.value)), max(ms.slider_max, ceil(ms.value))
+                        kb.relative_key.value = ms.value
                         kb.relative_key.mute = False
                         ObjectOp(mesh).shape_key_remove(kb)
                     elif kb.name in morph_sliders and self.__shape_key_driver_check(kb):

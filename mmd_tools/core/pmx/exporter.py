@@ -678,8 +678,26 @@ class __PmxExporter:
             return
         categories = self.CATEGORIES
         pose_bones = self.__armature.pose.bones
-        use_pose_mode = mmd_root.is_built and self.__armature.data.pose_position != 'REST'
-        bone_util_cls = BoneConverterPoseMode if use_pose_mode else BoneConverter
+        matrix_world = self.__armature.matrix_world
+        bone_util_cls = BoneConverterPoseMode if self.__armature.data.pose_position != 'REST' else BoneConverter
+
+        class _RestBone:
+            def __init__(self, b):
+                self.matrix_local = matmul(matrix_world, b.bone.matrix_local)
+
+        class _PoseBone: # world space
+            def __init__(self, b):
+                self.bone = _RestBone(b)
+                self.matrix = matmul(matrix_world, b.matrix)
+                self.matrix_basis = b.matrix_basis
+                self.location = b.location
+
+        converter_cache = {}
+        def _get_converter(b):
+            if b not in converter_cache:
+                converter_cache[b] = bone_util_cls(_PoseBone(blender_bone), self.__scale, invert=True)
+            return converter_cache[b]
+
         for morph in mmd_root.bone_morphs:
             bone_morph = pmx.BoneMorph(
                 name=morph.name,
@@ -696,7 +714,7 @@ class __PmxExporter:
                 if blender_bone is None:
                     logging.warning('Bone Morph (%s): Bone "%s" was not found.', morph.name, data.bone)
                     continue
-                converter = bone_util_cls(blender_bone, self.__scale, invert=True)
+                converter = _get_converter(blender_bone)
                 morph_data.location_offset = converter.convert_location(data.location)
                 rw, rx, ry, rz = data.rotation
                 rw, rx, ry, rz = converter.convert_rotation([rx, ry, rz, rw])
@@ -1132,10 +1150,12 @@ class __PmxExporter:
             shape_key_name = kb.name
             logging.info(' - processing shape key: %s', shape_key_name)
             kb_mute, kb.mute = kb.mute, False
+            kb_value, kb.value = kb.value, 1.0
             meshObj.active_shape_key_index = i
             mesh = _to_mesh(meshObj)
             mesh.transform(pmx_matrix)
             kb.mute = kb_mute
+            kb.value = kb_value
             if len(mesh.vertices) != len(base_vertices):
                 logging.warning('   * Error! vertex count mismatch!')
                 continue
@@ -1180,7 +1200,6 @@ class __PmxExporter:
 
     def __loadMeshData(self, meshObj, bone_map):
         show_only_shape_key = meshObj.show_only_shape_key
-        meshObj.show_only_shape_key = True
         active_shape_key_index = meshObj.active_shape_key_index
         meshObj.active_shape_key_index = 0
         uv_textures = getattr(meshObj.data, 'uv_textures', meshObj.data.uv_layers)
@@ -1197,6 +1216,7 @@ class __PmxExporter:
 
         try:
             logging.info('Loading mesh: %s', meshObj.name)
+            meshObj.show_only_shape_key = bool(muted_modifiers)
             return self.__doLoadMeshData(meshObj, bone_map)
         finally:
             meshObj.show_only_shape_key = show_only_shape_key
