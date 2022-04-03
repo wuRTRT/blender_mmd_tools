@@ -142,10 +142,11 @@ class FnSDEF():
             shapekey_data = shapekey.data
             if use_scale:
                 # with scale
+                key_blocks = tuple(k for k in shapekey.id_data.key_blocks[1:] if not k.mute and k.value and k.name != cls.SHAPEKEY_NAME)
                 for bone0, bone1, sdef_data, vids in cls.g_verts[_hash(obj)].values():
                     bone0, bone1 = pose_bones[bone0.name], pose_bones[bone1.name]
-                    if use_skip and not cls.__check_bone_update(obj, bone0, bone1):
-                        continue
+                    #if use_skip and not cls.__check_bone_update(obj, bone0, bone1):
+                    #    continue
                     mat0 = matmul(bone0.matrix, bone0.bone.matrix_local.inverted())
                     mat1 = matmul(bone1.matrix, bone1.bone.matrix_local.inverted())
                     rot0 = mat0.to_euler('YXZ').to_quaternion()
@@ -156,7 +157,9 @@ class FnSDEF():
                     for vid, w0, w1, pos_c, cr0, cr1 in sdef_data:
                         s = s0*w0 + s1*w1
                         mat_rot = matmul((rot0*w0 + rot1*w1).normalized().to_matrix(), Matrix([(s[0],0,0), (0,s[1],0), (0,0,s[2])]))
-                        shapekey_data[vid].co = matmul(mat_rot, pos_c) + matmul(mat0, cr0)*w0 + matmul(mat1, cr1)*w1
+                        #shapekey_data[vid].co = matmul(mat_rot, pos_c) + matmul(mat0, cr0)*w0 + matmul(mat1, cr1)*w1
+                        delta = sum(((key.data[vid].co - key.relative_key.data[vid].co)*key.value for key in key_blocks), Vector()) # assuming key.vertex_group = ''
+                        shapekey_data[vid].co = matmul(mat_rot, pos_c+delta) - delta + matmul(mat0, cr0)*w0 + matmul(mat1, cr1)*w1
             else:
                 # default
                 for bone0, bone1, sdef_data, vids in cls.g_verts[_hash(obj)].values():
@@ -182,10 +185,11 @@ class FnSDEF():
                 shapekey_data = cls.g_shapekey_data[_hash(obj)] = shapekey_data.reshape(len(shapekey.data), 3)
             if use_scale:
                 # scale & bulk update
+                key_blocks = tuple(k for k in shapekey.id_data.key_blocks[1:] if not k.mute and k.value and k.name != cls.SHAPEKEY_NAME)
                 for bone0, bone1, sdef_data, vids in cls.g_verts[_hash(obj)].values():
                     bone0, bone1 = pose_bones[bone0.name], pose_bones[bone1.name]
-                    if use_skip and not cls.__check_bone_update(obj, bone0, bone1):
-                        continue
+                    #if use_skip and not cls.__check_bone_update(obj, bone0, bone1):
+                    #    continue
                     mat0 = matmul(bone0.matrix, bone0.bone.matrix_local.inverted())
                     mat1 = matmul(bone1.matrix, bone1.bone.matrix_local.inverted())
                     rot0 = mat0.to_euler('YXZ').to_quaternion()
@@ -196,7 +200,11 @@ class FnSDEF():
                     def scale(mat_rot, w0, w1):
                         s = s0*w0 + s1*w1
                         return matmul(mat_rot, Matrix([(s[0],0,0), (0,s[1],0), (0,0,s[2])]))
-                    shapekey_data[vids] = [matmul(scale((rot0*w0 + rot1*w1).normalized().to_matrix(), w0, w1), pos_c) + matmul(mat0, cr0)*w0 + matmul(mat1, cr1)*w1 for vid, w0, w1, pos_c, cr0, cr1 in sdef_data]
+                    #shapekey_data[vids] = [matmul(scale((rot0*w0 + rot1*w1).normalized().to_matrix(), w0, w1), pos_c) + matmul(mat0, cr0)*w0 + matmul(mat1, cr1)*w1 for vid, w0, w1, pos_c, cr0, cr1 in sdef_data]
+                    def offset(mat_rot, pos_c, vid):
+                        delta = sum(((key.data[vid].co - key.relative_key.data[vid].co)*key.value for key in key_blocks), Vector()) # assuming key.vertex_group = ''
+                        return matmul(mat_rot, pos_c+delta) - delta
+                    shapekey_data[vids] = [offset(scale((rot0*w0 + rot1*w1).normalized().to_matrix(), w0, w1), pos_c, vid) + matmul(mat0, cr0)*w0 + matmul(mat1, cr1)*w1 for vid, w0, w1, pos_c, cr0, cr1 in sdef_data]
             else:
                 # bulk update
                 for bone0, bone1, sdef_data, vids in cls.g_verts[_hash(obj)].values():
