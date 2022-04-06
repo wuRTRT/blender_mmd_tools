@@ -93,14 +93,14 @@ class _OpenTextureBase(object):
     """
     bl_options = {'REGISTER', 'UNDO', 'INTERNAL'}
 
-    filepath = StringProperty(
+    filepath: StringProperty(
         name="File Path",
         description="Filepath used for importing the file",
         maxlen=1024,
         subtype='FILE_PATH',
         )
 
-    use_filter_image = BoolProperty(
+    use_filter_image: BoolProperty(
         default=True,
         options={'HIDDEN'},
         )

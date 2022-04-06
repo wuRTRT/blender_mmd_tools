@@ -11,7 +11,7 @@ class ConvertToMMDLamp(Operator):
     bl_description = 'Create a light rig for MMD'
     bl_options = {'REGISTER', 'UNDO'}
 
-    scale = FloatProperty(
+    scale: FloatProperty(
         name='Scale',
         description='Scaling factor for initializing the light',
         default=0.08,

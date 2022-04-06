@@ -13,20 +13,20 @@ class ConvertToMMDCamera(Operator):
     bl_description = 'Create a camera rig for MMD'
     bl_options = {'REGISTER', 'UNDO'}
 
-    scale = FloatProperty(
+    scale: FloatProperty(
         name='Scale',
         description='Scaling factor for initializing the camera',
         default=0.08,
         )
 
-    bake_animation = BoolProperty(
+    bake_animation: BoolProperty(
         name='Bake Animation',
         description='Bake camera animation to a new MMD camera rig',
         default=False,
         options={'SKIP_SAVE'},
         )
 
-    camera_source = EnumProperty(
+    camera_source: EnumProperty(
         name='Camera Source',
         description='Select camera source to bake animation (camera target is the selected or DoF object)',
         items = [
@@ -36,7 +36,7 @@ class ConvertToMMDCamera(Operator):
         default='CURRENT',
         )
 
-    min_distance = FloatProperty(
+    min_distance: FloatProperty(
         name='Min Distance',
         description='Minimum distance to camera target when baking animation',
         default=0.1,
