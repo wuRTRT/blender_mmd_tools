@@ -316,6 +316,7 @@ class MMDRoot(bpy.types.PropertyGroup):
         default='',
     )
 
+    # TODO: Replace to driver for NLA
     show_meshes: bpy.props.BoolProperty(
         name='Show Meshes',
         description='Show all meshes of the MMD model',

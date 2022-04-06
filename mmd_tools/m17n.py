@@ -136,6 +136,7 @@ translation_dict = {
         ("*", "Mirror Motion"): "モーションをミラー",
         ("*", "Update scene settings"): "シーン設定を更新",
         ("*", "Use Frame Range"): "フレーム範囲を使用",
+        ("*", "Use NLA"): "NLAを使用",
 
         ("*", "Pose:"): "ポーズ:",
         ("*", "Current Pose"): "現在のポーズ",
@@ -480,6 +481,7 @@ translation_dict = {
         ("*", "Mirror Motion"): "镜像运动",
         ("*", "Update scene settings"): "更新场景设置",
         ("*", "Use Frame Range"): "使用帧范围",
+        ("*", "Use NLA"): "使用NLA",
 
         ("*", "Pose:"): "姿态:",
         ("*", "Current Pose"): "当前的姿态",

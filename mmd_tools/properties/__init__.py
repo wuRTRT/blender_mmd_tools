@@ -46,6 +46,7 @@ __properties = {
         'mmd_bone': bpy.props.PointerProperty(type=MMDBone),
         'is_mmd_shadow_bone': bpy.props.BoolProperty(name='is_mmd_shadow_bone', default=False),
         'mmd_shadow_bone_type': bpy.props.StringProperty(name='mmd_shadow_bone_type'),
+        # TODO: Replace to driver for NLA
         'mmd_ik_toggle': bpy.props.BoolProperty(
             name='MMD IK Toggle',
             description='MMD IK toggle is used to import/export animation of IK on-off',

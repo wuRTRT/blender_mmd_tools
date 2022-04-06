@@ -264,6 +264,11 @@ class ImportVmd(Operator, ImportHelper):
         description='Update frame range and frame rate (30 fps)',
         default=True,
         )
+    use_NLA: bpy.props.BoolProperty(
+        name='Use NLA',
+        description='Import the motion as NLA strips',
+        default=False,
+        )
 
     @classmethod
     def poll(cls, context):
@@ -273,6 +278,7 @@ class ImportVmd(Operator, ImportHelper):
         layout = self.layout
         layout.prop(self, 'scale')
         layout.prop(self, 'margin')
+        layout.prop(self, 'use_NLA')
 
         layout.prop(self, 'bone_mapper')
         if self.bone_mapper == 'RENAMED_BONES':
@@ -312,6 +318,7 @@ class ImportVmd(Operator, ImportHelper):
             use_pose_mode=self.use_pose_mode,
             frame_margin=self.margin,
             use_mirror=self.use_mirror,
+            use_NLA=self.use_NLA,
             )
 
         for i in selected_objects:
