@@ -774,6 +774,7 @@ class PMXImporter:
         DisplayItemQuickSetup.apply_bone_groups(root.mmd_root, self.__armObj)
 
     def __addArmatureModifier(self, meshObj, armObj):
+        # TODO: move to model.py
         armModifier = meshObj.modifiers.new(name='Armature', type='ARMATURE')
         armModifier.object = armObj
         armModifier.use_vertex_groups = True

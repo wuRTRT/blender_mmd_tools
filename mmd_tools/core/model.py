@@ -249,27 +249,59 @@ class FnModel:
             if len(child_root_object.children) == 0:
                 bpy.data.objects.remove(child_root_object)
 
+    @staticmethod
+    def _add_armature_modifier(mesh_object: bpy.types.Object, armature_object: bpy.types.Object) -> bpy.types.ArmatureModifier:
+        if any(m.type == 'ARMATURE' for m in mesh_object.modifiers):
+            # already has armature modifier.
+            return
+
+        modifier: bpy.types.ArmatureModifier = mesh_object.modifiers.new(name='Armature', type='ARMATURE')
+        modifier.object = armature_object
+        modifier.use_vertex_groups = True
+        modifier.name = 'mmd_bone_order_override'
+
+        return modifier
+
+    @staticmethod
+    def attach_meshes(parent_root_object: bpy.types.Object, mesh_objects: Iterable[bpy.types.Object], add_armature_modifier: bool):
+        armature_object: bpy.types.Object = FnModel.find_armature(parent_root_object)
+
+        def __get_root_object(obj: bpy.types.Object) -> bpy.types.Object:
+            if obj.parent is None:
+                return obj
+            return __get_root_object(obj.parent)
+
+        for mesh_object in mesh_objects:
+            if mesh_object.type != 'MESH':
+                continue
+            if mesh_object.mmd_type != 'NONE':
+                continue
+            if FnModel.find_root(mesh_object) is not None:
+                continue
+
+            mesh_root_object = __get_root_object(mesh_object)
+            original_matrix_world = mesh_root_object.matrix_world
+            mesh_root_object.parent_type = 'OBJECT'
+            mesh_root_object.parent = armature_object
+            mesh_root_object.matrix_world = original_matrix_world
+
+            if add_armature_modifier:
+                FnModel._add_armature_modifier(mesh_object, armature_object)
+
+
 # SUPPORT_UNTIL: 4.3 LTS
-
-
 def isRigidBodyObject(obj):
     return FnModel.is_rigid_body_object(obj)
 
 # SUPPORT_UNTIL: 4.3 LTS
-
-
 def isJointObject(obj):
     return FnModel.is_joint_object(obj)
 
 # SUPPORT_UNTIL: 4.3 LTS
-
-
 def isTemporaryObject(obj):
     return FnModel.is_temporary_object(obj)
 
 # SUPPORT_UNTIL: 4.3 LTS
-
-
 def getRigidBodySize(obj):
     return FnModel.get_rigid_body_size(obj)
 
@@ -646,6 +678,9 @@ class Model:
         if arm is None:
             return []
         return FnModel.child_meshes(arm)
+
+    def attachMeshes(self, meshes: Iterable[bpy.types.Object], add_armature_modifier: bool = True):
+        FnModel.attach_meshes(self.rootObject(), meshes, add_armature_modifier)
 
     def firstMesh(self):
         for i in self.meshes():

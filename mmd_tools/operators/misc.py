@@ -230,33 +230,22 @@ class AttachMeshesToMMD(Operator):
     bl_description = 'Finds existing meshes and attaches them to the selected MMD model'
     bl_options = {'REGISTER', 'UNDO'}
 
-    def execute(self, context):
-        root = mmd_model.Model.findRoot(context.active_object)
+    add_armature_modifier: bpy.props.BoolProperty(
+        default=True
+    )
+
+    def execute(self, context: bpy.types.Context):
+        root = mmd_model.FnModel.find_root(context.active_object)
         if root is None:
             self.report({ 'ERROR' }, 'Select a MMD model')
             return { 'CANCELLED' }
 
-        rig = mmd_model.Model(root)
-        armObj = rig.armature()
+        armObj = mmd_model.FnModel.find_armature(root)
         if armObj is None:
             self.report({ 'ERROR' }, 'Model Armature not found')
             return { 'CANCELLED' }
 
-        def __get_root(mesh):
-            if mesh.parent is None:
-                return mesh
-            return __get_root(mesh.parent)
-
-        meshes_list = (o for o in context.visible_objects if o.type == 'MESH' and o.mmd_type == 'NONE')
-        for mesh in meshes_list:
-            if mmd_model.Model.findRoot(mesh) is not None:
-                # Do not attach meshes from other models
-                continue
-            mesh = __get_root(mesh)
-            m = mesh.matrix_world
-            mesh.parent_type = 'OBJECT'
-            mesh.parent = armObj
-            mesh.matrix_world = m
+        mmd_model.FnModel.attach_meshes(root, context.visible_objects, self.add_armature_modifier)
         return { 'FINISHED' }
 
 class ChangeMMDIKLoopFactor(Operator):
