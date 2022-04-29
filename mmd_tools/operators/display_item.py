@@ -88,8 +88,19 @@ class AddDisplayItem(Operator):
             morph_name = morph.name if morph else 'Morph Item'
             self._add_item(frame, 'MORPH', morph_name, mmd_root.active_morph_type)
         else:
-            bone_name = context.active_bone.name if context.active_bone else 'Bone Item'
-            self._add_item(frame, 'BONE', bone_name)
+            if context.active_bone:
+                bone_names = [context.active_bone.name]
+                if context.selected_bones:
+                    bone_names += [b.name for b in context.selected_bones]
+                if context.selected_editable_bones:
+                    bone_names += [b.name for b in context.selected_editable_bones]
+                if context.selected_pose_bones:
+                    bone_names += [b.name for b in context.selected_pose_bones]
+                bone_names = sorted(list(set(bone_names)))
+                for bone_name in bone_names:
+                    self._add_item(frame, 'BONE', bone_name)
+            else:
+                self._add_item(frame, 'BONE', 'Bone Item')
         return {'FINISHED'}
 
     def _add_item(self, frame, item_type, item_name, morph_type=None):
