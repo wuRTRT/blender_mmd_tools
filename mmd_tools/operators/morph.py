@@ -672,6 +672,10 @@ class EditUVMorph(Operator):
                 if d.select:
                     vertices[l.vertex_index].select = True
 
+            if not hasattr(meshObj.data, 'uv_textures'):
+                polygons = meshObj.data.polygons
+                polygons.active = getattr(next((p for p in polygons if all(vertices[i].select for i in p.vertices)), None), 'index', polygons.active)
+
             bpy.ops.object.mode_set(mode='EDIT')
         meshObj.select = selected
         return { 'FINISHED' }
