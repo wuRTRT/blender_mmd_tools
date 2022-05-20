@@ -966,8 +966,15 @@ class Model:
         rigid = rigid_obj.mmd_rigid
         rigid_type = int(rigid.type)
         relation = rigid_obj.constraints['mmd_tools_rigid_parent']
+
+        if relation.target is None:
+            relation.target = self.armature()
+
         arm = relation.target
-        bone_name = relation.subtarget
+        if relation.subtarget not in arm.pose.bones:
+            bone_name = ''
+        else:
+            bone_name = relation.subtarget
 
         if rigid_type == rigid_body.MODE_STATIC:
             rb.kinematic = True
