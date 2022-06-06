@@ -70,6 +70,9 @@ def load_handler(_dummy):
     FnSDEF.clear_cache()
     FnSDEF.register_driver_function()
 
+    from mmd_tools.core.material import MigrationFnMaterial
+    MigrationFnMaterial.update_mmd_shader()
+
 def register():
     auto_load.register()
     properties.register()

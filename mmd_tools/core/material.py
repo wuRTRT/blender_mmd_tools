@@ -2,9 +2,10 @@
 
 import logging
 import os
+from typing import Optional
 
 import bpy
-from mmd_tools.bpyutils import addon_preferences, select_object
+from mmd_tools.bpyutils import addon_preferences
 from mmd_tools.core.exceptions import MaterialNotFoundError
 from mmd_tools.core.shader import _NodeGroupUtils
 
@@ -765,7 +766,7 @@ class _FnMaterialCycles(_FnMaterialBI):
             node_uv.location = node_shader.location + Vector((-5*210, -2.5*220))
             node_uv.node_tree = self.__get_shader_uv()
 
-        if not node_shader.outputs['Shader'].is_linked:
+        if not (node_shader.outputs['Shader'].is_linked or node_shader.outputs['Color'].is_linked or node_shader.outputs['Alpha'].is_linked):
             node_output = next((n for n in nodes if isinstance(n, bpy.types.ShaderNodeOutputMaterial) and n.is_active_output), None)
             if node_output is None:
                 node_output = nodes.new('ShaderNodeOutputMaterial')
@@ -915,6 +916,8 @@ class _FnMaterialCycles(_FnMaterialBI):
         links.new(node_input.outputs['Sphere Tex'], node_spa.inputs['Color2'])
 
         ng.new_output_socket('Shader', shader_alpha_mix.outputs['Shader'])
+        ng.new_output_socket('Color', node_sphere.outputs['Color'])
+        ng.new_output_socket('Alpha', node_alpha.outputs['Value'])
 
         return shader
 
@@ -922,3 +925,22 @@ FnMaterial = _FnMaterialCycles
 if bpy.app.version < (2, 80, 0):
     FnMaterial = _FnMaterialBI
 
+class MigrationFnMaterial:
+    @staticmethod
+    def update_mmd_shader():
+        mmd_shader_node_tree: Optional[bpy.types.NodeTree] = bpy.data.node_groups.get('MMDShaderDev')
+        if mmd_shader_node_tree is None:
+            return
+
+        if 'Color' in mmd_shader_node_tree.outputs:
+            return
+
+        ng = _NodeGroupUtils(mmd_shader_node_tree)
+        shader_diffuse: bpy.types.ShaderNodeBsdfDiffuse = [n for n in mmd_shader_node_tree.nodes if n.type == 'BSDF_DIFFUSE'][0]
+        node_sphere: bpy.types.ShaderNodeMixRGB = shader_diffuse.inputs['Color'].links[0].from_node
+        node_output: bpy.types.NodeGroupOutput = ng.node_output
+        shader_alpha_mix: bpy.types.ShaderNodeMixShader = node_output.inputs['Shader'].links[0].from_node
+        node_alpha: bpy.types.ShaderNodeMath = shader_alpha_mix.inputs['Fac'].links[0].from_node
+
+        ng.new_output_socket('Color', node_sphere.outputs['Color'])
+        ng.new_output_socket('Alpha', node_alpha.outputs['Value'])
