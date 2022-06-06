@@ -3,7 +3,7 @@
 import bpy
 import mmd_tools.core.model as mmd_model
 from bpy.types import Operator
-from mmd_tools.bpyutils import SceneOp
+from mmd_tools.bpyutils import SceneOp, activate_layer_collection
 from mmd_tools.core.bone import FnBone
 
 
@@ -27,14 +27,17 @@ class MorphSliderSetup(Operator):
     def execute(self, context):
         obj = context.active_object
         root = mmd_model.Model.findRoot(context.active_object)
-        rig = mmd_model.Model(root)
-        if self.type == 'BIND':
-            rig.morph_slider.bind()
-        elif self.type == 'UNBIND':
-            rig.morph_slider.unbind()
-        else:
-            rig.morph_slider.create()
-        SceneOp(context).active_object = obj
+
+        with activate_layer_collection(root):
+            rig = mmd_model.Model(root)
+            if self.type == 'BIND':
+                rig.morph_slider.bind()
+            elif self.type == 'UNBIND':
+                rig.morph_slider.unbind()
+            else:
+                rig.morph_slider.create()
+            SceneOp(context).active_object = obj
+
         return {'FINISHED'}
 
 class CleanRiggingObjects(Operator):
@@ -73,9 +76,12 @@ class BuildRig(Operator):
 
     def execute(self, context):
         root = mmd_model.Model.findRoot(context.active_object)
-        rig = mmd_model.Model(root)
-        rig.build(self.non_collision_distance_scale, self.collision_margin)
-        SceneOp(context).active_object = root
+
+        with activate_layer_collection(root):
+            rig = mmd_model.Model(root)
+            rig.build(self.non_collision_distance_scale, self.collision_margin)
+            SceneOp(context).active_object = root
+
         return {'FINISHED'}
 
 class CleanAdditionalTransformConstraints(Operator):
@@ -380,16 +386,18 @@ class AssembleAll(Operator):
     def execute(self, context):
         active_object = context.active_object
         root_object = mmd_model.Model.findRoot(active_object)
-        rig = mmd_model.Model(root_object)
 
-        rig.applyAdditionalTransformConstraints()
-        rig.build(1.5, 1e-06)
-        rig.morph_slider.bind()
+        with activate_layer_collection(root_object):
+            rig = mmd_model.Model(root_object)
 
-        bpy.ops.mmd_tools.sdef_bind({'selected_objects': [active_object]})
-        root_object.mmd_root.use_property_driver = True
+            rig.applyAdditionalTransformConstraints()
+            rig.build(1.5, 1e-06)
+            rig.morph_slider.bind()
 
-        SceneOp(context).active_object = active_object
+            bpy.ops.mmd_tools.sdef_bind({'selected_objects': [active_object]})
+            root_object.mmd_root.use_property_driver = True
+
+            SceneOp(context).active_object = active_object
 
         return {'FINISHED'}
 
@@ -401,14 +409,16 @@ class DisassembleAll(Operator):
     def execute(self, context):
         active_object = context.active_object
         root_object = mmd_model.Model.findRoot(active_object)
-        rig = mmd_model.Model(root_object)
 
-        root_object.mmd_root.use_property_driver = False
-        bpy.ops.mmd_tools.sdef_unbind({'selected_objects': [active_object]})
-        rig.morph_slider.unbind()
-        rig.clean()
-        rig.cleanAdditionalTransformConstraints()
+        with activate_layer_collection(root_object):
+            rig = mmd_model.Model(root_object)
 
-        SceneOp(context).active_object = active_object
+            root_object.mmd_root.use_property_driver = False
+            bpy.ops.mmd_tools.sdef_unbind({'selected_objects': [active_object]})
+            rig.morph_slider.unbind()
+            rig.clean()
+            rig.cleanAdditionalTransformConstraints()
+
+            SceneOp(context).active_object = active_object
 
         return {'FINISHED'}
