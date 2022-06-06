@@ -11,7 +11,7 @@ import mathutils
 from mmd_tools import bpyutils
 from mmd_tools.bpyutils import Props, SceneOp, matmul
 from mmd_tools.core import rigid_body
-from mmd_tools.core.bone import FnBone
+from mmd_tools.core.bone import FnBone, MigrationFnBone
 from mmd_tools.core.morph import FnMorph
 
 
@@ -1165,5 +1165,7 @@ class Model:
 
     def applyAdditionalTransformConstraints(self):
         arm = self.armature()
-        if arm:
-            FnBone.apply_additional_transformation(arm)
+        if not arm:
+            return
+        MigrationFnBone.fix_mmd_ik_limit_override(arm)
+        FnBone.apply_additional_transformation(arm)

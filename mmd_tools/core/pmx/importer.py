@@ -402,7 +402,7 @@ class PMXImporter:
                 c = bone.constraints.new(type='LIMIT_ROTATION')
                 c.mute = not is_valid_ik
                 c.name = 'mmd_ik_limit_override'
-                c.owner_space = 'POSE' # WORLD/POSE/LOCAL
+                c.owner_space = 'LOCAL'
                 c.max_x, c.max_y, c.max_z = maximum
                 c.min_x, c.min_y, c.min_z = minimum
                 c.use_limit_x = bone.ik_max_x != c.max_x or bone.ik_min_x != c.min_x
