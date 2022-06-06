@@ -512,7 +512,7 @@ class UpdateRigidBodyWorld(Operator):
 
         def _references(obj):
             yield obj
-            if obj.proxy:
+            if getattr(obj, 'proxy', None):
                 yield from _references(obj.proxy)
             if getattr(obj, 'override_library', None):
                 yield from _references(obj.override_library.reference)
