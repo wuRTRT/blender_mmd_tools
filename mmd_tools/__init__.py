@@ -17,8 +17,6 @@ bl_info = {
 import bpy
 import logging
 
-logging.basicConfig(format='%(message)s', level=logging.DEBUG)
-
 from mmd_tools import auto_load
 auto_load.init()
 
