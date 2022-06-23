@@ -219,6 +219,8 @@ translation_dict = {
         ("*", "Bone Order"): "ボーン順序",
         ("*", "After Dynamics"): "物理後",
         ("*", "Transform Order"): "変形階層",
+        ("Operator", "Add Missing Vertex Groups from Bones"): "ボーンから不足している頂点グループを追加",
+        ("*", "Search in all meshes"): "全てのメッシュで検索",
 
         # 3D Viewport > Sidebar > Misc > MMD Display Panel
         ("*", "MMD Display"): "MMD表示",
@@ -564,6 +566,8 @@ translation_dict = {
         ("*", "Bone Order"): "骨骼顺序",
         ("*", "After Dynamics"): "物理後",
         ("*", "Transform Order"): "変形階層",
+        ("Operator", "Add Missing Vertex Groups from Bones"): "从骨骼中添加缺失的顶点组",
+        ("*", "Search in all meshes"): "在所有网格中搜索",
 
         # 3D Viewport > Sidebar > Misc > MMD Display Panel
         ("*", "MMD Display"): "MMD显示",

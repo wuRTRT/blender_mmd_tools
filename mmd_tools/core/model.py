@@ -117,6 +117,15 @@ class FnModel:
         return next(filter(lambda o: o.type == 'EMPTY' and o.mmd_type == 'TEMPORARY_GRP_OBJ', root.children), None)
 
     @classmethod
+    def find_bone_order_mesh_object(cls, root_object: bpy.types.Object) -> Optional[bpy.types.Object]:
+        armature_object = cls.find_armature(root_object)
+        if armature_object is None:
+            return None
+
+        # TODO consistency issue
+        return next(filter(lambda o: o.type == 'MESH' and 'mmd_bone_order_override' in o.modifiers, armature_object.children), None)
+
+    @classmethod
     def all_children(cls, obj: bpy.types.Object) -> Iterable[bpy.types.Object]:
         child: bpy.types.Object
         for child in obj.children:
@@ -288,6 +297,28 @@ class FnModel:
             if add_armature_modifier:
                 FnModel._add_armature_modifier(mesh_object, armature_object)
 
+    @staticmethod
+    def add_missing_vertex_groups_from_bones(root_object: bpy.types.Object, mesh_object: bpy.types.Object, search_in_all_meshes: bool):
+        vertex_group_names: Set[str] = set()
+
+        search_meshes = FnModel.child_meshes(root_object) if search_in_all_meshes else [mesh_object]
+
+        for search_mesh in search_meshes:
+            vertex_group_names.update(search_mesh.vertex_groups.keys())
+
+        armature_object = FnModel.find_armature(root_object)
+
+        pose_bone: bpy.types.PoseBone
+        for pose_bone in armature_object.pose.bones:
+            pose_bone_name = pose_bone.name
+
+            if pose_bone_name in vertex_group_names:
+                continue
+
+            if pose_bone_name.startswith('_'):
+                continue
+
+            mesh_object.vertex_groups.new(name=pose_bone_name)
 
 # SUPPORT_UNTIL: 4.3 LTS
 def isRigidBodyObject(obj):
