@@ -3,7 +3,7 @@
 bl_info = {
     "name": "mmd_tools",
     "author": "sugiany",
-    "version": (2, 3, 0),
+    "version": (2, 4, 0),
     "blender": (2, 83, 0),
     "location": "View3D > Sidebar > MMD Tools Panel",
     "description": "Utility tools for MMD model editing. (UuuNyaa's forked version)",
@@ -15,7 +15,6 @@ bl_info = {
 }
 
 import bpy
-import logging
 
 from mmd_tools import auto_load
 auto_load.init()
