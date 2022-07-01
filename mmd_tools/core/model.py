@@ -3,16 +3,21 @@
 import itertools
 import logging
 import time
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Set, Union
 
 import bpy
 import idprop
 import mathutils
+import rna_prop_ui
 from mmd_tools import bpyutils
 from mmd_tools.bpyutils import Props, SceneOp, matmul
 from mmd_tools.core import rigid_body
 from mmd_tools.core.bone import FnBone, MigrationFnBone
 from mmd_tools.core.morph import FnMorph
+from mmd_tools.core.rigid_body import MODE_DYNAMIC, MODE_DYNAMIC_BONE, MODE_STATIC
+
+if TYPE_CHECKING:
+    from properties.rigid_body import MMDRigidBody
 
 
 class InvalidRigidSettingException(ValueError):
@@ -805,6 +810,7 @@ class Model:
         logging.info('****************************************')
         start_time = time.time()
         self.__preBuild()
+        self.disconnectPhysicsBones()
         self.buildRigids(non_collision_distance_scale, collision_margin)
         self.buildJoints()
         self.__postBuild()
@@ -852,6 +858,7 @@ class Model:
             self.__restoreTransforms(i)
 
         self.__removeTemporaryObjects()
+        self.connectPhysicsBones()
 
         arm = self.armature()
         if arm is not None:  # update armature
@@ -1200,3 +1207,41 @@ class Model:
             return
         MigrationFnBone.fix_mmd_ik_limit_override(arm)
         FnBone.apply_additional_transformation(arm)
+
+    def __editPhysicsBones(self, editor: Callable[[bpy.types.EditBone], None], target_modes: Set[str]):
+        armature_object = self.armature()
+
+        armature: bpy.types.Armature
+        with bpyutils.edit_object(armature_object) as armature:
+            edit_bones = armature.edit_bones
+            rigid_body_object: bpy.types.Object
+            for rigid_body_object in self.rigidBodies():
+                mmd_rigid: MMDRigidBody = rigid_body_object.mmd_rigid
+                if mmd_rigid.type not in target_modes:
+                    continue
+
+                bone_name: str = mmd_rigid.bone
+                edit_bone = edit_bones.get(bone_name)
+                if edit_bone is None:
+                    continue
+
+                editor(edit_bone)
+
+    def disconnectPhysicsBones(self):
+        def editor(edit_bone: bpy.types.EditBone):
+            rna_prop_ui.rna_idprop_ui_create(edit_bone, 'mmd_bone_use_connect', default=edit_bone.use_connect)
+            edit_bone.use_connect = False
+
+        self.__editPhysicsBones(editor, {str(MODE_DYNAMIC)})
+
+    def connectPhysicsBones(self):
+        def editor(edit_bone: bpy.types.EditBone):
+            mmd_bone_use_connect_str: Optional[str] = edit_bone.get('mmd_bone_use_connect')
+            if mmd_bone_use_connect_str is None:
+                return
+
+            if not edit_bone.use_connect: # wasn't it overwritten?
+                edit_bone.use_connect = bool(mmd_bone_use_connect_str)
+            del edit_bone['mmd_bone_use_connect']
+
+        self.__editPhysicsBones(editor, {str(MODE_STATIC), str(MODE_DYNAMIC), str(MODE_DYNAMIC_BONE)})

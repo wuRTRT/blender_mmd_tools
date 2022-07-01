@@ -388,7 +388,7 @@ class __PmxExporter:
                 # a connected child bone is preferred
                 pmx_bone.displayConnection = None
                 for child in bone.children:
-                    if child.use_connect:
+                    if child.use_connect or bool(child.get('mmd_bone_use_connect')):
                         pmx_bone.displayConnection = child
                         break
                 if not pmx_bone.displayConnection:
