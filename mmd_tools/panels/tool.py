@@ -299,10 +299,15 @@ class MMD_TOOLS_UL_MaterialMorphOffsets(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if self.layout_type in {'DEFAULT'}:
             material = item.material
-            if not material and item.material_id >= 0:
-                layout.label(text='Material ID %d is missing'%item.material_id, translate=False, icon='ERROR')
-            else:
-                layout.label(text=material or 'All Materials', translate=False, icon='MATERIAL')
+            if material == '':
+                material = 'All Materials'
+            layout.label(text=material, translate=False, icon='MATERIAL')
+
+            # if not material and item.material_id >= 0:
+            #     layout.label(text='Material ID %d is missing'%item.material_id, translate=False, icon='ERROR')
+            # else:
+            #     layout.label(text=material or 'All Materials', translate=False, icon='MATERIAL')
+                
         elif self.layout_type in {'COMPACT'}:
             pass
         elif self.layout_type in {'GRID'}:
@@ -399,15 +404,20 @@ class MMDMorphToolsPanel(_PanelBase, Panel):
         tb1 = tb.column(align=True)
         tb1.operator('mmd_tools.morph_move', text='', icon='TRIA_UP').type = 'UP'
         tb1.operator('mmd_tools.morph_move', text='', icon='TRIA_DOWN').type = 'DOWN'
+        # add show detail
+        tb.separator()
+        tb1 = tb.column(align=True)
+        tb1.prop(mmd_root, 'morph_panel_show_detail', text='', icon='COLLAPSEMENU')
 
         morph = ItemOp.get_by_index(getattr(mmd_root, morph_type), mmd_root.active_morph)
         if morph:
             slider = rig.morph_slider.get(morph.name)
             if slider:
                 col.row().prop(slider, 'value')
-            draw_func = getattr(self, '_draw_%s_data'%morph_type[:-7], None)
-            if draw_func:
-                draw_func(context, rig, col, morph)
+            if mmd_root.morph_panel_show_detail:
+                draw_func = getattr(self, '_draw_%s_data'%morph_type[:-7], None)
+                if draw_func:
+                    draw_func(context, rig, col, morph)
 
     def _template_morph_offset_list(self, layout, morph, list_type_name):
         row = layout.row()

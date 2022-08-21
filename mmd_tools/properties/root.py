@@ -464,6 +464,11 @@ class MMDRoot(bpy.types.PropertyGroup):
         set=_setActiveMorph,
         get=_getActiveMorph,
     )
+    morph_panel_show_detail: bpy.props.BoolProperty(
+        name='Morph Panel Show Detail',
+        description='Show Morph Detail',
+        default=True,
+    )
     active_mesh_index: bpy.props.IntProperty(
         name='Active Mesh',
         min=0,

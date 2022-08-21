@@ -10,7 +10,7 @@ import idprop
 import mathutils
 import rna_prop_ui
 from mmd_tools import bpyutils
-from mmd_tools.bpyutils import Props, SceneOp, matmul
+from mmd_tools.bpyutils import Props, SceneOp, matmul, activate_layer_collection
 from mmd_tools.core import rigid_body
 from mmd_tools.core.bone import FnBone, MigrationFnBone
 from mmd_tools.core.morph import FnMorph
@@ -699,14 +699,15 @@ class Model:
     def temporaryGroupObject(self):
         if self.__temporary_grp is None:
             self.__temporary_grp = FnModel.find_temporary_group(self.__root)
-            if self.__temporary_grp is None:
-                temporarys = bpy.data.objects.new(name='temporary', object_data=None)
-                SceneOp(bpy.context).link_object(temporarys)
-                temporarys.mmd_type = 'TEMPORARY_GRP_OBJ'
-                temporarys.parent = self.__root
-                temporarys.hide = temporarys.hide_select = True
-                temporarys.lock_rotation = temporarys.lock_location = temporarys.lock_scale = [True, True, True]
-                self.__temporary_grp = temporarys
+            with activate_layer_collection(self.__root):
+                if self.__temporary_grp is None:
+                    temporarys = bpy.data.objects.new(name='temporary', object_data=None)
+                    SceneOp(bpy.context).link_object(temporarys)
+                    temporarys.mmd_type = 'TEMPORARY_GRP_OBJ'
+                    temporarys.parent = self.__root
+                    temporarys.hide = temporarys.hide_select = True
+                    temporarys.lock_rotation = temporarys.lock_location = temporarys.lock_scale = [True, True, True]
+                    self.__temporary_grp = temporarys
         return self.__temporary_grp
 
     def meshes(self):
