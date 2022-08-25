@@ -5,6 +5,7 @@ from typing import Dict, List, Optional, Set
 
 import bmesh
 import bpy
+from mmd_tools.bpyutils import activate_layer_collection
 from mmd_tools.core.model import FnModel, Model
 
 
@@ -66,7 +67,8 @@ class ModelJoinByBonesOperator(bpy.types.Operator):
         if parent_root_object is None or len(child_root_objects) == 0:
             raise MessageException("No MMD Models selected")
 
-        FnModel.join_models(parent_root_object, child_root_objects)
+        with activate_layer_collection(parent_root_object):
+            FnModel.join_models(parent_root_object, child_root_objects)
 
         bpy.ops.object.mode_set(mode='EDIT')
         bpy.ops.armature.parent_set(type='OFFSET')
