@@ -390,7 +390,7 @@ class _MorphSlider:
         mmd_root = self.__rig.rootObject().mmd_root
 
         # after unbind, the weird lag problem will disappear.
-        mmd_root.morph_panel_show_detail = True
+        mmd_root.morph_panel_show_settings = True
 
         for m in mmd_root.bone_morphs:
             for d in m.data:
@@ -416,7 +416,7 @@ class _MorphSlider:
         mmd_root = root.mmd_root
 
         # hide detail to avoid weird lag problem
-        mmd_root.morph_panel_show_detail = False
+        mmd_root.morph_panel_show_settings = False
 
         obj = self.create()
         arm = self.__dummy_armature(obj, create=True)
@@ -526,7 +526,6 @@ class _MorphSlider:
             material_offset_map.setdefault('group_dict', {})[m.name] = (data_path, groups)
             for d in m.data:
                 d.name = name_bind = 'mmd_bind%s'%hash(d)
-                # table = material_offset_map.setdefault(d.material_id, ([], []))
                 # add '#' before material name to avoid conflict with group_dict
                 table = material_offset_map.setdefault('#'+d.material, ([], []))
                 table[1 if d.offset_type == 'ADD' else 0].append((m.name, d, name_bind))
@@ -647,16 +646,16 @@ class MigrationFnMorph:
             for mat_morph in root.mmd_root.material_morphs:
                 for morph_data in mat_morph.data:
 
-                    if morph_data.material_pointer is not None:
+                    if morph_data.material_data is not None:
 
                         # The material_id is also no longer used, but for compatibility with older version mmd_tools, keep it.
-                        if 'material_id' not in morph_data.material_pointer.mmd_material.keys() or\
-                            'material_id' not in morph_data.keys() or\
-                            morph_data.material_pointer.mmd_material['material_id'] == morph_data['material_id']:
+                        if 'material_id' not in morph_data.material_data.mmd_material or\
+                            'material_id' not in morph_data or\
+                            morph_data.material_data.mmd_material['material_id'] == morph_data['material_id']:
 
                             # In the new version, the related_mesh property is no longer used.
                             # Explicitly remove this property to avoid misuse.
-                            if 'related_mesh' in morph_data.keys():
+                            if 'related_mesh' in morph_data:
                                 del morph_data['related_mesh']
                             continue
 
@@ -665,22 +664,22 @@ class MigrationFnMorph:
                             # Go update path.
                             pass
                     
-                    morph_data.material_pointer = None
-                    if 'material_id' in morph_data.keys():
+                    morph_data.material_data = None
+                    if 'material_id' in morph_data:
                         mat_id = morph_data['material_id']
                         if mat_id != -1:
                             fnMat = FnMaterial.from_material_id(mat_id)
                             if fnMat:
-                                morph_data.material_pointer = fnMat.material
+                                morph_data.material_data = fnMat.material
                             else:
                                 morph_data['material_id'] = -1
                     
-                    morph_data.related_mesh_pointer = None
-                    if 'related_mesh' in morph_data.keys():
+                    morph_data.related_mesh_data = None
+                    if 'related_mesh' in morph_data:
                         related_mesh = morph_data['related_mesh']
                         del morph_data['related_mesh']
                         if related_mesh != '' and related_mesh in bpy.data.meshes:
-                            morph_data.related_mesh_pointer = bpy.data.meshes[related_mesh]
+                            morph_data.related_mesh_data = bpy.data.meshes[related_mesh]
 
     @staticmethod
     def ensure_material_id_not_conflict():
@@ -705,7 +704,7 @@ class MigrationFnMorph:
 
                     morph_data['related_mesh'] = morph_data.related_mesh
 
-                    if morph_data.material_pointer is None:
+                    if morph_data.material_data is None:
                         morph_data.material_id = -1
                     else:
-                        morph_data.material_id = morph_data.material_pointer.mmd_material.material_id
+                        morph_data.material_id = morph_data.material_data.mmd_material.material_id

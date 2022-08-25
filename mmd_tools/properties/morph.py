@@ -179,7 +179,7 @@ class BoneMorph(_MorphBase, bpy.types.PropertyGroup):
 
 
 def _get_material(prop):
-    mat_p = prop.get('material_pointer', None)
+    mat_p = prop.get('material_data', None)
     if mat_p is not None:
         return mat_p.name
     return ''
@@ -187,12 +187,12 @@ def _get_material(prop):
 
 def _set_material(prop, value):
     if value not in bpy.data.materials:
-        prop['material_pointer'] = None
+        prop['material_data'] = None
         prop['material_id'] = -1
     else:
         mat = bpy.data.materials[value]
         fnMat = FnMaterial(mat)
-        prop['material_pointer'] = mat
+        prop['material_data'] = mat
         prop['material_id'] = fnMat.material_id
 
 
@@ -200,13 +200,13 @@ def _set_related_mesh(prop, value):
     rig = FnModel(prop.id_data)
     mesh = rig.findMesh(value)
     if mesh is not None:
-        prop['related_mesh_pointer'] = mesh.data
+        prop['related_mesh_data'] = mesh.data
     else:
-        prop['related_mesh_pointer'] = None
+        prop['related_mesh_data'] = None
 
 
 def _get_related_mesh(prop):
-    mesh_p = prop.get('related_mesh_pointer', None)
+    mesh_p = prop.get('related_mesh_data', None)
     if mesh_p is not None:
         return mesh_p.name
     return ''
@@ -216,7 +216,7 @@ def _update_material_morph_data(prop, context):
     if not prop.name.startswith('mmd_bind'):
         return
     from mmd_tools.core.shader import _MaterialMorph
-    mat = prop['material_pointer']
+    mat = prop['material_data']
     if mat is not None:
         _MaterialMorph.update_morph_inputs(mat, prop)
     else:
@@ -234,8 +234,8 @@ class MaterialMorphData(bpy.types.PropertyGroup):
         get=_get_related_mesh,
     )
 
-    related_mesh_pointer: bpy.props.PointerProperty(
-        name='Related Mesh Pointer',
+    related_mesh_data: bpy.props.PointerProperty(
+        name='Related Mesh Data',
         type=bpy.types.Mesh,
     )
 
@@ -261,8 +261,8 @@ class MaterialMorphData(bpy.types.PropertyGroup):
         default=-1,
     )
 
-    material_pointer: bpy.props.PointerProperty(
-        name='Material Pointer',
+    material_data: bpy.props.PointerProperty(
+        name='Material Data',
         type=bpy.types.Material,
     )
 

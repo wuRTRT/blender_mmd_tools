@@ -173,6 +173,7 @@ translation_dict = {
         ("*", "Eye"): "目",
         ("*", "Eye Brow"): "眉毛",
         ("*", "Mouth"): "口",
+        ("Operator", "Create .placeholder"): ".placeholderを作成",
         ("Operator", "Add Morph"): "モーフを追加",
         ("Operator", "Remove Morph"): "モーフを削除",
         ("Operator", "Copy Morph"): "モーフをコピー",
@@ -186,6 +187,11 @@ translation_dict = {
         ("*", "Texture factor"): "テクスチャ係数",
         ("*", "Sphere Texture factor"): "スフィアテクスチャ係数",
         ("*", "Toon Texture factor"): "トゥーンテクスチャ係数",
+        ("*", "Morph Settings"): "モーフ設定",
+        ("*", "Material Offsets (%d)"): "マテリアルオフセット (%d)",
+        ("*", "Bone Offsets (%d)"): "ボーンオフセット (%d)",
+        ("*", "UV Offsets (%d)"): "UVオフセット (%d)",
+        ("*", "Group Offsets (%d)"): "グループオフセット (%d)",
 
         # 3D Viewport > Sidebar > MMD > Rigid Bodies
         ("*", "Rigid Bodies"): "リジッドボディ",
@@ -520,6 +526,7 @@ translation_dict = {
         ("*", "Eye"): "眼",
         ("*", "Eye Brow"): "眼眉",
         ("*", "Mouth"): "嘴巴",
+        ("Operator", "Create .placeholder"): "创建.placeholder",
         ("Operator", "Add Morph"): "添加变形",
         ("Operator", "Remove Morph"): "移除变形",
         ("Operator", "Copy Morph"): "复制变形",
@@ -533,6 +540,11 @@ translation_dict = {
         ("*", "Texture factor"): "纹理系数",
         ("*", "Sphere Texture factor"): "球体纹理系数",
         ("*", "Toon Texture factor"): "卡通纹理系数",
+        ("*", "Morph Settings"): "变形设置",
+        ("*", "Material Offsets (%d)"): "材质偏移 (%d)",
+        ("*", "Bone Offsets (%d)"): "骨骼偏移 (%d)",
+        ("*", "UV Offsets (%d)"): "UV偏移 (%d)",
+        ("*", "Group Offsets (%d)"): "群组偏移 (%d)",
 
         # 3D Viewport > Sidebar > MMD > Rigid Bodies
         ("*", "Rigid Bodies"): "刚体",
