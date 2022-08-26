@@ -388,6 +388,10 @@ class _MorphSlider:
 
     def unbind(self):
         mmd_root = self.__rig.rootObject().mmd_root
+
+        # after unbind, the weird lag problem will disappear.
+        mmd_root.morph_panel_show_settings = True
+
         for m in mmd_root.bone_morphs:
             for d in m.data:
                 d.name = ''
@@ -410,6 +414,9 @@ class _MorphSlider:
         root = rig.rootObject()
         armObj = rig.armature()
         mmd_root = root.mmd_root
+
+        # hide detail to avoid weird lag problem
+        mmd_root.morph_panel_show_settings = False
 
         obj = self.create()
         arm = self.__dummy_armature(obj, create=True)
@@ -519,7 +526,8 @@ class _MorphSlider:
             material_offset_map.setdefault('group_dict', {})[m.name] = (data_path, groups)
             for d in m.data:
                 d.name = name_bind = 'mmd_bind%s'%hash(d)
-                table = material_offset_map.setdefault(d.material_id, ([], []))
+                # add '#' before material name to avoid conflict with group_dict
+                table = material_offset_map.setdefault('#'+d.material, ([], []))
                 table[1 if d.offset_type == 'ADD' else 0].append((m.name, d, name_bind))
 
         for m in mmd_root.group_morphs:
@@ -610,9 +618,13 @@ class _MorphSlider:
                 driver.expression = '%s'%__config_groups(variables, var.name, groups)
 
         for mat in (m for m in rig.materials() if m and m.use_nodes and not m.name.startswith('mmd_')):
-            mat_id = mat.mmd_material.material_id
-            mul_all, add_all = material_offset_map.get(-1, ([], []))
-            mul_list, add_list = material_offset_map.get('' if mat_id < 0 else mat_id, ([], []))
+            mul_all, add_all = material_offset_map.get('#', ([], []))
+            if mat.name == '':
+                logging.warning('Oh no. The material name should never empty.')
+                mul_list, add_list = [], []
+            else:
+                mat_name = '#'+mat.name
+                mul_list, add_list = material_offset_map.get(mat_name, ([], []))
             morph_list = tuple(mul_all+mul_list+add_all+add_list)
             __config_material_morph(mat, morph_list)
             mat_edge = bpy.data.materials.get('mmd_edge.'+mat.name, None)
@@ -621,3 +633,78 @@ class _MorphSlider:
 
         morph_sliders[0].mute = False
 
+
+class MigrationFnMorph:
+    @staticmethod
+    def update_mmd_morph():
+        from mmd_tools.core.material import FnMaterial
+
+        for root in bpy.data.objects:
+            if root.mmd_type != 'ROOT':
+                continue
+
+            for mat_morph in root.mmd_root.material_morphs:
+                for morph_data in mat_morph.data:
+
+                    if morph_data.material_data is not None:
+
+                        # The material_id is also no longer used, but for compatibility with older version mmd_tools, keep it.
+                        if 'material_id' not in morph_data.material_data.mmd_material or\
+                            'material_id' not in morph_data or\
+                            morph_data.material_data.mmd_material['material_id'] == morph_data['material_id']:
+
+                            # In the new version, the related_mesh property is no longer used.
+                            # Explicitly remove this property to avoid misuse.
+                            if 'related_mesh' in morph_data:
+                                del morph_data['related_mesh']
+                            continue
+
+                        else:
+                            # Compat case. The new version mmd_tools saved. And old version mmd_tools edit. Then new version mmd_tools load again.
+                            # Go update path.
+                            pass
+                    
+                    morph_data.material_data = None
+                    if 'material_id' in morph_data:
+                        mat_id = morph_data['material_id']
+                        if mat_id != -1:
+                            fnMat = FnMaterial.from_material_id(mat_id)
+                            if fnMat:
+                                morph_data.material_data = fnMat.material
+                            else:
+                                morph_data['material_id'] = -1
+                    
+                    morph_data.related_mesh_data = None
+                    if 'related_mesh' in morph_data:
+                        related_mesh = morph_data['related_mesh']
+                        del morph_data['related_mesh']
+                        if related_mesh != '' and related_mesh in bpy.data.meshes:
+                            morph_data.related_mesh_data = bpy.data.meshes[related_mesh]
+
+    @staticmethod
+    def ensure_material_id_not_conflict():
+        mat_ids_set = set()
+        for mat in bpy.data.materials:
+            if mat.mmd_material.material_id < 0:
+                continue
+            if mat.mmd_material.material_id in mat_ids_set:
+                mat.mmd_material.material_id = max(mat_ids_set) + 1
+            mat_ids_set.add(mat.mmd_material.material_id)
+
+    @staticmethod
+    def compatible_with_old_version_mmd_tools():
+        MigrationFnMorph.ensure_material_id_not_conflict()
+
+        for root in bpy.data.objects:
+            if root.mmd_type != 'ROOT':
+                continue
+
+            for mat_morph in root.mmd_root.material_morphs:
+                for morph_data in mat_morph.data:
+
+                    morph_data['related_mesh'] = morph_data.related_mesh
+
+                    if morph_data.material_data is None:
+                        morph_data.material_id = -1
+                    else:
+                        morph_data.material_id = morph_data.material_data.mmd_material.material_id

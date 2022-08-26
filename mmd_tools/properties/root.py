@@ -4,7 +4,7 @@
 import bpy
 import mmd_tools.core.model as mmd_model
 from mmd_tools import utils
-from mmd_tools.bpyutils import SceneOp
+from mmd_tools.bpyutils import SceneOp, activate_layer_collection
 from mmd_tools.core.material import FnMaterial
 from mmd_tools.core.sdef import FnSDEF
 from mmd_tools.properties.morph import (BoneMorph, GroupMorph, MaterialMorph,
@@ -133,8 +133,9 @@ def _toggleVisibilityOfJoints(self, context):
 def _toggleVisibilityOfTemporaryObjects(self, context):
     root = self.id_data
     hide = not self.show_temporary_objects
-    for i in mmd_model.Model(root).temporaryObjects():
-        i.hide = hide
+    with activate_layer_collection(root):
+        for i in mmd_model.Model(root).temporaryObjects():
+            i.hide = hide
     if hide and context.active_object is None:
         SceneOp(context).active_object = root
 
@@ -463,6 +464,11 @@ class MMDRoot(bpy.types.PropertyGroup):
         min=0,
         set=_setActiveMorph,
         get=_getActiveMorph,
+    )
+    morph_panel_show_settings: bpy.props.BoolProperty(
+        name='Morph Panel Show Settings',
+        description='Show Morph Settings',
+        default=True,
     )
     active_mesh_index: bpy.props.IntProperty(
         name='Active Mesh',

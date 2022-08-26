@@ -299,10 +299,7 @@ class MMD_TOOLS_UL_MaterialMorphOffsets(UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         if self.layout_type in {'DEFAULT'}:
             material = item.material
-            if not material and item.material_id >= 0:
-                layout.label(text='Material ID %d is missing'%item.material_id, translate=False, icon='ERROR')
-            else:
-                layout.label(text=material or 'All Materials', translate=False, icon='MATERIAL')
+            layout.label(text=material or 'All Materials', translate=False, icon='MATERIAL')
         elif self.layout_type in {'COMPACT'}:
             pass
         elif self.layout_type in {'GRID'}:
@@ -356,7 +353,8 @@ class MMDMorphMenu(Menu):
         layout = self.layout
         layout.operator('mmd_tools.morph_remove', text='Delete All', icon='X').all = True
         layout.separator()
-        layout.operator_enum('mmd_tools.morph_slider_setup', 'type')
+        layout.operator('mmd_tools.morph_slider_setup', text='Bind morphs to .placeholder', icon='DRIVER').type = 'BIND'
+        layout.operator('mmd_tools.morph_slider_setup', text='Unbind morphs from .placeholder', icon='UNLINKED').type = 'UNBIND'
         layout.separator()
         layout.operator('mmd_tools.morph_copy', icon='COPY_ID')
         layout.operator('mmd_tools.morph_overwrite_from_active_pose_library', icon='PRESET_NEW')
@@ -405,9 +403,19 @@ class MMDMorphToolsPanel(_PanelBase, Panel):
             slider = rig.morph_slider.get(morph.name)
             if slider:
                 col.row().prop(slider, 'value')
-            draw_func = getattr(self, '_draw_%s_data'%morph_type[:-7], None)
-            if draw_func:
-                draw_func(context, rig, col, morph)
+
+            row = col.row(align=True)
+            row.prop(
+                mmd_root, 'morph_panel_show_settings',
+                icon='TRIA_DOWN' if mmd_root.morph_panel_show_settings else 'TRIA_RIGHT',
+                icon_only=True,
+                emboss=False,
+            )
+            row.label(text='Morph Settings')
+            if mmd_root.morph_panel_show_settings:
+                draw_func = getattr(self, '_draw_%s_data'%morph_type[:-7], None)
+                if draw_func:
+                    draw_func(context, rig, col, morph)
 
     def _template_morph_offset_list(self, layout, morph, list_type_name):
         row = layout.row()
@@ -442,7 +450,7 @@ class MMDMorphToolsPanel(_PanelBase, Panel):
             r.operator('mmd_tools.morph_offset_remove', text='', icon='X').all = True
 
     def _draw_material_data(self, context, rig, col, morph):
-        col.label(text='Material Offsets (%d)'%len(morph.data))
+        col.label(text=bpy.app.translations.pgettext_iface('Material Offsets (%d)')%len(morph.data))
         data = self._template_morph_offset_list(col, morph, 'MMD_TOOLS_UL_MaterialMorphOffsets')
         if data is None:
             return
@@ -525,7 +533,7 @@ class MMDMorphToolsPanel(_PanelBase, Panel):
         row.operator(operators.morph.ApplyBoneMorph.bl_idname, text='Apply')
         row.operator(operators.morph.ClearBoneMorphView.bl_idname, text='Clear')
 
-        col.label(text='Bone Offsets (%d)'%len(morph.data))
+        col.label(text=bpy.app.translations.pgettext_iface('Bone Offsets (%d)')%len(morph.data))
         data = self._template_morph_offset_list(col, morph, 'MMD_TOOLS_UL_BoneMorphOffsets')
         if data is None:
             return
@@ -559,13 +567,13 @@ class MMDMorphToolsPanel(_PanelBase, Panel):
         if morph.data_type == 'VERTEX_GROUP':
             row.prop(morph, 'vertex_group_scale', text='Scale')
         else:
-            row.label(text='UV Offsets (%d)'%len(morph.data))
+            row.label(text=bpy.app.translations.pgettext_iface('UV Offsets (%d)')%len(morph.data))
             #self._template_morph_offset_list(c, morph, 'MMD_TOOLS_UL_UVMorphOffsets')
         row.prop(morph, 'uv_index')
         row.operator('mmd_tools.morph_offset_remove', text='', icon='X').all = True
 
     def _draw_group_data(self, context, rig, col, morph):
-        col.label(text='Group Offsets (%d)'%len(morph.data))
+        col.label(text=bpy.app.translations.pgettext_iface('Group Offsets (%d)')%len(morph.data))
         item = self._template_morph_offset_list(col, morph, 'MMD_TOOLS_UL_GroupMorphOffsets')
         if item is None:
             return

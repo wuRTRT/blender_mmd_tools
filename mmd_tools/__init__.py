@@ -69,11 +69,20 @@ def load_handler(_dummy):
 
     from mmd_tools.core.material import MigrationFnMaterial
     MigrationFnMaterial.update_mmd_shader()
+    
+    from mmd_tools.core.morph import MigrationFnMorph
+    MigrationFnMorph.update_mmd_morph()
+
+@bpy.app.handlers.persistent
+def save_pre_handler(_dummy):
+    from mmd_tools.core.morph import MigrationFnMorph
+    MigrationFnMorph.compatible_with_old_version_mmd_tools()
 
 def register():
     auto_load.register()
     properties.register()
     bpy.app.handlers.load_post.append(load_handler)
+    bpy.app.handlers.save_pre.append(save_pre_handler)
     bpy.types.VIEW3D_MT_object.append(menu_view3d_object)
     bpy.types.VIEW3D_MT_select_object.append(menu_view3d_select_object)
     bpy.types.VIEW3D_MT_pose.append(menu_view3d_pose_context_menu)
@@ -102,6 +111,7 @@ def unregister():
     bpy.types.VIEW3D_MT_select_object.remove(menu_view3d_select_object)
     bpy.types.VIEW3D_MT_object.remove(menu_view3d_object)
     bpy.app.handlers.load_post.remove(load_handler)
+    bpy.app.handlers.save_pre.remove(save_pre_handler)
     properties.unregister()
     auto_load.unregister()
 
