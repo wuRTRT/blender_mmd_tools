@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
+import itertools
 from operator import itemgetter
 from typing import Dict, List, Optional, Set
 
 import bmesh
 import bpy
-from mmd_tools.bpyutils import activate_layer_collection
+from mmd_tools.bpyutils import activate_layer_collection, find_user_layer_collection
 from mmd_tools.core.model import FnModel, Model
 
 
@@ -243,6 +244,14 @@ class ModelSeparateByBonesOperator(bpy.types.Operator):
             'object': separate_model.jointGroupObject(),
             'selected_editable_objects': [separate_model.jointGroupObject(), *separate_joints],
         }, type='OBJECT', keep_transform=True)
+
+        # move separate objects to new collection
+        mmd_layer_collection = find_user_layer_collection(mmd_root_object)
+        separate_layer_collection = find_user_layer_collection(separate_root_object)
+        if mmd_layer_collection.name != separate_layer_collection.name:
+            for separate_object in itertools.chain(separate_mesh_objects, separate_rigid_bodies, separate_joints):
+                separate_layer_collection.collection.objects.link(separate_object)
+                mmd_layer_collection.collection.objects.unlink(separate_object)
 
         FnModel.copy_mmd_root(
             separate_root_object,
