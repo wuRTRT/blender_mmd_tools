@@ -353,7 +353,8 @@ class MMDMorphMenu(Menu):
         layout = self.layout
         layout.operator('mmd_tools.morph_remove', text='Delete All', icon='X').all = True
         layout.separator()
-        layout.operator('mmd_tools.morph_slider_setup', text='Create .placeholder', icon='OUTLINER_OB_MESH').type = 'CREATE'
+        layout.operator('mmd_tools.morph_slider_setup', text='Bind morphs to .placeholder', icon='DRIVER').type = 'BIND'
+        layout.operator('mmd_tools.morph_slider_setup', text='Unbind morphs from .placeholder', icon='UNLINKED').type = 'UNBIND'
         layout.separator()
         layout.operator('mmd_tools.morph_copy', icon='COPY_ID')
         layout.operator('mmd_tools.morph_overwrite_from_active_pose_library', icon='PRESET_NEW')
