@@ -777,6 +777,11 @@ class Model:
         """
         material_list = []
         for mesh in self.meshes():
+            # Support search object's materials.
+            for mat_slot in mesh.material_slots:
+                if mat_slot.material is not None and mat_slot.material not in material_list:
+                    # control the case of a material shared among different meshes
+                    material_list.append(mat_slot.material)
             for mat in mesh.data.materials:
                 if mat not in material_list:
                     # control the case of a material shared among different meshes
