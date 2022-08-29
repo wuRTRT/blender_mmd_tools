@@ -775,18 +775,11 @@ class Model:
         """
         Helper method to list all materials in all meshes
         """
-        material_list = []
+        materials = set()
         for mesh in self.meshes():
-            # Support search object's materials.
-            for mat_slot in mesh.material_slots:
-                if mat_slot.material is not None and mat_slot.material not in material_list:
-                    # control the case of a material shared among different meshes
-                    material_list.append(mat_slot.material)
-            for mat in mesh.data.materials:
-                if mat not in material_list:
-                    # control the case of a material shared among different meshes
-                    material_list.append(mat)
-        return material_list
+            materials.update(slot.material for slot in mesh.material_slots if slot.material is not None)
+            materials.update(mesh.data.materials)
+        return list(materials)
 
     def renameBone(self, old_bone_name, new_bone_name):
         if old_bone_name == new_bone_name:
