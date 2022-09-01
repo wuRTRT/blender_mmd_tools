@@ -684,9 +684,18 @@ class MigrationFnMorph:
     @staticmethod
     def ensure_material_id_not_conflict():
         mat_ids_set = set()
+
+        # The reference library properties cannot be modified and bypassed in advance.
+        need_update_mat = []
         for mat in bpy.data.materials:
             if mat.mmd_material.material_id < 0:
                 continue
+            if mat.library is not None:
+                mat_ids_set.add(mat.mmd_material.material_id)
+            else:
+                need_update_mat.append(mat)
+
+        for mat in need_update_mat:
             if mat.mmd_material.material_id in mat_ids_set:
                 mat.mmd_material.material_id = max(mat_ids_set) + 1
             mat_ids_set.add(mat.mmd_material.material_id)
