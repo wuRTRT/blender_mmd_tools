@@ -269,6 +269,10 @@ class ImportVmd(Operator, ImportHelper):
         description='Import the motion as NLA strips',
         default=False,
         )
+    files: bpy.props.CollectionProperty(
+        type=OperatorFileListElement,
+        )
+    directory: bpy.props.StringProperty(subtype='DIR_PATH')
 
     @classmethod
     def poll(cls, context):
@@ -310,20 +314,21 @@ class ImportVmd(Operator, ImportHelper):
                 translator=DictionaryEnum.get_translator(self.dictionary),
                 ).init
 
-        start_time = time.time()
-        importer = vmd_importer.VMDImporter(
-            filepath=self.filepath,
-            scale=self.scale,
-            bone_mapper=bone_mapper,
-            use_pose_mode=self.use_pose_mode,
-            frame_margin=self.margin,
-            use_mirror=self.use_mirror,
-            use_NLA=self.use_NLA,
-            )
+        for file in self.files:
+            start_time = time.time()
+            importer = vmd_importer.VMDImporter(
+                filepath=os.path.join(self.directory, file.name),
+                scale=self.scale,
+                bone_mapper=bone_mapper,
+                use_pose_mode=self.use_pose_mode,
+                frame_margin=self.margin,
+                use_mirror=self.use_mirror,
+                use_NLA=self.use_NLA,
+                )
 
-        for i in selected_objects:
-            importer.assign(i)
-        logging.info(' Finished importing motion in %f seconds.', time.time() - start_time)
+            for i in selected_objects:
+                importer.assign(i)
+            logging.info(' Finished importing motion in %f seconds.', time.time() - start_time)
 
         if self.update_scene_settings:
             auto_scene_setup.setupFrameRanges()
